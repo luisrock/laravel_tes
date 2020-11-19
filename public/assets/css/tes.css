@@ -1,0 +1,21 @@
+#pdf-button {
+  display: flex; 
+  justify-content: flex-end; 
+  padding: 15px;
+  margin-top: -20px;
+}
+
+#radios-tribunais {
+  display: flex; 
+  flex-wrap: wrap;
+  justify-content: flex-start; 
+  padding: 15px;
+}
+
+.form-check {
+  margin-right: 20px;
+}
+
+/* .form-check-label {
+  margin-left: -4px;
+} */
