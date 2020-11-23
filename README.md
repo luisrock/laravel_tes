@@ -12,19 +12,15 @@
 10. npm run dev
 11. cp .env.example .env
 
+```
 APP_NAME=[name]
-
 APP_KEY=
-
 APP_DEBUG=true
-
 APP_URL=https://[name].test
-
 DB_DATABASE=tes
-
 DB_USERNAME=root
-
 DB_PASSWORD=
+```
 
 12. php artisan key:generate
 13. php artisan session:table
