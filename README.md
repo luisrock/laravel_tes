@@ -11,14 +11,22 @@
 9. npm install
 10. npm run dev
 11. cp .env.example .env
+
 APP_NAME=[name]
+
 APP_KEY=
+
 APP_DEBUG=true
+
 APP_URL=https://[name].test
+
 DB_DATABASE=tes
+
 DB_USERNAME=root
+
 DB_PASSWORD=
-php artisan key:generate
-php artisan session:table
-php artisan migrate
-12. valet secure [name]
+
+12. php artisan key:generate
+13. php artisan session:table
+14. php artisan migrate
+15. valet secure [name]
