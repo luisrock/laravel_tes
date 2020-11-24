@@ -821,11 +821,6 @@ function cej_adjust_query_sum($results) {
   return $array;
 }
 
-
-
-
-
-
 //Calling adjust query functions dinamically
 function call_adjust_query_function($tribunal_lower,$kind,$param) {
     $function_name = trim($tribunal_lower) . '_adjust_query_' . trim($kind);
@@ -837,3 +832,65 @@ function call_request_api($tribunal_lower,$param) {
     $function_name = trim($tribunal_lower) . '_request';
     return $function_name($param);
 }
+
+
+//Searching db (main function)
+function tes_search_db($keyword,$tribunal_lower,$tribunal_array) {
+
+  $tese_name = $tribunal_array['tese_name'];
+
+  //preparing results array
+  $output = [];
+  $output['sumula'] = [];
+  $output['sumula']['total'] = 0;
+  $output['sumula']['hits'] = [];
+  $output[$tese_name] = [];
+  $output[$tese_name]['total'] = 0;
+  $output[$tese_name]['hits'] = [];
+
+  //preparing keyword for the full text search
+  $arr = insertOperator(keyword_to_array($keyword));
+  $final_str = buildFinalSearchString($arr);
+
+  //getting the tables for the chosen tribunal
+  $tables = $tribunal_array['tables'];
+
+  foreach ($tables as $table => $tab) {
+    
+    if(empty($tab)) {
+        continue;
+    }
+    $key = '';
+    $it = '';
+    if($table === 'sumulas') {
+        $key = 'sumula'; 
+        $it = 'sum';
+    } else if($table === 'teses') {
+        $key = $tese_name;
+        $it = 'rep';
+    }
+
+    foreach ($tab as $t) {
+
+        $table_name = $tribunal_lower . '_' . $t;
+        $to_match = $tribunal_array["to_match_$it"]; //para TNU QO, usar $to_match_sum
+        $query = "MATCH ($to_match) AGAINST (? IN BOOLEAN MODE)";                
+        $results = DB::table($table_name)
+                ->whereRaw($query, [$final_str])
+                ->orderBy('numero','desc')
+                ->get();
+        
+        //Laravel returns a stdClass. Converting to array
+        $results = json_decode(json_encode($results), true);
+
+        if($results) {                
+            $array_sum = call_adjust_query_function($tribunal_lower,$it,$results);
+            $output[$key]['hits'] = array_merge($output[$key]['hits'],$array_sum);
+        }
+        $output[$key]['total'] = count($output[$key]['hits']);
+    } //end inner foreach
+  } //end outter foreach
+
+return $output;
+}
+
