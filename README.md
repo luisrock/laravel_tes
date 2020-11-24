@@ -10,11 +10,11 @@ RENAME TABLE `tes`.`fon_faz_sumulas` TO `tes`.`fonaje_faz_sumulas`;
 ```
 
 3. clone repo
-4. mv laravel_tes [name]
-5. composer install
-6. npm install
-7. npm run dev
-8. cp .env.example .env
+4. ``` mv laravel_tes [name] ```
+5. ``` composer install ```
+6. ``` npm install ```
+7. ``` npm run dev ```
+8. ``` cp .env.example .env ```
 
 ```
 APP_NAME=[name]
@@ -26,7 +26,7 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-9. php artisan key:generate
-10. php artisan session:table
-11. php artisan migrate
-12. valet secure [name]
+9. ``` php artisan key:generate ```
+10. ``` php artisan session:table ```
+11. ``` php artisan migrate ```
+12. ``` valet secure [name] ```
