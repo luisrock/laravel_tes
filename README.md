@@ -2,15 +2,19 @@
 
 1. create db tes
 2. import tes tables
-3. RENAME TABLE `tes`.`fon_civ_sumulas` TO `tes`.`fonaje_civ_sumulas`;
-4. RENAME TABLE `tes`.`fon_cri_sumulas` TO `tes`.`fonaje_cri_sumulas`;
-5. RENAME TABLE `tes`.`fon_faz_sumulas` TO `tes`.`fonaje_faz_sumulas`;
-6. clone repo
-7. mv laravel_tes [name]
-8. composer install
-9. npm install
-10. npm run dev
-11. cp .env.example .env
+
+```
+RENAME TABLE `tes`.`fon_civ_sumulas` TO `tes`.`fonaje_civ_sumulas`;
+RENAME TABLE `tes`.`fon_cri_sumulas` TO `tes`.`fonaje_cri_sumulas`;
+RENAME TABLE `tes`.`fon_faz_sumulas` TO `tes`.`fonaje_faz_sumulas`;
+```
+
+3. clone repo
+4. mv laravel_tes [name]
+5. composer install
+6. npm install
+7. npm run dev
+8. cp .env.example .env
 
 ```
 APP_NAME=[name]
@@ -22,7 +26,7 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-12. php artisan key:generate
-13. php artisan session:table
-14. php artisan migrate
-15. valet secure [name]
+9. php artisan key:generate
+10. php artisan session:table
+11. php artisan migrate
+12. valet secure [name]
