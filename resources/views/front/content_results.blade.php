@@ -21,6 +21,30 @@
 
         <div class="block-content tab-content overflow-hidden">
 
+<!-- PDF Button -->
+        @if (   (
+                    !empty($output['sumula']['total']) 
+                    || 
+                    !empty($output[$tese_name]['total'])
+                )
+                &&
+                (
+                    empty($_GET['print']) 
+                    ||
+                    'pdf' != $_GET['print']
+                )   )
+
+            <div id="pdf-button">
+                <a href="{{ url()->full() }}&print=pdf" 
+                    target="_blank" 
+                    rel="nofollow">
+                <img src="assets/img/pdf.png" 
+                        alt="image_pdf" title="Gerar PDF">
+                </a>
+            </div>
+        
+        @endif
+<!-- PDF Button END-->
 
             <!-- Súmulas -->
             <div class="tab-pane fade fade-up show active" id="busca-sumulas-trib" role="tabpanel">
