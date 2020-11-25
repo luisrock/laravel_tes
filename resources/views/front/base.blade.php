@@ -48,13 +48,25 @@
         <meta name="theme-color" content="#ffffff">
       <!-- END Icons -->
         
+      @php
+      //mPdf does not access css by url, but by full path
+      $basepath = (empty($display_pdf)) ? url('/') : public_path();
+      @endphp
+
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400italic,600,700%7COpen+Sans:300,400,400italic,600,700">
-        <link rel="stylesheet" id="css-main" href='{{ url("assets/css/tescustom.min.css") }}' type="text/css">
+        <link rel="stylesheet" id="css-main" href='{{ $basepath ."/assets/css/tescustom.min.css" }}' type="text/css">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-        <link rel="stylesheet" href='{{ url("assets/css/tes.css") }}' type="text/css">
-        <link rel="stylesheet" href='{{ url("assets/css/tespdf.css") }}' type="text/css" media="tespdf">
+        <link rel="stylesheet" href='{{ $basepath . "/assets/css/tes.css?v=" . time() }}' type="text/css">
   	
         @yield('styles')
+
+        @if ($display_pdf == 'display:none;')
+        <style>
+        body,.trib-texto-quantidade {
+          background-color: #fff;
+        }
+        </style>
+        @endif
 
   </head>
     <body>
@@ -66,12 +78,11 @@
 
             @yield('content')
 
-
             </main>
             <!-- END Main Container -->
 
             <!-- Footer -->
-            <footer id="page-footer" class="bg-body-light" style="">
+            <footer id="page-footer" class="bg-body-light" style="{{ $display_pdf }}">
               <div class="content py-3">
                     <div class="row font-size-sm">
                         <div class="col-sm-6 order-sm-2 py-1 text-center text-sm-right">

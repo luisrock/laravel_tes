@@ -7,7 +7,7 @@
 <div class="content" id="content-results">
     <!-- Results -->
     <div class="block">
-        <ul class="nav nav-tabs nav-tabs-block" data-toggle="tabs" role="tablist" style="">
+        <ul class="nav nav-tabs nav-tabs-block" data-toggle="tabs" role="tablist" style="{{ $display_pdf }}">
             <li class="nav-item" id="nav-sumulas">
                 <a class="nav-link active" href="#busca-sumulas-trib">Súmulas</a>
             </li>
@@ -34,7 +34,7 @@
                     'pdf' != $_GET['print']
                 )   )
 
-            <div id="pdf-button">
+            <div id="pdf-button" style="{{ $display_pdf }}">
                 <a href="{{ url()->full() }}&print=pdf" 
                     target="_blank" 
                     rel="nofollow">

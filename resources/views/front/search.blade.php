@@ -4,7 +4,7 @@
 
 @section('content')
 <!-- Hero -->
-<div class="bg-body-light" style="">
+<div class="bg-body-light" style="{{ $display_pdf }}">
     <div class="content content-full">
         <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
             <h1 class="flex-sm-fill h3 my-2">
@@ -32,7 +32,7 @@
 
 
 <!-- Search -->
-<div class="content" style="">
+<div class="content" style="{{ $display_pdf }}">
     <form method="GET" id="trib-form">
 
         @if ($errors->any())
