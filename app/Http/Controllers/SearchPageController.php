@@ -1,6 +1,8 @@
 <?php
 //ALTER: rename fonaje tables
 //ALTER: TST => merged $output['orientacao_jurisprudencia'] and $output['precedente_normativo'] to $output['orientacao_precedente']
+
+//TODO: PDF => https://tesesesumulas.com.br/?keyword=isencao&keylabel=&tribunal=STF&print=pdf
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -28,6 +30,7 @@ class SearchPageController extends Controller
         $query = $request->validate([
                 'q' => 'required|min:3',
                 'tribunal' => 'required|in:' . $lista_tribunais_string,
+                'print' => 'string|nullable'
             ],
             [
                 'q.required' => 'Por favor, defina o(s) termo(s) de busca.',
@@ -36,6 +39,8 @@ class SearchPageController extends Controller
                 'tribunal.in' => 'Por favor, indique um tribunal/órgão válido para a sua pesquisa.',
             ]
         );
+
+        //dd($query);
         
         $keyword = $query['q'];
         $tribunal = $query['tribunal'];
@@ -63,7 +68,7 @@ class SearchPageController extends Controller
 
         // dd($output);
 
-        return view($results_view, compact('lista_tribunais','keyword', 'tribunal', 'output'));
+        return view($results_view, compact('lista_tribunais','keyword', 'tribunal', 'output', 'tese_name'));
         
     } //end public function
 }
