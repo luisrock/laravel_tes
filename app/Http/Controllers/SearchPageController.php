@@ -2,7 +2,6 @@
 //ALTER: rename fonaje tables
 //ALTER: TST => merged $output['orientacao_jurisprudencia'] and $output['precedente_normativo'] to $output['orientacao_precedente']
 
-//TODO: PDF => https://tesesesumulas.com.br/?keyword=isencao&keylabel=&tribunal=STF&print=pdf
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -19,12 +18,11 @@ class SearchPageController extends Controller
 
         $lista_tribunais = Config::get('tes_constants.lista_tribunais');
         $lista_tribunais_string = implode(",",array_keys($lista_tribunais));
-        
+        $display_pdf = '';
         //Initial view (no search)
         if(empty($request->query())) {
-            return view('front.search', compact('lista_tribunais'));
+            return view('front.search', compact('lista_tribunais','display_pdf'));
         }
-
 
         //User is searching. Prepare and return results
         $query = $request->validate([
@@ -39,36 +37,48 @@ class SearchPageController extends Controller
                 'tribunal.in' => 'Por favor, indique um tribunal/órgão válido para a sua pesquisa.',
             ]
         );
-
-        //dd($query);
         
         $keyword = $query['q'];
         $tribunal = $query['tribunal'];
+        $pdf = !empty($query['print']) && 'pdf' == $query['print'];
+        $display_pdf = ($pdf) ? 'display:none;' : ''; 
         $tribunal_lower = strtolower($tribunal);
         $tribunal_upper = strtoupper($tribunal);
         $tribunal_array = $lista_tribunais[$tribunal_upper];
         $tese_name = $tribunal_array['tese_name'];
         $results_view = 'front.results.' . $tribunal_lower;
-        
+        $output = [];
 
         //search in db (not through tribunal API)
         if($lista_tribunais[$tribunal]['db']) {
-
+            //Getting the results by querying tes db
             $output = tes_search_db($keyword,$tribunal_lower,$tribunal_array);    
-        
-        //end db true
         } else {
-        //Getting the results by calling the tribunal API
-            $output = [];
+            //Getting the results by calling the tribunal API
             //tratando keyword
             $keyword = buildFinalSearchStringForApi($keyword, $tribunal_upper);
-            
             $output = call_request_api($tribunal_lower,$keyword);
         }
+        $html = view($results_view, compact('lista_tribunais','keyword', 'tribunal', 'output', 'tese_name', 'display_pdf'));
+        if(!$pdf) {
+            return $html;
+        }
 
-        // dd($output);
+        // render PDF
 
-        return view($results_view, compact('lista_tribunais','keyword', 'tribunal', 'output', 'tese_name'));
+        $url_request = url()->full();
+        $mpdf = new \Mpdf\Mpdf();
+        $mpdf->useSubstitutions = true; // optional - just as an example
+        $mpdf->setBasePath($url_request);
+        $mpdf->SetWatermarkText('T&S',0.05);
+        $mpdf->showWatermarkText = true;
+        $mpdf->SetHeader("$keyword|{DATE d/m/Y}|{PAGENO}");
+        $mpdf->SetFooter('|' . env('APP_URL') . '|');
+        $mpdf->CSSselectMedia='tespdf'; // assuming you used this in the document header
+        //                 $mpdf->Output("tes_$key.pdf", 'D');
+      
+        $mpdf->WriteHTML($html->render());
+        $mpdf->Output('tes_'.$tribunal.'_'.$keyword.'.pdf', 'D');
         
     } //end public function
 }
