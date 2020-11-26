@@ -26,7 +26,9 @@ class SearchPageController extends Controller
 
         //User is searching. Prepare and return results
         $query = $request->validate([
-                'q' => 'required|min:3',
+                //compat with extension
+                'q' => 'required_without:keyword|min:3',
+                'keyword' => 'required_without:q|min:3',
                 'tribunal' => 'required|in:' . $lista_tribunais_string,
                 'print' => 'string|nullable'
             ],
@@ -38,7 +40,7 @@ class SearchPageController extends Controller
             ]
         );
         
-        $keyword = $query['q'];
+        $keyword = $query['q'] ?? $query['keyword']; //compat with extension
         $tribunal = $query['tribunal'];
         $pdf = !empty($query['print']) && 'pdf' == $query['print'];
         $display_pdf = ($pdf) ? 'display:none;' : ''; 
