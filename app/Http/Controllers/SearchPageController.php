@@ -67,11 +67,15 @@ class SearchPageController extends Controller
         // render PDF
 
         $url_request = url()->full();
-        $mpdf = new \Mpdf\Mpdf();
-        $mpdf->useSubstitutions = true; // optional - just as an example
+        $mpdf = new \Mpdf\Mpdf([
+            'mode' => 'utf-8',
+            'CSSselectMedia' => 'screen',
+            'showWatermarkText' => true,
+            'useSubstitutions' => false
+        ]);
+
         $mpdf->setBasePath($url_request);
         $mpdf->SetWatermarkText('T&S',0.05);
-        $mpdf->showWatermarkText = true;
         $mpdf->SetHeader("$keyword|{DATE d/m/Y}|{PAGENO}");
         $mpdf->SetFooter('|' . url()->current() . '|');
         $mpdf->WriteHTML($html->render());
