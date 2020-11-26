@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -22,4 +23,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
  * TES api route
  */
 
-Route::post('/', [App\Http\Controllers\ApiController::class, 'index'])->name('api');
+//Route::post('/', [App\Http\Controllers\ApiController::class, 'index'])->name('api');
+
+//Making the laravel endpoint compatible with the old endpoint, called by the chrome extension
+//When the extension is updated, we can set the '/' endpoint
+Route::post('/{what?}', [App\Http\Controllers\ApiController::class, 'index'])->name('api');
+
