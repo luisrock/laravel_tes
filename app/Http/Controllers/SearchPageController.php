@@ -74,9 +74,6 @@ class SearchPageController extends Controller
         $mpdf->showWatermarkText = true;
         $mpdf->SetHeader("$keyword|{DATE d/m/Y}|{PAGENO}");
         $mpdf->SetFooter('|' . url()->current() . '|');
-        $mpdf->CSSselectMedia='tespdf'; // assuming you used this in the document header
-        //                 $mpdf->Output("tes_$key.pdf", 'D');
-      
         $mpdf->WriteHTML($html->render());
         $mpdf->Output('tes_'.$tribunal.'_'.$keyword.'.pdf', 'D');
         
