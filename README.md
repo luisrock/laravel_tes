@@ -1,6 +1,6 @@
-<p align="center">Teses & Súmulas</p>
+## Teses & Súmulas
 
-##How to prepare local?
+### Prepare local
 
 1. create db tes
 2. import tes tables from production
