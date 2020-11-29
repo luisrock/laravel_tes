@@ -62,7 +62,7 @@ class SearchPageController extends Controller
             $output = call_request_api($tribunal_lower,$keyword);
         }
 
-        //dd($output);
+        //obs: when searching by calling the tribunal API and getting 500 error, output will be a string...
         
         $html = view($results_view, compact('lista_tribunais','keyword', 'tribunal', 'output', 'tese_name', 'display_pdf'));
         if(!$pdf) {
