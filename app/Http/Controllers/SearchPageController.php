@@ -61,6 +61,9 @@ class SearchPageController extends Controller
             $keyword = buildFinalSearchStringForApi($keyword, $tribunal_upper);
             $output = call_request_api($tribunal_lower,$keyword);
         }
+
+        //dd($output);
+        
         $html = view($results_view, compact('lista_tribunais','keyword', 'tribunal', 'output', 'tese_name', 'display_pdf'));
         if(!$pdf) {
             return $html;
