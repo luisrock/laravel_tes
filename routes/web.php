@@ -18,12 +18,12 @@ use Illuminate\Support\Facades\Route;
 //     return view('welcome');
 // });
 
-Auth::routes();
+//Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+//Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 /**
- * TES web route
+ * TES web routes
  */
 
 Route::get('/', [App\Http\Controllers\SearchPageController::class, 'index'])->name('searchpage');

@@ -13,6 +13,7 @@
 @endsection
 
 @section('sumulas_inner_table')
+
     @foreach ($output['sumula']['hits'] as $sum)
     <tr>
       <td>
