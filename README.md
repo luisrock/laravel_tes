@@ -1,14 +1,9 @@
 <p align="center">Teses & Súmulas</p>
 
+##How to prepare local?
+
 1. create db tes
-2. import tes tables
-
-```
-RENAME TABLE `tes`.`fon_civ_sumulas` TO `tes`.`fonaje_civ_sumulas`;
-RENAME TABLE `tes`.`fon_cri_sumulas` TO `tes`.`fonaje_cri_sumulas`;
-RENAME TABLE `tes`.`fon_faz_sumulas` TO `tes`.`fonaje_faz_sumulas`;
-```
-
+2. import tes tables from production
 3. clone repo
 4. ``` mv laravel_tes [name] ```
 5. ``` composer install ```
