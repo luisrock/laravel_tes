@@ -54,11 +54,15 @@ class ApiController extends Controller
             $output = call_request_api($tribunal_lower,$keyword);
         }
 
-        $final_result['total_sum'] = $output['sumula']['total'];
-        $final_result['total_rep'] = $output[$tese_name]['total'];
-        $final_result['hits_sum'] = $output['sumula']['hits'];
-        $final_result['hits_rep'] = $output[$tese_name]['hits'];
-        
+        if(is_array($output)) {
+            $final_result['total_sum'] = $output['sumula']['total'];
+            $final_result['total_rep'] = $output[$tese_name]['total'];
+            $final_result['hits_sum'] = $output['sumula']['hits'];
+            $final_result['hits_rep'] = $output[$tese_name]['hits'];
+        } else if(is_string($output)) {
+            $final_result['error'] = $output;
+        }
+
         return $final_result; 
         
     } //end public function
