@@ -14,18 +14,18 @@ return [
             'request' => 'stf_request',
             'to_match_sum' => 'titulo,texto,obs,legis,precedentes',
             'to_match_rep' => 'tema_texto,tese_texto,indexacao,ementa_texto,relator,acordao',
-            'tese_name' => 'repercussao',
+            'tese_name' => 'tese',
             'tables' => [   'sumulas' => ['sumulas'], 
                             'teses'  => ['teses']
                         ],
-            'db' => false
+            'db' => false // pesquisa = busca via API; temas = busca via db
         ],
         'TST' => [
             'trib_url' => 'https://jurisprudencia.tst.jus.br/',
             'request' => 'tst_request',
             'to_match_sum' => '',
             'to_match_rep' => '',
-            'tese_name' => 'orientacao_precedente',
+            'tese_name' => 'tese',
             'tables' => [],
             'db' => false
         ],
@@ -34,7 +34,7 @@ return [
             'request' => 'stj_request',
             'to_match_sum' => 'texto_raw,ramos',
             'to_match_rep' => 'tese_texto,tema,ramos',
-            'tese_name' => 'repetitivo',
+            'tese_name' => 'tese',
             'tables' => [   'sumulas' => ['sumulas'], 
                             'teses'  => ['teses']
                         ],
@@ -45,7 +45,7 @@ return [
             'request' => 'tnu_request',
             'to_match_sum' => 'titulo,texto', //serve para QO tb
             'to_match_rep' => 'titulo,tema,tese',
-            'tese_name' => 'repetitivo',
+            'tese_name' => 'tese',
             'tables' => [   'sumulas' => ['sumulas','questoesdeordem'], 
                             'teses'  => ['teses']
                         ],
@@ -56,7 +56,7 @@ return [
             'request' => 'tcu_request',
             'to_match_sum' => '',
             'to_match_rep' => '',
-            'tese_name' => 'resposta-consulta',
+            'tese_name' => 'tese',
             'tables' => [],
             'db' => false
         ],
@@ -65,7 +65,7 @@ return [
             'request' => 'carf_request',
             'to_match_sum' => 'titulo,texto',
             'to_match_rep' => '',
-            'tese_name' => 'repetitivo',
+            'tese_name' => 'tese',
             'tables' => [   'sumulas' => ['sumulas'], 
                             'teses'  => []
                         ],
@@ -76,7 +76,7 @@ return [
             'request' => 'fonaje_request',
             'to_match_sum' => 'titulo,texto',
             'to_match_rep' => '',
-            'tese_name' => 'repetitivo',
+            'tese_name' => 'tese',
             'tables' => [   'sumulas' => ['civ_sumulas','cri_sumulas','faz_sumulas'], 
                             'teses'  => []
                         ],
@@ -87,7 +87,7 @@ return [
             'request' => 'cej_request',
             'to_match_sum' => 'comissao,ramos,texto,legis,notas,titulo,jornada',
             'to_match_rep' => '',
-            'tese_name' => 'repetitivo',
+            'tese_name' => 'tese',
             'tables' => [   'sumulas' => ['sumulas'], 
                             'teses'  => []
                         ],

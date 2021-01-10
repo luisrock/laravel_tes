@@ -1,5 +1,7 @@
 <?php
 
+//TODO: ordenar resultados STF via db e excluir canceladas e revogadas
+
 function adjustOneQuoteOnly($str) { 
   $r = $str;
   $res = Str::replaceFirst('"', '', $r);
@@ -11,7 +13,8 @@ function adjustOneQuoteOnly($str) {
 
 function noSignal($str) {
     //se tiver menos de 3 chars e não for operador, ignorar
-    if(mb_strlen($str, 'utf8') < 3 && !in_array($str, OPERADORES)) {
+    $operadores = config('tes_constants.options.operadores');
+    if(mb_strlen($str, 'utf8') < 3 && !in_array($str, $operadores)) {
         return true;
     }
     return false;
@@ -196,12 +199,12 @@ function stf_request($keyword) {
 
   $com_resultados = false;
 
-  foreach(['sumula','repercussao'] as $s) {
+  foreach(['sumula','tese'] as $s) {
 
     $output[$s] = [];
 
 
-    if($s == 'repercussao') {
+    if($s == 'tese') {
       $file = storage_path('stf_json/repercussao.json');
       $base_label = 'TESES DE REPERCUSSÃO GERAL';
     } else if($s == 'sumula') {
@@ -273,8 +276,8 @@ function stf_request($keyword) {
         $output[$s]['hits'][] = $sum_array;
       } //end if sumula
 
-      //colheita para repercussao  
-      if($s == 'repercussao') {
+      //colheita para tese  
+      if($s == 'tese') {
 
         $rep_array = [];
 
@@ -311,7 +314,7 @@ function stf_request($keyword) {
         $rep_array['trib_rep_url'] = $julgado['inteiro_teor_url'] ?? '';
 
         $output[$s]['hits'][] = $rep_array;
-      } //end if repercussao
+      } //end if tese
     } // end foreach lista:
   } //end foreach s
 
@@ -437,12 +440,12 @@ function tcu_request($keyword) {
 
   $com_resultados = false;
 
-  foreach(['sumula','resposta-consulta'] as $s) {
+  foreach(['sumula','tese'] as $s) {
 
     $output[$s] = [];
-    $search_tcu_url_base = config('tex_constants.options.tcu_search_url');
     $search_tcu_url_base = 'https://pesquisa.apps.tcu.gov.br/rest/publico/base';
-    $search_tcu_url = "$search_tcu_url_base/$s/documentosResumidos?";
+    $type = ($s === 'sumula') ? $s : "resposta-consulta";
+    $search_tcu_url = "$search_tcu_url_base/$type/documentosResumidos?";
     
     $params = array(
         'termo'=> $keyword,
@@ -452,7 +455,7 @@ function tcu_request($keyword) {
         'sinonimos' => 'true'
     );
 
-    if($s === 'resposta-consulta') {
+    if($s === 'tese') {
         $params['ordenacao'] = 'score desc, COLEGIADO asc, ANOACORDAO desc, NUMACORDAO desc';
     } else if($s === 'sumula') {
         $params['filtro'] = 'VIGENTE:"true"';
@@ -518,8 +521,8 @@ function tcu_request($keyword) {
       } //end if sumula
 
 
-      //colheita para repercussao  
-      if($s == 'resposta-consulta') {
+      //colheita para tese  
+      if($s == 'tese') {
         $rep_array = [];
         $rep_array['trib_rep_acordao'] = $julgado['NUMACORDAO'] ?? '';
         $rep_array['trib_rep_ano'] = $julgado['ANOACORDAO'] ?? '';
@@ -531,7 +534,7 @@ function tcu_request($keyword) {
         $rep_array['trib_rep_url'] = "https://pesquisa.apps.tcu.gov.br/#/documento/acordao-completo/*/NUMACORDAO:{$rep_array['trib_rep_acordao']}%20ANOACORDAO:{$rep_array['trib_rep_ano']}%20COLEGIADO:%22{$rep_array['trib_rep_orgao']}%22/DTRELEVANCIA%20desc,%20NUMACORDAOINT%20desc/0/%20";
 
         $output[$s]['hits'][] = $rep_array;
-      } //end if repercussao
+      } //end if tese
     } // end foreach lista:
   } //end foreach s
 
@@ -543,8 +546,8 @@ function adjustingRep($res,$tribunal) {
   $output = [];
   switch ($tribunal) {
     case 'STF':
-      $output['total'] = $res['repercussao']['total'];
-      $output['content'] = $res['repercussao']['hits'];
+      $output['total'] = $res['tese']['total'];
+      $output['content'] = $res['tese']['hits'];
       $output['singular'] = 'tese de repercussão geral com mérito julgado encontrada';
       $output['plural'] = 'teses de repercussão geral com mérito julgado encontradas';
       $output['nenhum'] = 'Nenhuma';
@@ -559,24 +562,24 @@ function adjustingRep($res,$tribunal) {
       $output['em'] = 'no';
       break;
     case 'STJ':
-      $output['total'] = $res['repetitivo']['total'];
-      $output['content'] = $res['repetitivo']['hits'];
+      $output['total'] = $res['tese']['total'];
+      $output['content'] = $res['tese']['hits'];
       $output['singular'] = 'tema de repetitivo encontrado';
       $output['plural'] = 'temas de repetitivo encontrados';
       $output['nenhum'] = 'Nenhum';
       $output['em'] = 'no';
       break;
     case 'TNU':
-      $output['total'] = $res['repetitivo']['total'];
-      $output['content'] = $res['repetitivo']['hits'];
+      $output['total'] = $res['tese']['total'];
+      $output['content'] = $res['tese']['hits'];
       $output['singular'] = 'tema representativo encontrado';
       $output['plural'] = 'temas representativos encontrados';
       $output['nenhum'] = 'Nenhum';
       $output['em'] = 'na';
       break;
     case 'TCU':
-      $output['total'] = $res['resposta-consulta']['total'];
-      $output['content'] = $res['resposta-consulta']['hits'];
+      $output['total'] = $res['tese']['total'];
+      $output['content'] = $res['tese']['hits'];
       $output['singular'] = 'enunciado paradigmático encontrado';
       $output['plural'] = 'enunciados paradigmáticos encontrados';
       $output['nenhum'] = 'Nenhum';
@@ -585,8 +588,8 @@ function adjustingRep($res,$tribunal) {
     case 'CARF':
     case 'FONAJE':
     case 'CEJ':
-      $output['total'] = $res['repetitivo']['total'];
-      $output['content'] = $res['repetitivo']['hits'];
+      $output['total'] = $res['tese']['total'];
+      $output['content'] = $res['tese']['hits'];
       $output['singular'] = 'tese encontrada';
       $output['plural'] = 'teses encontradas';
       $output['nenhum'] = 'Nenhuma';
@@ -676,6 +679,33 @@ function buildFinalSearchStringForApi($keyword, $tribunal) {
 
 //Adjust STF queries
 
+function stf_adjust_query_sum($results) {
+  $array = [];
+  foreach ($results as $r) {
+    $a_r = [];
+    $a_r['trib_sum_titulo'] = $r['titulo'] ?? ''; 
+    $a_r['trib_sum_texto'] = $r['texto'] ?? ''; 
+    $a_r['trib_sum_data'] = $r['aprovadaEm'] ?? ''; 
+    $a_r['trib_sum_url'] = $r['link'] ?? ''; 
+    $array[] = $a_r;
+  } // end foreach
+  return $array;
+}
+
+function stf_adjust_query_rep($results) {
+  $array = [];
+  foreach ($results as $r) {
+    $a_r = [];
+    $a_r['trib_rep_titulo'] = $r['acordao'] ?? ''; 
+    $a_r['trib_rep_tema'] = $r['tema_texto'] ?? ''; 
+    $a_r['trib_rep_tese'] = $r['tese_texto'] ?? ''; 
+    $a_r['trib_rep_relator'] = $r['relator'] ?? ''; 
+    $a_r['trib_rep_data'] = $r['aprovadaEm'] ?? ''; 
+    $a_r['trib_rep_url'] = $r['link'] ?? ''; 
+    $array[] = $a_r;
+  } // end foreach
+  return $array;
+}
 
 //Adjust TST queries
 
@@ -847,6 +877,7 @@ function tes_search_db($keyword,$tribunal_lower,$tribunal_array) {
   $output[$tese_name] = [];
   $output[$tese_name]['total'] = 0;
   $output[$tese_name]['hits'] = [];
+  $output['total_count'] = 0;
 
   //preparing keyword for the full text search
   $arr = insertOperator(keyword_to_array($keyword));
@@ -890,7 +921,9 @@ function tes_search_db($keyword,$tribunal_lower,$tribunal_array) {
         $output[$key]['total'] = count($output[$key]['hits']);
     } //end inner foreach
   } //end outter foreach
+  
+  $output['total_count'] = $output['sumula']['total'] + $output['tese']['total'];
 
-return $output;
+  return $output;
 }
 

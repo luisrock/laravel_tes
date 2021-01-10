@@ -25,7 +25,7 @@
         @if (   (
                     !empty($output['sumula']['total']) 
                     || 
-                    !empty($output[$tese_name]['total'])
+                    !empty($output['tese']['total'])
                 )
                 &&
                 (

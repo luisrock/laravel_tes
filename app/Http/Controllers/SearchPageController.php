@@ -47,7 +47,6 @@ class SearchPageController extends Controller
         $tribunal_lower = strtolower($tribunal);
         $tribunal_upper = strtoupper($tribunal);
         $tribunal_array = $lista_tribunais[$tribunal_upper];
-        $tese_name = $tribunal_array['tese_name'];
         $results_view = 'front.results.' . $tribunal_lower;
         $output = [];
 
@@ -60,11 +59,13 @@ class SearchPageController extends Controller
             //tratando keyword
             $keyword = buildFinalSearchStringForApi($keyword, $tribunal_upper);
             $output = call_request_api($tribunal_lower,$keyword);
+            
+            //dd($output);
         }
 
         //obs: when searching by calling the tribunal API and getting 500 error, output will be a string...
         
-        $html = view($results_view, compact('lista_tribunais','keyword', 'tribunal', 'output', 'tese_name', 'display_pdf'));
+        $html = view($results_view, compact('lista_tribunais','keyword', 'tribunal', 'output', 'display_pdf'));
         if(!$pdf) {
             return $html;
         }
