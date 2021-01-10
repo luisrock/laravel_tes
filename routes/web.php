@@ -26,4 +26,8 @@ use Illuminate\Support\Facades\Route;
  * TES web routes
  */
 
-Route::get('/', [App\Http\Controllers\SearchPageController::class, 'index'])->name('searchpage');
+//Home (busca)
+ Route::get('/', [App\Http\Controllers\SearchPageController::class, 'index'])->name('searchpage');
+
+//Páginas prontas de temas
+Route::get('/tema/{tema?}', [App\Http\Controllers\TemaPageController::class, 'index'])->name('temapage');

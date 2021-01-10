@@ -20,13 +20,13 @@
 
         <title>@yield('page-title') - Teses & Súmulas</title>
 
-        <meta name="description" content="{{ config('tes_constants.options.meta_description') }}">
+        <meta name="description" content="{{ $description ?? config('tes_constants.options.meta_description') }}">
         <meta name="author" content="Mauro Lopes">
 
         <!-- Open Graph Meta -->
         <meta property="og:title" content="Teses e Súmulas">
         <meta property="og:site_name" content="tesesesumulas">
-        <meta property="og:description" content="{{ config('tes_constants.options.meta_description') }}">
+        <meta property="og:description" content="{{  $description ?? config('tes_constants.options.meta_description') }}">
         <meta property="og:type" content="website">
 <!--         <meta property="og:url" content="">
         <meta property="og:image" content=""> -->
