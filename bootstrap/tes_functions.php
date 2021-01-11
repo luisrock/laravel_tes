@@ -236,7 +236,7 @@ function stf_request($keyword) {
     $response = trib_request_body($j,'stf');
 
     if(is_integer($response)) {
-      return "O sistema do STF pode estar momentaneamente indisponível. Código de resposta da requisição => $response";
+      return "O sistema do STF pode estar momentaneamente indisponível (ou sua consulta foi mal construída). Código de resposta da requisição => $response";
     }
     if(empty($response)) {
       return 'Requisição ao STF falhou...';
@@ -317,7 +317,8 @@ function stf_request($keyword) {
       } //end if tese
     } // end foreach lista:
   } //end foreach s
-
+  
+  $output['total_count'] = $output['sumula']['total'] + $output['tese']['total'];
   return $output;
 }
 
@@ -429,6 +430,7 @@ function tst_request($keyword) {
         
   } //end foreach lista
     
+  //TODO: total count key
   return $output;
 }
 
@@ -538,6 +540,8 @@ function tcu_request($keyword) {
     } // end foreach lista:
   } //end foreach s
 
+  $output['total_count'] = $output['sumula']['total'] + $output['tese']['total'];
+  
   return $output;
 }
 

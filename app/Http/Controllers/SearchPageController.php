@@ -63,9 +63,20 @@ class SearchPageController extends Controller
             //dd($output);
         }
 
+        $canonical_url = '';
+
+        //If search is fruitful, save it to db in order to generate page (SEO purposes)
+        if(!empty($output['total_count']) && $output['total_count'] > 0) {
+            DB::table('pesquisas')->insertOrIgnore([
+                'keyword' => $keyword,
+                'results' => $output['total_count'],
+                'tribunal' => $tribunal_upper
+            ]);
+            $canonical_url = url('/') . '/tema/' . $keyword;
+        }
+
         //obs: when searching by calling the tribunal API and getting 500 error, output will be a string...
-        
-        $html = view($results_view, compact('lista_tribunais','keyword', 'tribunal', 'output', 'display_pdf'));
+        $html = view($results_view, compact('lista_tribunais','keyword', 'tribunal', 'output', 'display_pdf', 'canonical_url'));
         if(!$pdf) {
             return $html;
         }
