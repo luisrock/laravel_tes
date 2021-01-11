@@ -23,6 +23,8 @@
         <meta name="description" content="{{ $description ?? config('tes_constants.options.meta_description') }}">
         <meta name="author" content="Mauro Lopes">
 
+        <link href="{{ $canonical_url ?? Request::url() }}" rel="canonical">
+
         <!-- Open Graph Meta -->
         <meta property="og:title" content="Teses e Súmulas">
         <meta property="og:site_name" content="tesesesumulas">
