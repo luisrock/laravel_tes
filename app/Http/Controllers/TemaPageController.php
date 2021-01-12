@@ -45,7 +45,7 @@ class TemaPageController extends Controller
 
         //dd($output);
 
-        $description = 'Teses de Repercussão/Repetitivos e Súmulas dos tribunais superiores (STF, STJ) e de outros órgãos relevantes federais (TNU, FONAJE/CNJ, CEJ/CJF, TCU, CARF) para o tema: ' . $tema;
+        $description = $tema . ' - Teses de Repercussão/Repetitivos e Súmulas dos tribunais superiores (STF, STJ) e de outros órgãos relevantes federais (TNU, FONAJE/CNJ, CEJ/CJF, TCU, CARF)';
         
         $html = view('front.tema', compact('tema', 'output', 'display_pdf', 'description'));
         return $html;

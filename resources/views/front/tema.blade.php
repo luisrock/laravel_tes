@@ -16,6 +16,7 @@
                 <a href="{{ url('/') }}">
                 Teses & Súmulas
                 </a>
+                <span class="text-muted">sobre</span> {{ $tema }}
             </h1>
             <span>
                 <a href="https://chrome.google.com/webstore/detail/teses-e-s%C3%BAmulas/biigfejcdpcpibfmffgmmndpjhnlcjfb?hl=pt-BR"
@@ -23,7 +24,7 @@
             </span>
         </div>
         <p>
-            Tema: {{ $tema }}. <br>Faça outra pesquisa <a href="{{ url('/') }}">aqui</a>.
+            Faça outra pesquisa <a href="{{ url('/') }}">aqui</a>.
         </p>
     </div>
 </div>
