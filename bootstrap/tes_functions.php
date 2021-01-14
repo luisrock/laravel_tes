@@ -733,7 +733,10 @@ function tst_adjust_query_rep($results) {
   $array = [];
   foreach ($results as $r) {
     $a_r = [];
-    if (strpos($r['tema'], 'cancelamento') !== false || strpos($r['tema'], 'cancelada') !== false || strpos($r['tema'], 'negativo') !== false) {
+    if (  strpos($r['tema'], 'cancelamento') !== false || 
+          strpos($r['tema'], 'cancelada') !== false ||
+          strpos($r['tema'], 'cancelado') !== false || 
+          strpos($r['tema'], 'negativo') !== false) {
       continue;
     }
     $a_r['trib_rep_numero'] = $r['numero'] ?? ''; 
