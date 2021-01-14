@@ -20,11 +20,11 @@
 
   @section('teses_total_text')
       @if (empty($output['tese']['total']))
-          <span id="trib-rep-num">tese de orientação jurisprudencial ou de precedente normativo encontrada 
+          <span id="trib-rep-num">Nenhuma tese encontrada 
       @elseif ($output['tese']['total'] == 1)
-          <span class="text-primary font-w700" id="trib-rep-num">1</span> tese de orientação jurisprudencial ou de precedente normativo encontrada 
+          <span class="text-primary font-w700" id="trib-rep-num">1</span> tese encontrada 
       @else
-          <span class="text-primary font-w700" id="trib-rep-num">{{ $output['tese']['total'] }}</span> teses de orientação jurisprudencial ou de precedente normativo encontradas 
+          <span class="text-primary font-w700" id="trib-rep-num">{{ $output['tese']['total'] }}</span> teses encontradas 
       @endif
           no TST para <mark class="text-danger trib-keyword">{{ $keyword }}</mark>
       </span>

@@ -712,7 +712,39 @@ function stf_adjust_query_rep($results) {
 }
 
 //Adjust TST queries
+function tst_adjust_query_sum($results) {
+  $array = [];
+  foreach ($results as $r) {
+    $a_r = [];
+    if (strpos($r['tema'], 'cancelamento') !== false || strpos($r['tema'], 'cancelada') !== false) {
+      continue;
+    }
+    $a_r['trib_sum_tipo'] = 'Súmula'; 
+    $a_r['trib_sum_numero'] = $r['numero'] ?? ''; 
+    $a_r['trib_sum_tema'] = $r['tema'] ?? '';
+    $a_r['trib_sum_texto'] = $r['texto'] ?? ''; 
+    $a_r['trib_sum_url'] = $r['link'] ?? ''; 
+    $array[] = $a_r;
+  } // end foreach
+  return $array;
+}
 
+function tst_adjust_query_rep($results) {
+  $array = [];
+  foreach ($results as $r) {
+    $a_r = [];
+    if (strpos($r['tema'], 'cancelamento') !== false || strpos($r['tema'], 'cancelada') !== false || strpos($r['tema'], 'negativo') !== false) {
+      continue;
+    }
+    $a_r['trib_rep_numero'] = $r['numero'] ?? ''; 
+    $a_r['trib_rep_tipo'] = ($r['tipo'] == 'PN') ? 'Precedente Normativo' : 'Orientação Jurisprudencial'; 
+    $a_r['trib_rep_tema'] = $r['tema'] ?? ''; 
+    $a_r['trib_rep_texto'] = $r['texto'] ?? ''; 
+    $a_r['trib_rep_url'] = $r['link'] ?? ''; 
+    $array[] = $a_r;
+  } // end foreach
+  return $array;
+}
 
 //Adjust STJ queries
 
