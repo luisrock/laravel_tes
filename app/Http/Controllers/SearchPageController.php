@@ -63,6 +63,7 @@ class SearchPageController extends Controller
             //dd($output);
         }
 
+        //dd($output);
         $canonical_url = '';
 
         //If search is fruitful, save it to db in order to generate page (SEO purposes)

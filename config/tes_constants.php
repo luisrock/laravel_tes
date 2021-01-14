@@ -23,11 +23,14 @@ return [
         'TST' => [
             'trib_url' => 'https://jurisprudencia.tst.jus.br/',
             'request' => 'tst_request',
-            'to_match_sum' => '',
-            'to_match_rep' => '',
+            'to_match_sum' => 'titulo,tema,texto',
+            'to_match_rep' => 'titulo,tema,texto',
             'tese_name' => 'tese',
-            'tables' => [],
-            'db' => false
+            'tables' => [
+                            'sumulas' => ['sumulas'], 
+                            'teses'  => ['teses']
+                        ],
+            'db' => true
         ],
         'STJ' => [
             'trib_url' => 'https://scon.stj.jus.br/SCON/',
