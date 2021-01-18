@@ -18,16 +18,22 @@ use Illuminate\Support\Facades\Route;
 //     return view('welcome');
 // });
 
-//Auth::routes();
+//Auth::routes(); //with registering
 
-//Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+//No registering, by now.
+Auth::routes([
+    'register' => false
+]);
+
+
+Route::get('/admin', [App\Http\Controllers\HomeController::class, 'index'])->name('admin');
 
 /**
  * TES web routes
  */
 
-//Home (busca)
+//Busca
  Route::get('/', [App\Http\Controllers\SearchPageController::class, 'index'])->name('searchpage');
 
-//Páginas prontas de temas
+//Pages for temas
 Route::get('/tema/{tema?}', [App\Http\Controllers\TemaPageController::class, 'index'])->name('temapage');
