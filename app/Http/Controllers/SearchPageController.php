@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Jobs\SearchToDbPesquisas;
 
 class SearchPageController extends Controller
 {
@@ -68,11 +69,7 @@ class SearchPageController extends Controller
 
         //If search is fruitful, save it to db in order to generate page (SEO purposes)
         if(!empty($output['total_count']) && $output['total_count'] > 0) {
-            DB::table('pesquisas')->insertOrIgnore([
-                'keyword' => $keyword,
-                'results' => $output['total_count'],
-                'tribunal' => $tribunal_upper
-            ]);
+            SearchToDbPesquisas::dispatch($keyword);
             $canonical_url = url('/') . '/tema/' . $keyword;
         }
 
