@@ -53,7 +53,12 @@
                         }
                         @endphp
                             <td class="font-w600 font-size-sm td-tema">
-                                <a href="{{ route('temapage') . '/' . $t->slug }}">{{ $t->keyword }}</a><code> ({{$t->results}})</code>
+                                @if(!empty($t->slug) && !empty($t->created_at))
+                                <a href="{{ route('temapage') . '/' . $t->slug }}">{{ $t->keyword }}</a>
+                                @else
+                                {{ $t->keyword }}
+                                @endif
+                                <code> ({{$t->results}})</code>
                                 <span class="badge badge-pill badge-info toggle-form-tema" style="color: white; cursor:pointer;">action</span>
                                 <span class="badge badge-pill del-form-tema" style="color: red;cursor: pointer;background-color: #fff;border: solid 1px red;" data-tema-id="{{ $t->id }}">del</span>
                                 <form action="" class="form-tema" id="{{$k}}" data-tema-id="{{ $t->id }}">
