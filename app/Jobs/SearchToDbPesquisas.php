@@ -66,7 +66,7 @@ class SearchToDbPesquisas implements ShouldQueue
 
         //3. Insert to table 'pesquisas' keyword and results (#)
         
-        if($total_count > 10) {
+        if($total_count > 1) {
             DB::table('pesquisas')->insertOrIgnore([
                 'keyword' => $tema,
                 'results' => $total_count

@@ -70,7 +70,7 @@ class SearchPageController extends Controller
         //If search is fruitful, save it to db in order to generate page (SEO purposes)
         if(!empty($output['total_count']) && $output['total_count'] > 0) {
             SearchToDbPesquisas::dispatch($keyword);
-            $canonical_url = url('/') . '/tema/' . $keyword;
+            $canonical_url = url('/') . '/tema/' . slugify($keyword);
         }
 
         //obs: when searching by calling the tribunal API and getting 500 error, output will be a string...

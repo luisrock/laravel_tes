@@ -35,5 +35,12 @@ Route::get('/admin', [App\Http\Controllers\HomeController::class, 'index'])->nam
 //Busca
  Route::get('/', [App\Http\Controllers\SearchPageController::class, 'index'])->name('searchpage');
 
-//Pages for temas
+//Pages for individual tema
 Route::get('/tema/{tema?}', [App\Http\Controllers\TemaPageController::class, 'index'])->name('temapage');
+
+//Pages for temas links
+Route::get('/temas', [App\Http\Controllers\AllTemasPageController::class, 'index'])->name('alltemaspage');
+
+//Ajax requests admin
+Route::post('/admin-ajax-request', [App\Http\Controllers\AjaxController::class, 'adminstore'])->name('adminstore');
+Route::post('/admin-ajax-request-del', [App\Http\Controllers\AjaxController::class, 'admindel'])->name('admindel');

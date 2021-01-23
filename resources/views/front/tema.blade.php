@@ -1,6 +1,6 @@
 @extends('front.base')
 
-@section('page-title', $tema)
+@section('page-title', $label)
 
 @yield('stj')
 
@@ -16,7 +16,7 @@
                 <a href="{{ url('/') }}">
                 Teses & Súmulas
                 </a>
-                <span class="text-muted">sobre</span> {{ $tema }}
+                <span class="text-muted">sobre</span> {{ $label }}
             </h1>
             <span>
                 <a href="https://chrome.google.com/webstore/detail/teses-e-s%C3%BAmulas/biigfejcdpcpibfmffgmmndpjhnlcjfb?hl=pt-BR"
@@ -24,7 +24,7 @@
             </span>
         </div>
         <p>
-            Faça outra pesquisa <a href="{{ url('/') }}">aqui</a>.
+            Faça <a href="{{ route('searchpage') }}">outra pesquisa</a> ou veja as <a href="{{ route('alltemaspage') }}">pesquisas prontas</a>.
         </p>
     </div>
 </div>
@@ -56,7 +56,7 @@
             @endphp
             <div class="{{$class_pane}}" id="tema-{{$out}}" role="tabpanel">
                 <div class="font-size-h4 font-w600 p-2 mb-4 border-left border-4x border-primary bg-body-light trib-texto-quantidade">
-                    <code>{{ $tema }}</code> - {{ strtoupper($out) }} 
+                    <code>{{ $label }}</code> - {{ strtoupper($out) }} 
                     (resultados: <code>{{($output[$out]['total_count']) }}</code>)
                 </div>
                 <table class="table table-striped table-vcenter">

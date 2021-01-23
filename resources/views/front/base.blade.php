@@ -91,7 +91,13 @@
               <div class="content py-3">
                     <div class="row font-size-sm">
                         <div class="col-sm-6 order-sm-2 py-1 text-center text-sm-right">
-                            Criado por <a class="font-w600" href="mailto:mauluis@gmail.com" target="_blank">Mauro Lopes</a> &copy; <span data-toggle="year-copy"></span>. Todos os direitos reservados.
+                          @if(Route::currentRouteName() == 'searchpage')
+                          <a class="font-w600" href="{{ route('alltemaspage') }}">Pesquisas prontas</a>
+                          @elseif(Route::currentRouteName() == 'alltemaspage')
+                          <a class="font-w600" href="{{ route('searchpage') }}">Pesquisar</a>
+                          @else
+                          <a class="font-w600" href="{{ route('alltemaspage') }}">Pesquisas prontas</a> | <a class="font-w600" href="{{ route('searchpage') }}">Pesquisar</a>
+                          @endif
                         </div>
                         <div class="col-sm-6 order-sm-1 py-1 text-center text-sm-left">
                           Fontes:
@@ -111,8 +117,18 @@
                           <a class="font-w600" href="https://www.cnj.jus.br/corregedoria-nacional-de-justica/redescobrindo-os-juizados-especiais/enunciados-fonaje/" target="_blank">FONAJE</a>
                            -  
                           <a class="font-w600" href="https://www.cjf.jus.br/enunciados/" target="_blank">CEJ</a>
-                                                  </div>
+                        </div>
                     </div>
+<hr>
+                    <div class="row font-size-sm">
+                        <div class="col-sm-6 order-sm-2 py-1 text-center text-sm-right">
+                          &copy; <span data-toggle="year-copy"></span>. Todos os direitos reservados.
+                        </div>
+                        <div class="col-sm-6 order-sm-1 py-1 text-center text-sm-left">
+                          Criado por <a class="font-w600" href="https://maurolopes.com.br" target="_blank">Mauro Lopes</a>.
+                        </div>
+                    </div>
+
                 </div>
             </footer>
             <!-- END Footer -->
