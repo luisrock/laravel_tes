@@ -1,5 +1,4 @@
 <?php
-//TODO: criar slug sem espaços, tb na DB
 
 namespace App\Http\Controllers;
 

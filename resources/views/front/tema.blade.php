@@ -25,6 +25,11 @@
         </div>
         <p>
             Faça <a href="{{ route('searchpage') }}">outra pesquisa</a> ou veja as <a href="{{ route('alltemaspage') }}">pesquisas prontas</a>.
+            @auth
+            @if(in_array(Auth::user()->email, ['mauluis@gmail.com','trator70@gmail.com','ivanaredler@gmail.com']))
+            <br><a href="{{ route('admin') }}">Admin</a>
+            @endif
+            @endauth
         </p>
     </div>
 </div>

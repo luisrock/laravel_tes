@@ -41,6 +41,11 @@
     <div class="block block-rounded">
         <div class="block-header">
             <h3 class="block-title">Temas</h3>
+            @auth
+            @if(in_array(Auth::user()->email, ['mauluis@gmail.com','trator70@gmail.com','ivanaredler@gmail.com']))
+            <a href="{{ route('admin') }}">Admin</a>
+            @endif
+            @endauth
                 <div class="block-options">
                     <div class="block-options-item">
                         <!-- <code>.table</code> -->
