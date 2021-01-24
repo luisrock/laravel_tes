@@ -62,11 +62,13 @@
                         }
                         @endphp
                             <td class="font-w600 font-size-sm td-tema {{ $class_created }} {{ $class_checked }}">
+                                <span class="span-label">
                                 @if($class_created)
                                 <a href="{{ route('temapage') . '/' . $t->slug }}">{{ $t->keyword }}</a>
                                 @else
                                 {{ $t->keyword }}
                                 @endif
+                                </span>
                                 <code> ({{$t->results}})</code>
                                 <span class="badge badge-pill badge-info toggle-form-tema" style="color: white; cursor:pointer;">action</span>
                                 <span class="badge badge-pill del-form-tema" style="color: red;cursor: pointer;background-color: #fff;border: solid 1px red;" data-tema-id="{{ $t->id }}">del</span>
@@ -171,7 +173,7 @@ $( document ).ready(function() {
         let divCheck = $("#div-check-" + id)
         if(this.checked) {
             inputLabel.show()
-            inputLabel.val(titleCase(form.parent().children('a').text().replace(/['"]+/g, '')));
+            inputLabel.val(titleCase(form.parent().children('span.span-label').text().replace(/['"]+/g, '')).trim());
             btnSubmit.show()
             divCheck.hide()
         } else{
