@@ -210,6 +210,7 @@ $( document ).ready(function() {
     $('.form-tema').on('submit', function(e){
         e.preventDefault();
         let form = $(this);
+        let td = form.parent();
         let formId = form.attr('id');
         let temaId = form.attr('data-tema-id');
         let inputLabel = $("#inputLabel-" + formId).val()
@@ -239,6 +240,7 @@ $( document ).ready(function() {
                 if(!inputLabel) {
                     $("#inputLabel-" + formId).hide();
                 }
+                td.addClass('td-tema-created');
             }
           //console.log(response);
         },
