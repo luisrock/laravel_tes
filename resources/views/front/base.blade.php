@@ -96,8 +96,13 @@
                           @elseif(Route::currentRouteName() == 'alltemaspage')
                           <a class="font-w600" href="{{ route('searchpage') }}">Pesquisar</a>
                           @else
-                          <a class="font-w600" href="{{ route('alltemaspage') }}">Pesquisas prontas</a> | <a class="font-w600" href="{{ route('searchpage') }}">Pesquisar</a>
+                          <a class="font-w600" href="{{ route('alltemaspage') }}">Pesquisas prontas</a> | <a class="font-w600" href="{{ route('searchpage') }}">Pesquisar</a> 
                           @endif
+                          @auth
+                            @if(in_array(Auth::user()->email, ['mauluis@gmail.com','trator70@gmail.com','ivanaredler@gmail.com']))
+                            | <a href="{{ route('admin') }}">Admin</a>
+                            @endif
+                          @endauth
                         </div>
                         <div class="col-sm-6 order-sm-1 py-1 text-center text-sm-left">
                           Fontes:

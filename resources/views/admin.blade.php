@@ -15,6 +15,11 @@
                     @endif
 
                     {{ __('You are logged in!') }}
+                    @auth
+                    @if(in_array(Auth::user()->email, ['mauluis@gmail.com','trator70@gmail.com','ivanaredler@gmail.com']))
+                    <br><a href="{{ route('searchpage') }}">Pesquisa</a> | <a href="{{ route('alltemaspage') }}">Temas</a> 
+                    @endif
+                    @endauth
                 </div>
 
             </div>
@@ -23,7 +28,7 @@
         <div class="col-md-12" style="margin-top:50px">
             <div class="card">
                 <div class="card-header" style="display:flex; justify-content: space-between;">
-                    Temas
+                    <a href="{{ route('alltemaspage') }}">Temas</a>
                     <div>
                     <button id="toggle-forms">hide forms</button>
                     <button id="toggle-created">hide created</button>
