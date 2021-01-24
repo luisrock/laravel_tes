@@ -24,7 +24,10 @@
             <div class="card">
                 <div class="card-header" style="display:flex; justify-content: space-between;">
                     Temas
-                    <button id="toggle-forms">hide all</button>
+                    <div>
+                    <button id="toggle-forms">hide forms</button>
+                    <button id="toggle-created">hide created</button>
+                    </div>
                 </div>
 
                 <div class="card-body">
@@ -40,20 +43,26 @@
                         $lb_checked = 'check';
                         $st_created = '';
                         $lb_created = 'create';
+                        $class_created = '';
+                        $class_checked = '';
                         if($t->checked_at){
                             $st_checked = 'checked disabled';
                             $lb_checked = 'checked';
                             $st_created = 'disabled';
+                            $class_checked = 'td-tema-checked';
                         }
 
                         if($t->created_at){
                             $st_created = 'checked disabled';
                             $lb_created = 'created';
                             $st_checked = 'disabled';
+                            if(!empty($t->slug)) {
+                                $class_created = 'td-tema-created';
+                            }
                         }
                         @endphp
-                            <td class="font-w600 font-size-sm td-tema">
-                                @if(!empty($t->slug) && !empty($t->created_at))
+                            <td class="font-w600 font-size-sm td-tema {{ $class_created }} {{ $class_checked }}">
+                                @if($class_created)
                                 <a href="{{ route('temapage') . '/' . $t->slug }}">{{ $t->keyword }}</a>
                                 @else
                                 {{ $t->keyword }}
@@ -116,11 +125,21 @@ $( document ).ready(function() {
         if($('.form-tema').is(":hidden")) {
             $('.form-tema').show()
             $('.del-form-tema').hide()
-            $(this).text('hide all')
+            $(this).text('hide forms')
         } else {
             $('.form-tema').hide()
             $('.del-form-tema').show()
-            $(this).text('show all')
+            $(this).text('show forms')
+        }
+    });
+
+    $("#toggle-created").on('click', function() {
+        if($('.td-tema-created').is(":hidden")) {
+            $('.td-tema-created').show()
+            $(this).text('hide created')
+        } else {
+            $('.td-tema-created').hide()
+            $(this).text('show created')
         }
     });
 
