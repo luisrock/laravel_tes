@@ -37,6 +37,11 @@ class SearchToDbPesquisas implements ShouldQueue
     {
         $tema = $this->keyword;
 
+        //Don't store keyword with only numbers
+        if(is_numeric($tema)) {
+            return;
+        }
+
         //1. Search in all dbs for keyword
 
         $lista_tribunais = Config::get('tes_constants.lista_tribunais');
@@ -66,7 +71,7 @@ class SearchToDbPesquisas implements ShouldQueue
 
         //3. Insert to table 'pesquisas' keyword and results (#)
         
-        if($total_count > 1) {
+        if($total_count > 0) {
             DB::table('pesquisas')->insertOrIgnore([
                 'keyword' => $tema,
                 'results' => $total_count
