@@ -1,2 +1,3 @@
 User-agent: *
 Disallow:
+Sitemap: https://tesesesumulas.com.br/sitemap.xml
