@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Artisan;
 
 class AjaxController extends Controller
 {
@@ -44,6 +45,8 @@ class AjaxController extends Controller
                   ]
                 );
         }
+        
+        Artisan::call('sitemap:generate');
         return response()->json(['success'=>$affected]);
     }
 
