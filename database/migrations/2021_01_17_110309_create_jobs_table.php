@@ -13,17 +13,15 @@ class CreateJobsTable extends Migration
      */
     public function up()
     {
-        if (!Schema::hasTable('jobs')) { //deploys estava falhando dizendo que a tabela já existia...
-            Schema::create('jobs', function (Blueprint $table) {
-                $table->bigIncrements('id');
-                $table->string('queue')->index();
-                $table->longText('payload');
-                $table->unsignedTinyInteger('attempts');
-                $table->unsignedInteger('reserved_at')->nullable();
-                $table->unsignedInteger('available_at');
-                $table->unsignedInteger('created_at');
-            });    
-          }
+        Schema::create('jobs', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('queue')->index();
+            $table->longText('payload');
+            $table->unsignedTinyInteger('attempts');
+            $table->unsignedInteger('reserved_at')->nullable();
+            $table->unsignedInteger('available_at');
+            $table->unsignedInteger('created_at');
+        });
     }
 
     /**
