@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Artisan;
 
 class HomeController extends Controller
 {
@@ -24,6 +25,8 @@ class HomeController extends Controller
      */
     public function index()
     {
+        Artisan::call('queue:work --stop-when-empty');
+
         $temas = DB::table('pesquisas')
                 ->select('*')
                 ->orderBy(DB::raw("REPLACE(keyword, '\"', '')")) //GET RID OFF QUOTES ONLY FOR ALPHABETICAL ORDER
