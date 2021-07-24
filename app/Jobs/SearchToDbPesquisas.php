@@ -41,6 +41,11 @@ class SearchToDbPesquisas implements ShouldQueue
         if(is_numeric($tema)) {
             return;
         }
+        
+        //Don't store keyword with súmula
+        if( strpos(strtolower($tema), 'súmula')  !== false || strpos(strtolower($tema), 'sumula ')  !== false ) {
+            return;
+        }
 
         //1. Search in all dbs for keyword
 
