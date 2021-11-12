@@ -17,7 +17,7 @@
           </p>
           <span class="text-muted" style="display: flex;justify-content: flex-end;font-size: 0.8em;">
             Situação: {{ $rep['trib_rep_situacao'] }} 
-            (última atualização em {{ $rep['trib_rep_data'] }})</span>
+            (última verificação em {{ $rep['trib_rep_data'] }})</span>
         </td>
       </tr>
 @endforeach
