@@ -20,6 +20,13 @@
             {{ $sum['trib_sum_jornada'] }}
           </span>
         </div>
+
+        <span class="tes-clear tes-text-to-be-copied" style="display: none" data-spec="trim">{{ $sum['trib_sum_titulo'] }}. {{ $sum['trib_sum_texto'] }} @if(!empty($sum['trib_sum_notas']))NOTAS: {{$sum['trib_sum_notas']}}@endif {{ $sum['trib_sum_legis'] }} {{ $sum['trib_sum_jornada'] }}</span>
+            <button class="btn btn-rounded btn-outline-primary btn-sm mr-1 mb-3 btn-copy-text">
+            <span>
+              <i class="fa fa-copy"></i>
+            </span>
+          </button>
       </td>
     </tr>
 @endforeach

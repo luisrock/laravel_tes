@@ -128,6 +128,9 @@ $( document ).ready(function() {
         return splitStr.join(' '); 
     }
 
+    //Para ficar mais fácil a visualização dos criados e não criados
+    $('.td-tema-created').css('background-color', '#80808040');
+
     $("#toggle-forms").on('click', function() {
         if($('.form-tema').is(":hidden")) {
             $('.form-tema').show()
