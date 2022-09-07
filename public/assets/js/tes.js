@@ -53,6 +53,40 @@ btns.forEach(btn => {
 });
 
 
+//Open tab content that has something initially
+//Disable .nav-item > .nav-link with no corresponding content on .tab-pane for pesq uisas prontas
+const navItems = document.querySelectorAll('.nav-item');
+
+firstClicked = false;
+navItems.forEach(function(el) {
+    let hasContent = document.querySelectorAll('tr').length > 0;
+    if(!hasContent) {
+        //no pane has content. Leave as it is
+        return; 
+    }
+    let navLink = el.querySelector('.nav-link');
+    let href = navLink.getAttribute('href');
+    let tabPane = document.querySelector(href);
+    let trs = tabPane.querySelectorAll('tr');
+    if (trs.length === 0) {
+        if (navLink.closest('.nav-tabs-tribunais')) {
+            //disable for tema (pesquisa pronta)
+            navLink.classList.add('disabled'); 
+        }
+        navLink.classList.remove('active');
+        tabPane.classList.remove('show', 'active');
+    } else {
+        if (!firstClicked) {
+            navLink.classList.add('active');
+            tabPane.classList.add('show', 'active');
+            firstClicked = true;
+        } else {
+            navLink.classList.remove('active');
+            tabPane.classList.remove('show', 'active');
+        }
+    }
+});
+
 //nav links style
 const navLinks = document.querySelectorAll('.nav-link');
 function navLinkActiveStyle(el) {
@@ -78,3 +112,5 @@ function linkColorAndBorder() {
     let clicked = this;
     navLinkActiveStyle(clicked);
 }
+
+

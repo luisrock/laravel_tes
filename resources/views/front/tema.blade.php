@@ -39,13 +39,13 @@
 
     <!-- Results -->
     <div class="block">
-        <ul class="nav nav-tabs nav-tabs-block" data-toggle="tabs" role="tablist" style="{{ $display_pdf }}">
+        <ul class="nav nav-tabs nav-tabs-block nav-tabs-tribunais" data-toggle="tabs" role="tablist" style="{{ $display_pdf }}">
 
             @foreach($output as $out => $put)
             @php 
             $class_link = ($loop->first) ? "nav-link active" : "nav-link"; 
             @endphp 
-            <li class="nav-item" id="nav-{{$out}}">
+            <li class="nav-item nav-item-tribunal" id="nav-{{$out}}">
                 <a class="{{$class_link}}" href="#tema-{{$out}}">{{ strtoupper($out) }}</a>
             </li>
             @endforeach
