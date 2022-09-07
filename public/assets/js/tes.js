@@ -11,10 +11,13 @@ function waitingResults() {
     btnForm.style.display = 'none';
 }
 
-document.getElementById('trib-form').addEventListener("submit", function(event) {
-//     event.preventDefault();
-    waitingResults(); 
-});
+const tribForm = document.getElementById('trib-form');
+if(tribForm) {
+    tribForm.addEventListener("submit", function(event) {
+        //event.preventDefault();
+        waitingResults(); 
+    }); 
+}
 
 function tesGetTheText(element, trim = false) {
     if(!element) return '';
@@ -48,3 +51,30 @@ btns.forEach(btn => {
         );
     });
 });
+
+
+//nav links style
+const navLinks = document.querySelectorAll('.nav-link');
+function navLinkActiveStyle(el) {
+    el.style.color = '#5c80d1';
+    el.style.borderBottomColor = 'rgb(92 128 209 / 48%)'; 
+    navLinks.forEach(function(eachEl) {
+        if (eachEl !== el) {
+            eachEl.removeAttribute('style');
+        }
+    });   
+}
+
+//Initial state and adding click event
+navLinks.forEach(function(el) {
+    el.addEventListener('click', linkColorAndBorder);
+    if (el.classList.contains('active')) {
+        navLinkActiveStyle(el);
+    } 
+    
+});
+
+function linkColorAndBorder() {
+    let clicked = this;
+    navLinkActiveStyle(clicked);
+}
