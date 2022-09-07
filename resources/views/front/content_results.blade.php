@@ -7,7 +7,7 @@
 <div class="content" id="content-results">
     <!-- Results -->
     <div class="block">
-        <ul class="nav nav-tabs nav-tabs-block" data-toggle="tabs" role="tablist" style="{{ $display_pdf }}">
+        <ul class="nav nav-tabs nav-tabs-block nav-tabs-items" data-toggle="tabs" role="tablist" style="{{ $display_pdf }}">
             <li class="nav-item" id="nav-sumulas">
                 <a class="nav-link active" href="#busca-sumulas-trib">Súmulas</a>
             </li>
