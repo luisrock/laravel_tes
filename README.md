@@ -1,4 +1,4 @@
-## Teses & Súmulas
+## Teses & Súmulas (Laravel Site)
 
 ### Prepare local
 
