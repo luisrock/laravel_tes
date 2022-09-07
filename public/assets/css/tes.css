@@ -23,3 +23,7 @@
 .btn-copy-text {
   font-size: 0.7em;
 }
+
+.nav-tabs .nav-link.disabled {
+  color: #6c757d5e;
+}
