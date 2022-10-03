@@ -99,7 +99,7 @@
                           <a class="font-w600" href="{{ route('alltemaspage') }}">Pesquisas prontas</a> | <a class="font-w600" href="{{ route('searchpage') }}">Pesquisar</a> 
                           @endif
                           @auth
-                            @if(in_array(Auth::user()->email, ['mauluis@gmail.com','trator70@gmail.com','ivanaredler@gmail.com']))
+                            @if(in_array(Auth::user()->email, config('tes_constants.admins') ))
                             | <a href="{{ route('admin') }}">Admin</a>
                             @endif
                           @endauth
