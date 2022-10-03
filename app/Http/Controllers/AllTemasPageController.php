@@ -22,7 +22,7 @@ class AllTemasPageController extends Controller
                 ->orderBy(DB::raw("COALESCE(label, REPLACE(keyword, '\"', ''))")) //GET RID OFF QUOTES ONLY FOR ALPHABETICAL ORDER
                 ->get();
 
-        $description = 'Pesquisas prontas de Teses de Repercussão/Repetitivos e Súmulas dos tribunais superiores (STF, STJ, TST) e de outros órgãos federais relevantes (TNU, FONAJE/CNJ, CEJ/CJF, TCU, CARF)';
+        $description = 'Pesquisas prontas de Teses de Repercussão e Repetitivos e de Súmulas dos tribunais superiores (STF, STJ, TST) e de outros órgãos federais relevantes (TNU, FONAJE/CNJ, CEJ/CJF, TCU, CARF)';
         return view('front.temas', compact('temas','display_pdf','description'));
         
     } //end public function
