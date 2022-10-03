@@ -19,7 +19,7 @@
         </div>
         <p>
             Pesquisa Pronta de Súmulas, Enunciados e Teses de Repercussão Geral e Repetitivos
-            feita diretamente contra a base de dados de tribunais superiores
+            feita na base de dados de tribunais superiores
             e outros órgãos relevantes. Escolha o seu tema e comece a estudar!
         </p>
         <h2>
