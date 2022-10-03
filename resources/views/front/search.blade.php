@@ -18,8 +18,8 @@
             </span>
         </div>
         <p>
-            Pesquisa Simplificada de Súmulas e Teses de Repercussão Geral
-            feita diretamente contra a base de dados de tribunais superiores
+            Pesquisa Simplificada de Súmulas e Teses de Repetitivos e de Repercussão Geral
+            feita na base de dados de tribunais superiores
             e outros órgãos relevantes, com geração opcional de PDF contendo os resultados.
             Prepare seu estudo|aula|decisão|petição|parecer etc.
         </p>

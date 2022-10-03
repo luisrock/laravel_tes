@@ -59,7 +59,7 @@ class TemaPageController extends Controller
 
         //dd($output);
 
-        $description = $label . ' - Conheça as Teses de Repercussão/Repetitivos e Súmulas dos tribunais superiores (STF, STJ, TST) e de outros órgãos relevantes federais (TNU, FONAJE/CNJ, CEJ/CJF, TCU, CARF) sobre o tema ' . $label;
+        $description = $label . ' - Conheça as Teses de Repercussão e de Repetitivos e as Súmulas dos tribunais superiores (STF, STJ, TST) e de outros órgãos relevantes federais (TNU, FONAJE/CNJ, CEJ/CJF, TCU, CARF) sobre o tema ' . $label;
         
         $html = view('front.tema', compact('keyword', 'label', 'output', 'display_pdf', 'description'));
         return $html;
