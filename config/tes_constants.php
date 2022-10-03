@@ -6,7 +6,7 @@ return [
         'tst_search_url' => 'https://jurisprudencia-backend.tst.jus.br/rest/pesquisa-textual/1/200',
         'tcu_search_url' => 'https://pesquisa.apps.tcu.gov.br/rest/publico/base',
         'operadores' => ['AND', 'OR', 'NOT'],
-        'meta_description' => 'Pesquisa simplificada de Teses de Repercussão e Súmulas dos tribunais superiores (STF, STJ, TST) e de outros órgãos relevantes federais (TNU, FONAJE/CNJ, CEJ/CJF, TCU, CARF), com opcional geração de PDF. Ideal para a preparação de aula, decisão, petição, estudo etc.'
+        'meta_description' => 'Pesquisa simplificada de Teses de Repercussão e Repetitivos e de Súmulas dos tribunais superiores (STF, STJ, TST) e de outros órgãos relevantes federais (TNU, FONAJE/CNJ, CEJ/CJF, TCU, CARF), com opcional geração de PDF. Ideal para a preparação de aula, decisão, petição, estudo etc.'
     ],
     'lista_tribunais'  => [
         'STF' => [
