@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'admins' => ['mauluis@gmail.com','trator70@gmail.com','ivanaredler@gmail.com'],
     'options' => [
         'stf_search_url' => 'https://jurisprudencia.stf.jus.br/api/search/search',
         'tst_search_url' => 'https://jurisprudencia-backend.tst.jus.br/rest/pesquisa-textual/1/200',
