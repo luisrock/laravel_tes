@@ -64,7 +64,7 @@
                     <code>{{ $label }}</code> - {{ strtoupper($out) }} 
                     (resultados: <code>{{($output[$out]['total_count']) }}</code>)
                 </div>
-                <table class="table table-striped table-vcenter">
+                <table class="table table-striped table-vcenter table-results">
                     <tbody>
                         @includeif('front.results.inners.' . strtolower($out) . '_sum', ['output' => $output[$out]])
                         @includeif('front.results.inners.' . strtolower($out) . '_rep', ['output' => $output[$out]])

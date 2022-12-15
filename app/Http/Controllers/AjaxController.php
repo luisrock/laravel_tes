@@ -67,4 +67,46 @@ class AjaxController extends Controller
         return response()->json(['success'=>$del]);
     }
 
+    //new (dez/2022)
+    public function searchByKeywordSimilarity(Request $request)
+    {
+        if ($request->isMethod('post') === false) {
+            return;
+        }
+        $keyword = $request['keyword'];
+
+        // Get all records from the table 'pesquisas' where created_at is not null; get only label and id fields
+        $records = DB::table('pesquisas')
+            ->select('label', 'id')
+            ->whereNotNull('created_at')
+            ->get();
+
+        $results = [];
+
+        // Loop through all records
+        foreach ($records as $record) {
+            //save $record->label to a variable and remove ' and " and - and spaces from it
+            $label = str_replace([' ', '-', '"', "'"], '', $record->label);
+            //uncapitalize label
+            $label = strtolower($label);
+            //do the same with $keyword
+            $keyword = str_replace([' ', '-', '"', "'"], '', $keyword);
+            $keyword = strtolower($keyword);
+            // Get the similarity score of the record with the keyword
+            $similarityScore = similar_text($keyword, $label, $percentage);
+
+            // Check if the similarity score is at least 70%.
+            if ($percentage >= 70) {
+                //add round percentage to record
+                $record->percentage = round($percentage);
+
+                
+
+                // Push the record to the results array
+                array_push($results, $record);
+            }
+        }
+        return response()->json(['success' => $results]);
+    }
+
 }

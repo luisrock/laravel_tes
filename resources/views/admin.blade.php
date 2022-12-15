@@ -227,6 +227,9 @@ $( document ).ready(function() {
             'check' : check,
             '_token' : token
         }
+
+        // console.log(data);
+        // return;
         form.children('.btn-submit').hide();
 
         $.ajax({
