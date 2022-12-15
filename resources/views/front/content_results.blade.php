@@ -54,7 +54,7 @@
                     @yield('sumulas_total_text')
 
                 </div>
-                <table class="table table-striped table-vcenter">
+                <table class="table table-striped table-vcenter table-results">
                     <tbody>
 
                         @yield('sumulas_inner_table')
@@ -98,7 +98,7 @@
                     @yield('teses_total_text')
 
                 </div>
-                <table class="table table-striped table-vcenter">
+                <table class="table table-striped table-vcenter table-results">
                     <tbody>
 
                         @yield('teses_inner_table')
