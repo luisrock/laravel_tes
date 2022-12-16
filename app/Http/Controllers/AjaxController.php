@@ -8,6 +8,24 @@ use Illuminate\Support\Facades\Artisan;
 
 class AjaxController extends Controller
 {
+
+    //make a public function to get the id from the table 'pesquisas' by the keyword
+    public function getidbykeyword(Request $request)
+    {
+        if ($request->isMethod('get') === false) {
+            return;
+        }
+
+        $request->validate([
+                'keyword' => 'required'
+        ]);
+        
+        $keyword = $request['keyword'];
+        $id = DB::table('pesquisas')->where('keyword', $keyword)->value('id');
+        
+        return response()->json(['success' => $id]);
+    }
+
     public function adminstore(Request $request)
     {
         if ($request->isMethod('post') === false) {
@@ -73,11 +91,21 @@ class AjaxController extends Controller
         if ($request->isMethod('post') === false) {
             return;
         }
-        $keyword = $request['keyword'];
+        $keywordSearched = $request['keywordSearched'];
+        $label = $request['label'];
+        $typeToCompare = $request['typeToCompare'];
+        $percentage_requested = intval($request['percentage']);
+        $termToCompare = $keywordSearched;
+        if($typeToCompare == 'label') {
+            $termToCompare = $label;
+            $termToCompare = str_replace([' ', '-', '"', "'"], '', $termToCompare);
+            $termToCompare = strtolower($termToCompare);
+        }
+
 
         // Get all records from the table 'pesquisas' where created_at is not null; get only label and id fields
         $records = DB::table('pesquisas')
-            ->select('label', 'id')
+            ->select( 'id','keyword','label','results')
             ->whereNotNull('created_at')
             ->get();
 
@@ -85,23 +113,25 @@ class AjaxController extends Controller
 
         // Loop through all records
         foreach ($records as $record) {
-            //save $record->label to a variable and remove ' and " and - and spaces from it
-            $label = str_replace([' ', '-', '"', "'"], '', $record->label);
-            //uncapitalize label
-            $label = strtolower($label);
-            //do the same with $keyword
-            $keyword = str_replace([' ', '-', '"', "'"], '', $keyword);
-            $keyword = strtolower($keyword);
+            if($typeToCompare == 'label') {
+                $termFromDB = $record->label;
+                $termFromDB = str_replace([' ', '-', '"', "'"], '', $termFromDB);
+                $termFromDB = strtolower($termFromDB);
+            }
+            else {
+                $termFromDB = $record->keyword;
+            }
+
+
             // Get the similarity score of the record with the keyword
-            $similarityScore = similar_text($keyword, $label, $percentage);
+            $similarityScore = similar_text($termToCompare, $termFromDB, $percentage);
 
             // Check if the similarity score is at least 70%.
-            if ($percentage >= 70) {
+            if ($percentage >= $percentage_requested) {
                 //add round percentage to record
                 $record->percentage = round($percentage);
-
-                
-
+                $record->criteria = $typeToCompare;
+                $record->termCompared = $termToCompare;
                 // Push the record to the results array
                 array_push($results, $record);
             }
