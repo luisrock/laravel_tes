@@ -248,22 +248,17 @@
   
                 });
 
-                // //to config mark.js: https://markjs.io/configurator.html
-                // let context = document.querySelectorAll(".table-results");
-                
-                // let instance = new Mark(context);
-                // instance.mark(rawTitle, {
-                //     //make mark.js ignore words with less than three characters
-                //     filter : function(textNode, foundTerm, totalCounter, counter) {
-                //         return foundTerm.length > 2;
-                //     },
-                   
-                // });
-
-                markit(rawTitle, ".table-results");
-                
                 //get on the database table 'pesquisas' all the similar searches and console.log them 
-                $('#btn-store-search').click(function() {
+                $('#btn-store-search').on('click', function() {
+
+                    let label = $('input[name="store-label"]').val();
+
+                    //disable the btn-store-search
+                    $('#btn-store-search').attr('disabled', true);
+                    $(this).text('Salvando...');
+                    $('#admin-store').empty().html('<div class="alert alert-info" role="alert">Salvando...(seja paciente)</div>');
+                    
+                    
                     //make a get request to the route getidbykeyword with the keywordSearched
                     $.ajax({
                         url: "{{route('getidbykeyword')}}",
@@ -279,7 +274,7 @@
                                 type:"POST",
                                 data: {
                                     'id' : response.success,
-                                    'label' : $('input[name="store-label"]').val(),
+                                    'label' : label,
                                     'create' : 1,
                                     'check' : 0,
                                     '_token' : '{{ csrf_token() }}'
@@ -300,29 +295,13 @@
 
 
             
-// $request->validate([
-//     'check' => 'required|in:0,1',
-//     'create' => 'required|in:0,1',
-//     'id' => 'numeric'
-// ]);
 
-// $check = $request['check'];
-// $create = $request['create'];
-// $id = $request['id'];
-// $label = $request['label'];
-    // //update created_at, label
-// $affected = DB::table('pesquisas')
-//   ->where('id', $id)
-//   ->update([
-//       'created_at' => DB::raw('NOW()'),
-//       'label' => $label,
-//       'slug' => slugify($label)
-//       ]
-//     );
 
                     
                     return;
                 });
+
+                markit(rawTitle, ".table-results");
             })
         </script>
     
