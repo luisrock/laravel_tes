@@ -90,12 +90,21 @@
         @if(in_array(Auth::user()->email, ['mauluis@gmail.com','trator70@gmail.com','ivanaredler@gmail.com']))
             @if(!empty($output['total_count']))
             @php $toStore = true; @endphp
-            <div>
-                <br><button class="btn btn-sm btn-primary" id="btn-store-search"> Salvar Pesquisa </button> 
-                <input type="text" name="store-title">
-            </div>
-            <div>
-                <div id="similar-searched"></div>
+            <div id="admin-store">
+                <div>
+                    <input type="text" name="store-label" style="width: 300;"><br> 
+                    <button class="btn btn-sm btn-secondary" id="btn-similar-search"> Similares </button>
+                    <select name="typeToCompare">
+                        <option value="label" selected>by label</option>
+                        <option value="keyword">by keyword</option>
+                    </select>
+                    <input type="number" name="similarity-percentage" value="80" min="0" max="100" style="width: 50px;">%
+                </div>
+                <div class="similar-block" style="display:none;">
+                    <div id="similar-searched"></div>
+                    <button class="btn btn-sm btn-primary" id="btn-store-search" disabled> Salvar Pesquisa </button>
+                    
+                </div>
             </div>
             @endif
         @endif        
@@ -115,6 +124,19 @@
         <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script>
+            function markit(term, sel) {
+                //to config mark.js: https://markjs.io/configurator.html
+                let context = document.querySelectorAll(sel);
+                let instance = new Mark(context);
+                instance.mark(term, {
+                    //make mark.js ignore words with less than three characters
+                    filter : function(textNode, foundTerm, totalCounter, counter) {
+                        return foundTerm.length > 2;
+                    },
+                });
+            }
+                
+
             $( document ).ready(function() {
 
                 //Primeira letra maiúsula, salvo se a palavra tiver menos de 3 caracteres
@@ -130,56 +152,175 @@
                     return splitStr.join(' '); 
                 } 
 
-                //fill the store-title input with the input name "q" valu without the " char
-                let rawTitle = $('input[name="q"]').val().replace(/"/g, '').trim();
+                //fill the store-label input with the input name "q" valu without the " char
+                let keywordSearched = $('input[name="q"]').val().trim();
+                let rawTitle = keywordSearched.replace(/"/g, '');
                 let title = titleCase(rawTitle);
-                $('input[name="store-title"]').val(title);
-                $.ajax({
-                    url: "{{route('searchByKeywordSimilarity')}}",
-                    type:"POST",
-                    data: {
-                        'keyword':title, 
-                        '_token':'{{ csrf_token() }}'
-                    },
-                    success:function(response) {
-                        if(response.hasOwnProperty('success')) {
-                            console.log('success')
-                        }
-                        //insert items on the div similar-searched
-                        let similar = '';
-                        console.log(response.success)
-                        response.success.forEach(function(item) {
-                            //if item.percentage > 95, disable #btn-store-search and mark the item with a yellow color
-                            if(item.percentage > 95) {
-                                $('#btn-store-search').attr('disabled', true);
-                                similar += '<span style="background-color:yellow;">' + item.label + " (" + item.percentage + "%)</span>, ";
-                            } else {
-                                similar += item.label + " (" + item.percentage + "%), ";
+                $('input[name="store-label"]').val(title);
+
+                //click on the btn-similar-search
+                $('#btn-similar-search').click(function() {
+
+                    //show the similar-block
+                    $('.similar-block').show();
+                    $('#similar-searched').empty();
+                    //enable the btn-store-search
+                    $('#btn-store-search').attr('disabled', false);
+
+                    let label = $('input[name="store-label"]').val();
+                    //get select[name="typeToCompare"] option selected
+                    let typeToCompare = $('select[name="typeToCompare"]').find(":selected").val();
+
+                    //call the route searchByKeywordSimilarity
+                    $.ajax({
+                        url: "{{route('searchByKeywordSimilarity')}}",
+                        type:"POST",
+                        data: {
+                            'keywordSearched': keywordSearched, 
+                            'label': label,
+                            'percentage':$('input[name="similarity-percentage"]').val(),
+                            'typeToCompare': typeToCompare,
+                            '_token':'{{ csrf_token() }}'
+                        },
+                        success:function(response) {
+                            if(response.hasOwnProperty('success')) {
+                                console.log('success')
                             }
-                        });
-                        //remove the last comma on similar
-                        similar = similar.slice(0, -2);
-                        $('#similar-searched').html(similar);
-                    },
-                    error: function(response) {
-                        $('#similar-searched').val(stringify(response));
-                    },
+                            //insert items on the div similar-searched
+                            let similar = '';
+                            console.log(response.success)
+
+                            //if response.success is not empty, order by percentage
+                            if(response.success.length > 0) {
+                                response.success.sort(function(a, b) {
+                                    return b.percentage - a.percentage;
+                                });
+                            }
+
+                            response.success.forEach(function(item) {
+                                if(typeToCompare == 'keyword') {
+                                    itemToShow = item.keyword;
+                                    itemSecondary = item.label;
+                                } else {
+                                    itemToShow = item.label;
+                                    itemSecondary = item.keyword;
+                                }
+
+                                //TODO: alternate keyword and label on the parenthesis
+
+                                //if item.percentage > 95, disable #btn-store-search and mark the item with a yellow color
+                                //create three columns to fill the similar-searched div
+                                similar += '<div class="row">';
+                                similar += '<div class="col-4">' + itemToShow + '</div>';
+                                similar += '<div class="col-4">' + itemSecondary + '</div>';
+                                similar += '<div class="col-4">' + item.percentage + '%</div>';
+                                similar += '</div>';
+
+
+
+
+                                
+
+                                // if(item.percentage > 95) {
+                                //     $('#btn-store-search').attr('disabled', true);
+                                //     similar += '<span style="background-color:yellow;">' + itemToShow + " - " + item.percentage + "%</span> ";
+                                // } else {
+                                //     similar += itemToShow + " - " + item.percentage + "% ";
+                                // }
+                            });
+                            //remove the last comma on similar
+                            similar = similar.slice(0, -2);
+                            
+
+                            $('#similar-searched').html(similar);
+
+                            if(typeToCompare == 'keyword') {
+                                termToMark = keywordSearched;
+                            } else {
+                                termToMark = label;
+                            }
+                            markit(termToMark, '#similar-searched');
+                        },
+                        error: function(response) {
+                            $('#similar-searched').val(stringify(response));
+                        },
+                    });
+  
                 });
 
-                //to config mark.js: https://markjs.io/configurator.html
-                let context = document.querySelectorAll(".table-results");
+                // //to config mark.js: https://markjs.io/configurator.html
+                // let context = document.querySelectorAll(".table-results");
                 
-                let instance = new Mark(context);
-                instance.mark(rawTitle, {
-                    //make mark.js ignore words with less than three characters
-                    filter : function(textNode, foundTerm, totalCounter, counter) {
-                        return foundTerm.length > 2;
-                    },
+                // let instance = new Mark(context);
+                // instance.mark(rawTitle, {
+                //     //make mark.js ignore words with less than three characters
+                //     filter : function(textNode, foundTerm, totalCounter, counter) {
+                //         return foundTerm.length > 2;
+                //     },
                    
-                });
+                // });
+
+                markit(rawTitle, ".table-results");
                 
                 //get on the database table 'pesquisas' all the similar searches and console.log them 
                 $('#btn-store-search').click(function() {
+                    //make a get request to the route getidbykeyword with the keywordSearched
+                    $.ajax({
+                        url: "{{route('getidbykeyword')}}",
+                        type:"GET",
+                        data: {
+                            'keyword': keywordSearched, 
+                            '_token':'{{ csrf_token() }}'
+                        },
+                        success:function(response) {
+                            //make a post to save, now that we have the ID
+                            $.ajax({
+                                url: "{{route('adminstore')}}",
+                                type:"POST",
+                                data: {
+                                    'id' : response.success,
+                                    'label' : $('input[name="store-label"]').val(),
+                                    'create' : 1,
+                                    'check' : 0,
+                                    '_token' : '{{ csrf_token() }}'
+                                },
+                                success:function(response){
+                                    if(response.hasOwnProperty('success') && response['success'] == 1) {
+                                        console.log('created successfully');
+                                        $('#admin-store').empty().append('<div class="alert alert-success" role="alert">Pesquisa salva com sucesso!</div>');
+                                    }
+                                //console.log(response);
+                                },
+                            }); 
+                        },
+                        error: function(response) {
+                            console.log('ERROR ON REQUEST TO GET THE ID: ' + response);
+                        },
+                    });
+
+
+            
+// $request->validate([
+//     'check' => 'required|in:0,1',
+//     'create' => 'required|in:0,1',
+//     'id' => 'numeric'
+// ]);
+
+// $check = $request['check'];
+// $create = $request['create'];
+// $id = $request['id'];
+// $label = $request['label'];
+    // //update created_at, label
+// $affected = DB::table('pesquisas')
+//   ->where('id', $id)
+//   ->update([
+//       'created_at' => DB::raw('NOW()'),
+//       'label' => $label,
+//       'slug' => slugify($label)
+//       ]
+//     );
+
+                    
                     return;
                 });
             })
