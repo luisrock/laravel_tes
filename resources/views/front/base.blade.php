@@ -148,6 +148,7 @@
         <script src='{{ url("assets/js/tescustom.core.min.js") }}'></script>
         <script src='{{ url("assets/js/tescustom.app.min.js") }}'></script>
         <script src='{{ url("assets/js/tes.js") }}'></script>
+        <script src='{{ url("assets/js/tes_tema.js") }}'></script>
         
     </body>
 </html>
