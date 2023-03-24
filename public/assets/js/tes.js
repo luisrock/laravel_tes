@@ -113,4 +113,3 @@ function linkColorAndBorder() {
     navLinkActiveStyle(clicked);
 }
 
-
