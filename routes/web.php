@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ConceptController;
 
 
 /*
@@ -46,3 +47,15 @@ Route::post('/admin-ajax-request', [App\Http\Controllers\AjaxController::class, 
 Route::post('/admin-ajax-request-del', [App\Http\Controllers\AjaxController::class, 'admindel'])->name('admindel');
 Route::post('/admin-ajax-request-similarity', [App\Http\Controllers\AjaxController::class, 'searchByKeywordSimilarity'])->name('searchByKeywordSimilarity');
 Route::get('/admin-ajax-request-get-id', [App\Http\Controllers\AjaxController::class, 'getidbykeyword'])->name('getidbykeyword');
+
+
+// Rota AJAX para gerar conceitos
+Route::post('/generate-concept', [ConceptController::class, 'generateConcept'])->name('generate-concept');
+
+// Rotas AJAX para validar, editar e remover conceitos
+Route::post('/validate-concept', [ConceptController::class, 'validateConcept'])->name('validate-concept');
+Route::post('/edit-concept', [ConceptController::class, 'editConcept'])->name('edit-concept');
+Route::post('/remove-concept', [ConceptController::class, 'removeConcept'])->name('remove-concept');
+
+//Salvar depois de gerar com OpenAI
+Route::post('/save-concept', [ConceptController::class, 'saveConcept'])->name('save-concept');

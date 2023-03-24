@@ -6,6 +6,11 @@
 
 @section('content')
 
+@php
+$admin = false;
+@endphp
+
+
 <!-- Page Content -->
 
 <!-- Hero -->
@@ -26,7 +31,7 @@
         <p>
             Faça <a href="{{ route('searchpage') }}">outra pesquisa</a> ou veja as <a href="{{ route('alltemaspage') }}">pesquisas prontas</a>.
             @auth
-            @if(in_array(Auth::user()->email, ['mauluis@gmail.com','trator70@gmail.com','ivanaredler@gmail.com']))
+            @if($admin = in_array(Auth::user()->email, ['mauluis@gmail.com','trator70@gmail.com','ivanaredler@gmail.com']))
             <br><a href="{{ route('admin') }}">Admin</a>
             @endif
             @endauth
@@ -36,6 +41,133 @@
 <!-- END Hero -->
 
 <div class="content" id="content-results">
+    
+
+    @if($concept)
+        @if($concept_validated_at || $admin )    
+    <!-- conceito -->
+    <div class="block block-conceito">
+        <table class="table table-striped table-vcenter table-results">
+            <tbody>                                                
+                <tr>
+                    <td>
+                        <h4 class="h5 mt-3 mb-2">
+                            <a id="open-concept" href="#">Resumo</a>
+                        </h4>
+                        <p class="d-sm-block text-muted" id="conceito">{{$concept}}</p>
+                        <!-- <span class="text-muted" style="display: flex;justify-content: flex-end;font-size: 0.8em;">Gerado por GPT-4</span> -->
+                        <!-- if admin, insert 3 buttons: validate, edit or remove  -->
+                        @if($admin)
+                        <div id = "content-actions-buttons" style="display: flex;justify-content: flex-end; column-gap: 10px;">
+                            @if(!$concept_validated_at)
+                            <button type="button" class="btn btn-sm btn-success" id="#concept-validate" data-concept-id="{{$id}}">
+                                <i class="fa fa-check"></i> Validar
+                            </button>
+                            @endif
+                            <button type="button" class="btn btn-sm btn-warning" id="#concept-edit" data-concept-id="{{$id}}">
+                                <i class="fa fa-edit"></i> Editar
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger" id="#concept-remove" data-concept-id="{{$id}}">
+                                <i class="fa fa-trash"></i> Remover
+                            </button>
+                        </div>
+
+<!-- modais -->
+<!-- Edit concept modal -->
+<div class="modal fade" id="editConceptModal" tabindex="-1" role="dialog" aria-labelledby="editConceptModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editConceptModalLabel">Editar Conceito</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <textarea id="editConceptTextarea" class="form-control" rows="5"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="saveEditConcept">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Remove concept modal -->
+<div class="modal fade" id="removeConceptModal" tabindex="-1" role="dialog" aria-labelledby="removeConceptModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="removeConceptModalLabel">Remover Conceito</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Tem certeza de que deseja remover este conceito?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmRemoveConcept">Remover</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- modais -->
+                        @endif
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+        @endif
+    
+    @else
+    <!-- sem conceito -->
+      @if($admin)
+    <!-- criar um textarea com um botao para buscar conceito via GPT-3  -->
+    <div class="block block-conceito">
+        <table class="table table-striped table-vcenter table-results">
+            <tbody>                                                
+                <tr>
+                    <td>
+                        <h4 class="h5 mt-3 mb-2">
+                            <a href="#">Gerador de Conceito</a>
+                        </h4>
+                        <p class="d-sm-block text-muted" id="conceito-gerado"></p>
+                        <!-- <span class="text-muted" style="display: flex;justify-content: flex-end;font-size: 0.8em;">Gerado por GPT-4</span> -->
+                        <!-- if admin, insert 3 buttons: validate, edit or remove  -->
+                        <div id = "content-actions-buttons" style="display: flex;justify-content: flex-end; column-gap: 10px;">
+                            <button type="button" class="btn btn-sm btn-success" id="concept-create" data-concept-id="{{$id}}" data-concept-label="{{$label}}" data-concept-save-route="{{ route('save-concept') }}" data-concept-generate-route="{{ route('generate-concept') }}">
+                                <span id="original-content"> 
+                                  <i class="fa fa-check"></i> Gerar com GPT-4
+                                </span>
+                                <span id="loading" style="display:none;">
+                                  <i class="fa fa-spinner fa-spin"></i> Aguarde...
+                                </span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                      <p>System Prompt</p>
+                        <textarea id="concept-system-prompt" class="form-control" rows="5">Você é um jurista brasileiro, professor de direito e conhecedor da jurisprudência formada até 2021. Você nunca inventa e quando não sabe, diz apenas 'Realmente não sei. Desculpe.'.</textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                      <p>User Prompt</p>
+                        <textarea id="concept-user-prompt" class="form-control" rows="5">Apresente um conceito objetivo e didático sobre o seguinte tema: {{$label}}</textarea>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+      @endif
+    @endif
+
 
     <!-- Results -->
     <div class="block">
