@@ -4,6 +4,9 @@
 
 @section('content')
 
+@php
+    $admin = false;
+@endphp
 @auth
 @php
     $admin = in_array(Auth::user()->email, ['mauluis@gmail.com','trator70@gmail.com','ivanaredler@gmail.com'])
@@ -48,6 +51,7 @@
         <div class="block-header">
             <h3 class="block-title">Temas</h3>
             @if($admin)
+            <h6 class="block-title">{{$perc_total_concepts}}</h6>
             <a href="{{ route('admin') }}">Admin</a>
             @endif
                 <div class="block-options">
