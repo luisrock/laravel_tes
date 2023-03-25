@@ -27,3 +27,8 @@
 .nav-tabs .nav-link.disabled {
   color: #6c757d5e;
 }
+
+input[name=gpt-model] {
+  display: inline;
+  margin-left:15px;
+}

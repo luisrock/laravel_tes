@@ -10,8 +10,7 @@ document.addEventListener("DOMContentLoaded", function() {
         conceptCreateButton.addEventListener('click', async function () {
             console.log('clicked')
             const conceptCreateButton = document.querySelector('#concept-create');
-            const label = conceptCreateButton.getAttribute('data-concept-label');
-            const apiKey = "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";
+            const label = conceptCreateButton.getAttribute('data-concept-label'); 
             const conceptId = conceptCreateButton.getAttribute('data-concept-id');
             setLoading(true);
             const conceptUserPrompt = document.querySelector('#concept-user-prompt').value.trim();
@@ -20,8 +19,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 {"role": "system", "content": conceptSystemPrompt},
                 {"role": "user", "content": conceptUserPrompt},
             ]
+            //get input[name=gpt-model] value
+            const gptModel = document.querySelector('input[name="gpt-model"]:checked').value;
             try {
-                console.log("Fazendo a requisição ao GPT-4")
+                console.log("Fazendo a requisição ao " + gptModel + "...")
                 const generateConceptResponse = await fetch(conceptGenerateRoute, {
                     method: "POST",
                     headers: {
@@ -29,7 +30,8 @@ document.addEventListener("DOMContentLoaded", function() {
                         "X-CSRF-TOKEN": csrf_token
                     },
                     body: JSON.stringify({
-                        messages: prompt
+                        messages: prompt,
+                        model: gptModel,
                     })
                 });
                 
