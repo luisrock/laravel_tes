@@ -23,7 +23,29 @@ class AllTemasPageController extends Controller
                 ->get();
 
         $description = 'Pesquisas prontas de Teses de Repercussão e Repetitivos e de Súmulas dos tribunais superiores (STF, STJ, TST) e de outros órgãos federais relevantes (TNU, FONAJE/CNJ, CEJ/CJF, TCU, CARF)';
-        return view('front.temas', compact('temas','display_pdf','description'));
+        $perc_total_concepts = "";
+        //from the total temas, calculate the percentage of validated concepts, if admin
+        $admin = false;
+        if (auth()->check()) {
+            //check the email
+            $useremail = auth()->user()->email;
+            if(in_array($useremail, ['mauluis@gmail.com','trator70@gmail.com','ivanaredler@gmail.com'])) {
+                $admin = true;
+            }
+        }
+
+        if($admin) {
+            $total_temas = count($temas);
+            $total_concepts = 0;
+            foreach ($temas as $tema) {
+                if ($tema->concept_validated_at) {
+                    $total_concepts++;
+                }
+            }
+            $percentage_concepts = round($total_concepts/$total_temas*100, 2);
+            $perc_total_concepts = "$total_concepts de $total_temas com resumo ($percentage_concepts%)"; 
+        }
+        return view('front.temas', compact('temas','display_pdf','description', 'perc_total_concepts'));
         
     } //end public function
 }

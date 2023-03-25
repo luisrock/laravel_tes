@@ -6,6 +6,9 @@
 
 @section('content')
 
+@php
+    $admin = false;
+@endphp
 @auth
 @php
     $admin = in_array(Auth::user()->email, ['mauluis@gmail.com','trator70@gmail.com','ivanaredler@gmail.com'])
