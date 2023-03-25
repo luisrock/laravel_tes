@@ -3,6 +3,12 @@
 @section('page-title', 'Temas')
 
 @section('content')
+
+@auth
+@php
+    $admin = in_array(Auth::user()->email, ['mauluis@gmail.com','trator70@gmail.com','ivanaredler@gmail.com'])
+@endphp
+@endauth
 <!-- Hero -->
 <div class="bg-body-light" style="{{ $display_pdf }}">
     <div class="content content-full">
@@ -41,11 +47,9 @@
     <div class="block block-rounded">
         <div class="block-header">
             <h3 class="block-title">Temas</h3>
-            @auth
-            @if(in_array(Auth::user()->email, ['mauluis@gmail.com','trator70@gmail.com','ivanaredler@gmail.com']))
+            @if($admin)
             <a href="{{ route('admin') }}">Admin</a>
             @endif
-            @endauth
                 <div class="block-options">
                     <div class="block-options-item">
                         <!-- <code>.table</code> -->
@@ -65,7 +69,10 @@
                     <tbody>
                         <tr>
                         @foreach ($temas as $k => $t)
-                            <td class="font-w600 font-size-sm">
+                            @php
+                                $style = ($admin && $t->concept && $t->concept_validated_at) ? 'background-color: #c3d1c3;' : '';
+                            @endphp
+                            <td class="font-w600 font-size-sm" style="{{$style}}">
                                 <a href="{{ route('temapage') }}/{{ $t->slug }}">{{ $t->label ?? str_replace('"','',$t->keyword) }}</a>
                             </td>
                             @if(is_int(($k + 1)/3))
