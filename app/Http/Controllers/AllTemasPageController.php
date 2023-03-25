@@ -15,7 +15,7 @@ class AllTemasPageController extends Controller
     {
         $display_pdf = '';
         $temas = DB::table('pesquisas')
-                ->select('keyword', 'label', 'slug')
+                ->select('keyword', 'label', 'slug', 'concept', 'concept_validated_at')
                 ->whereNull('checked_at')
                 ->whereNotNull('created_at')
                 ->whereNotNull('slug')
