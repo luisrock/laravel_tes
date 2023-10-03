@@ -114,7 +114,7 @@ class TesePageController extends Controller
         if ($have_tese) {
             $tese->to_be_copied = $text;
         } else {
-            $tese->to_be_copied = '';
+            $tese->to_be_copied = ' ';
         }
 
 
