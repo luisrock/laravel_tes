@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^7.3|^8.0",
+        "aws/aws-sdk-php": "^3.262",
         "delight-im/str": "^2.4",
         "fideloper/proxy": "^4.2",
         "fruitcake/laravel-cors": "^2.0",
@@ -18,9 +19,12 @@
         "laravel/ui": "^3.0",
         "mpdf/mpdf": "^8.0",
         "predis/predis": "^1.1",
+        "spatie/laravel-honeypot": "^4.3",
+        "spatie/laravel-permission": "^5.10",
         "spatie/laravel-sitemap": "^5.9"
     },
     "require-dev": {
+        "amirami/localizator": "^0.11.1@alpha",
         "facade/ignition": "^2.3.6",
         "fzaninotto/faker": "^1.9.1",
         "mockery/mockery": "^1.3.1",
