@@ -76,6 +76,27 @@
         <!-- google adsense -->
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6476437932373204" crossorigin="anonymous"></script>
         <!-- END google adsense -->
+
+        <!-- Pixel Code for https://proofcourse.com/ -->
+        <script defer src="https://proofcourse.com/pixel/g5ptl75ocv5t93oo54rbvw4r8uxspxz3"></script>
+        <!-- END Pixel Code -->
+      
+        <!-- Matomo -->
+        <script>
+          var _paq = window._paq = window._paq || [];
+          /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+          _paq.push(['trackPageView']);
+          _paq.push(['enableLinkTracking']);
+          (function() {
+            var u="//maurolopes.com.br/matomo/";
+            _paq.push(['setTrackerUrl', u+'matomo.php']);
+            _paq.push(['setSiteId', '2']);
+            var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+            g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+          })();
+        </script>
+        <!-- End Matomo Code -->
+
   </head>
     <body>
         <!-- Page Container -->
