@@ -74,14 +74,16 @@
                                         {{ $tese->text_muted }}
                                     </span>
 
-                                    <button class="btn btn-rounded btn-outline-primary btn-sm mr-1 mb-3 btn-copy-text">
-                                        <span>
-                                            <i class="fa fa-copy"></i>
+                                    @if (!empty($tese->to_be_copied))
+                                        <button class="btn btn-rounded btn-outline-primary btn-sm mr-1 mb-3 btn-copy-text">
+                                            <span>
+                                                <i class="fa fa-copy"></i>
+                                            </span>
+                                        </button>
+                                        <span class="tes-clear tes-text-to-be-copied" style="display: none"
+                                            data-spec="trim">{{ $tese->to_be_copied }}
                                         </span>
-                                    </button>
-                                    <span class="tes-clear tes-text-to-be-copied" style="display: none"
-                                        data-spec="trim">{{ $tese->to_be_copied }}
-                                    </span>
+                                    @endif
 
                                 </td>
                             </tr>

@@ -50,9 +50,11 @@ class TesePageController extends Controller
         }
 
         $tese_isCancelada = 0;
+        $have_tese = !empty($tese->tese_texto);
 
         // dd($tese);
         if ($tribunal == 'STF') {
+
             if (!Str::endsWith($tese->tema_texto, '.')) {
                 $tese->tema_texto = $tese->tema_texto . '.';
             }
@@ -108,7 +110,13 @@ class TesePageController extends Controller
         if (!Str::endsWith($text, '.')) {
             $text = $text . '.';
         }
-        $tese->to_be_copied = $text;
+
+        if ($have_tese) {
+            $tese->to_be_copied = $text;
+        } else {
+            $tese->to_be_copied = '';
+        }
+
 
         $display_pdf = false;
         $label = "TEMA {$tese->numero} do $tribunal_nome_completo - $tribunal";
