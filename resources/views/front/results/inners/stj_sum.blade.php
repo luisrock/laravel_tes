@@ -2,7 +2,7 @@
     <tr>
         <td>
             <h4 class="h5 mt-3 mb-2">
-                <a href="sumula/stj/{{ $sum['trib_sum_id'] }}" target="_blank"> {{ $sum['trib_sum_titulo'] }}</a>
+                <a href="{{ url('/sumula') }}/stj/{{ $sum['trib_sum_id'] }}"> {{ $sum['trib_sum_titulo'] }}</a>
             </h4>
             <p class="d-sm-block" style="font-weight: bold;">
                 {{ $sum['trib_sum_texto'] }}

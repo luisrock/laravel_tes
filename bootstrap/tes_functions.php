@@ -283,6 +283,13 @@ function stf_request($keyword)
 
         $sum_array['trib_sum_url'] = 'https://jurisprudencia.stf.jus.br/pages/search/' . $julgado['id'] . '/false';
 
+        //find sumula id on the stf_sumulas table by numero
+        $sumula_id = DB::table('stf_sumulas')
+          ->select('id')
+          ->where('numero', $sum_array['trib_sum_numero'])
+          ->first();
+        $sum_array['trib_sum_id'] = ($sumula_id) ? $sumula_id->id : '';
+
         $output[$s]['hits'][] = $sum_array;
       } //end if sumula
 
@@ -322,11 +329,22 @@ function stf_request($keyword)
         $rep_array['trib_rep_tese'] = $tese;
         $rep_array['trib_rep_data'] = $julgamento_data;
         $rep_array['trib_rep_url'] = $julgado['inteiro_teor_url'] ?? '';
+        $rep_array['trib_rep_numero'] = trib_remove_substring_after_delim($tema, '-') ?? '';
+
+        //find tese id on the stf_teses table by numero
+        $tese_id = DB::table('stf_teses')
+          ->select('id')
+          ->where('numero', $rep_array['trib_rep_numero'])
+          ->first();
+        $rep_array['trib_rep_id'] = ($tese_id) ? $tese_id->id : '';
+
+
 
         $output[$s]['hits'][] = $rep_array;
       } //end if tese
     } // end foreach lista:
   } //end foreach s
+
 
   $output['total_count'] = $output['sumula']['total'] + $output['tese']['total'];
   return $output;
