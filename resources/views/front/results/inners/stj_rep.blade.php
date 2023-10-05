@@ -3,7 +3,7 @@
         <td>
             <div style="display:flex; justify-content:space-between;">
                 <h4 class="h5 mt-3 mb-2">
-                    <a href="{{ $rep['trib_rep_url'] }}" target="_blank"> Tema/Repetitivo
+                    <a href="tese/stj/{{ $rep['trib_rep_id'] }}" target="_blank"> Tema/Repetitivo
                         {{ $rep['trib_rep_numero'] }}</a>
                 </h4>
                 <span class="text-muted mt-3 mb-2">
