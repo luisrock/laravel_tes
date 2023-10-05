@@ -89,6 +89,9 @@ class SumulaPageController extends Controller
             } else if (isset($sumula->julgadaEm) && $sumula->julgadaEm) {
                 $sumula->tempo = "Julgada em {$sumula->julgadaEm}";
             }
+            if (empty($sumula->link)) {
+                $sumula->link = "https://scon.stj.jus.br/SCON/sumstj/";
+            }
         } else if ($tribunal == 'TST') {
             if (isset($sumula->tema)) {
                 $sumula->obs = $sumula->tema;
