@@ -104,6 +104,9 @@ class TesePageController extends Controller
             if ($tese->situacao == 'Cancelado' || $tese->situacao == 'Cancelada') {
                 $tese_isCancelada = 1;
             }
+            if (empty($tese->link)) {
+                $tese->link = "https://processo.stj.jus.br/repetitivos/temas_repetitivos/pesquisa.jsp?novaConsulta=true&tipo_pesquisa=T&cod_tema_inicial={$tese->numero}&cod_tema_final={$tese->numero}";
+            }
         }
 
         //if there is no "." at the end of the text, add it
