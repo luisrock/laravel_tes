@@ -50,6 +50,21 @@ class AtualizacoesPageController extends Controller
                 if (count($tribunais[$tribunal]['news']) < 10) {
                     //get the original with $log->tema_id
                     $original = $this->get_original_by_item_id($tribunal, $log->item_id, $log->tipo);
+                    if (empty($original)) {
+                        continue;
+                    }
+                    if (empty($original->texto)) {
+                        $original->texto = $original->tese_texto ?? "";
+                    }
+                    if (empty($original->texto)) {
+                        $original->texto = $original->tese ?? "";
+                    }
+                    if (empty($original->texto)) {
+                        $original->texto = $original->tema_texto ?? "";
+                    }
+                    if (empty($original->texto)) {
+                        $original->texto = $original->tema ?? "";
+                    }
                     $log->original = $original;
                     $tribunais[$tribunal]['news'][] = $log;
                 }

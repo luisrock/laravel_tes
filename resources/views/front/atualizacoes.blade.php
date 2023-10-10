@@ -27,7 +27,8 @@
         </div>
     </div>
     <!-- END Hero -->
-    <div class="content" id="content-results">
+
+    <div class="content">
         <div class="block-content">
             <div class="tab-pane fade fade-up active show" id="tema-stf" role="tabpanel">
                 @foreach ($tribunais as $tribunal => $log_types)
@@ -43,7 +44,7 @@
                                 <tr>
                                     <td style="background: #87a0dc;">
                                         <h4 class="h5 mt-3 mb-2" style="color: #fff;">
-                                            Novidades
+                                            Novidades ({{ strtoupper($tribunal) }})
                                         </h4>
                                     </td>
                                 </tr>
@@ -53,26 +54,17 @@
                                             @if ($log->tipo == 'súmula')
                                                 <h4 class="h5 mt-3 mb-2">
                                                     <a href="{{ $log->link }}">
-                                                        {{ $log->original->titulo }}</a>
+                                                        {{ $log->original->titulo }} - {{ strtoupper($tribunal) }}</a>
                                                 </h4>
-                                                <p class="d-sm-block" style="font-weight: bold;">
-                                                    {{ $log->original->texto }}
-                                                </p>
                                             @elseif($log->tipo == 'tese')
                                                 <h4 class="h5 mt-3 mb-2">
                                                     <a href="{{ $log->link }}">
-                                                        Tema {{ $log->original->numero }}</a>
+                                                        Tema {{ $log->original->numero }} - {{ strtoupper($tribunal) }}</a>
                                                 </h4>
-                                                <p class="d-sm-block" style="font-weight: bold;">
-                                                    @if (!empty($log->original->tese))
-                                                        {{ $log->original->tese }}
-                                                    @elseif(!empty($log->original->texto))
-                                                        {{ $log->original->texto }}
-                                                    @elseif(!empty($log->original->tese_texto))
-                                                        {{ $log->original->tese_texto }}
-                                                    @endif
-                                                </p>
                                             @endif
+                                            <p class="d-sm-block" style="font-weight: bold;">
+                                                {{ $log->original->texto }}
+                                            </p>
                                             <div style="display: flex; justify-content: space-between;">
                                                 <span class="text-muted" style="font-size: 0.8em;">
                                                     {{ date('d/m/Y', strtotime($log->created_at)) }}
@@ -94,7 +86,7 @@
                                 <tr>
                                     <td style="background: #87a0dc;">
                                         <h4 class="h5 mt-3 mb-2" style="color: #fff;">
-                                            Alterações
+                                            Alterações ({{ strtoupper($tribunal) }})
                                         </h4>
                                     </td>
                                 </tr>
@@ -108,6 +100,7 @@
                                                     @elseif($log->tipo == 'tese')
                                                         Tema {{ $log->numero }}
                                                     @endif
+                                                    - {{ strtoupper($tribunal) }}
                                                 </a>
                                             </h4>
                                             <span class="text-muted">
@@ -130,11 +123,9 @@
                             </tbody>
                         </table>
                     @endif
-
+                    <hr>
+                @endforeach
             </div>
-            @endforeach
-
-
         </div>
     </div>
 
