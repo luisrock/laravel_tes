@@ -139,6 +139,10 @@
                             <a class="font-w600" href="{{ route('alltemaspage') }}">Pesquisas prontas</a> | <a
                                 class="font-w600" href="{{ route('searchpage') }}">Pesquisar</a>
                         @endif
+
+                        @if (Route::currentRouteName() != 'atualizacoespage')
+                            | <a class="font-w600" href="{{ route('atualizacoespage') }}">Atualizações</a>
+                        @endif
                         @auth
                             @if (in_array(Auth::user()->email, config('tes_constants.admins')))
                                 | <a href="{{ route('admin') }}">Admin</a>
@@ -146,7 +150,8 @@
                         @endauth
                     </div>
                     <div class="col-sm-6 order-sm-1 py-1 text-center text-sm-left">
-                        <a class="font-w600" href="/index">Todas as Súmulas e Teses do STF e do STJ</a>
+                        <a class="font-w600" href="/index">Index de Súmulas (STF, STJ, TST, TNU) e Teses (STF,
+                            STJ)</a>
 
                         {{-- Fontes:
 

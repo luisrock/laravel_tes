@@ -49,10 +49,14 @@ Route::get('/tema/{tema?}', [App\Http\Controllers\TemaPageController::class, 'in
 //Pages for temas links
 Route::get('/temas', [App\Http\Controllers\AllTemasPageController::class, 'index'])->name('alltemaspage');
 
+//Page for Atualizações
+Route::get('/atualizacoes', [App\Http\Controllers\AtualizacoesPageController::class, 'index'])->name('atualizacoespage');
+
 //Pages for sumulas
 Route::get('/index', function () {
     return view('front.tesindex', ['display_pdf' => false]);
 })->name('indexsumulaspage');
+
 Route::get('/sumulas/stf', [App\Http\Controllers\AllStfSumulasPageController::class, 'index'])->name('stfallsumulaspage');
 Route::get('/sumulas/stj', [App\Http\Controllers\AllStjSumulasPageController::class, 'index'])->name('stjallsumulaspage');
 Route::get('/sumulas/tst', [App\Http\Controllers\AllTstSumulasPageController::class, 'index'])->name('tstallsumulaspage');
