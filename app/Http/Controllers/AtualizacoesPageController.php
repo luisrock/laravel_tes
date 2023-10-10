@@ -8,7 +8,10 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-
+//TODO: Logar atualizações em outros tribunais além de STJ e STJ
+//Lembrar que STF não está logando súmulas, pq teria que haver mudança drástica no código, já que
+//da 1 a 58, súmulas terão o mesmo número (normal e vinculante)
+//Não mexi pq o STF não edita súmula desde 2020, então não vale o esforço, terá que ser feito manualmente
 class AtualizacoesPageController extends Controller
 {
 
