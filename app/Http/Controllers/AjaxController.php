@@ -17,12 +17,12 @@ class AjaxController extends Controller
         }
 
         $request->validate([
-                'keyword' => 'required'
+            'keyword' => 'required'
         ]);
-        
+
         $keyword = $request['keyword'];
         $id = DB::table('pesquisas')->where('keyword', $keyword)->value('id');
-        
+
         return response()->json(['success' => $id]);
     }
 
@@ -33,39 +33,40 @@ class AjaxController extends Controller
         }
 
         $request->validate([
-                'check' => 'required|in:0,1',
-                'create' => 'required|in:0,1',
-                'id' => 'numeric'
+            'check' => 'required|in:0,1',
+            'create' => 'required|in:0,1',
+            'id' => 'numeric'
         ]);
-        
+
         $check = $request['check'];
         $create = $request['create'];
         $id = $request['id'];
         $label = $request['label'];
 
-        if($check == 1) {
+        if ($check == 1) {
             //update checked_at
             $affected = DB::table('pesquisas')
-              ->where('id', $id)
-              ->update([
-                  'checked_at' => DB::raw('NOW()')
-                  ]
+                ->where('id', $id)
+                ->update(
+                    [
+                        'checked_at' => DB::raw('NOW()')
+                    ]
                 );
-        }
-        else if($create == 1) {
+        } else if ($create == 1) {
             //update created_at, label
             $affected = DB::table('pesquisas')
-              ->where('id', $id)
-              ->update([
-                  'created_at' => DB::raw('NOW()'),
-                  'label' => $label,
-                  'slug' => slugify($label)
-                  ]
+                ->where('id', $id)
+                ->update(
+                    [
+                        'created_at' => DB::raw('NOW()'),
+                        'label' => $label,
+                        'slug' => slugify($label)
+                    ]
                 );
         }
-        
-        Artisan::call('sitemap:generate');
-        return response()->json(['success'=>$affected]);
+
+        // Artisan::call('sitemap:generate');
+        return response()->json(['success' => $affected]);
     }
 
     public function admindel(Request $request)
@@ -75,14 +76,14 @@ class AjaxController extends Controller
         }
 
         $request->validate([
-                'id' => 'numeric'
+            'id' => 'numeric'
         ]);
-        
+
         $id = $request['id'];
 
         $del = DB::table('pesquisas')->where('id', $id)->delete();
-        
-        return response()->json(['success'=>$del]);
+
+        return response()->json(['success' => $del]);
     }
 
     //new (dez/2022)
@@ -96,7 +97,7 @@ class AjaxController extends Controller
         $typeToCompare = $request['typeToCompare'];
         $percentage_requested = intval($request['percentage']);
         $termToCompare = $keywordSearched;
-        if($typeToCompare == 'label') {
+        if ($typeToCompare == 'label') {
             $termToCompare = $label;
             $termToCompare = str_replace([' ', '-', '"', "'"], '', $termToCompare);
             $termToCompare = strtolower($termToCompare);
@@ -105,7 +106,7 @@ class AjaxController extends Controller
 
         // Get all records from the table 'pesquisas' where created_at is not null; get only label and id fields
         $records = DB::table('pesquisas')
-            ->select( 'id','keyword','label','results')
+            ->select('id', 'keyword', 'label', 'results')
             ->whereNotNull('created_at')
             ->get();
 
@@ -113,12 +114,11 @@ class AjaxController extends Controller
 
         // Loop through all records
         foreach ($records as $record) {
-            if($typeToCompare == 'label') {
+            if ($typeToCompare == 'label') {
                 $termFromDB = $record->label;
                 $termFromDB = str_replace([' ', '-', '"', "'"], '', $termFromDB);
                 $termFromDB = strtolower($termFromDB);
-            }
-            else {
+            } else {
                 $termFromDB = $record->keyword;
             }
 
