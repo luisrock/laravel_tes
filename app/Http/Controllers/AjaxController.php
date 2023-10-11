@@ -65,7 +65,7 @@ class AjaxController extends Controller
                 );
         }
 
-        // Artisan::call('sitemap:generate');
+        // Artisan::call('sitemap:generate'); //substituído por cronjob uma vez ao dia, às 06 da manhã: php8.1 /home/forge/tesesesumulas.com.br/artisan sitemap:generate
         return response()->json(['success' => $affected]);
     }
 
