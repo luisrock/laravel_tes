@@ -52,6 +52,9 @@ Route::get('/temas', [App\Http\Controllers\AllTemasPageController::class, 'index
 //Page for Atualizações
 Route::get('/atualizacoes', [App\Http\Controllers\AtualizacoesPageController::class, 'index'])->name('atualizacoespage');
 
+//Page to thank the user for sending email for newsletter (proofcourse)
+Route::get('/newsletter-obrigado', [App\Http\Controllers\NewsletterPageController::class, 'index'])->name('newsletterobrigadopage');
+
 //Pages for sumulas
 Route::get('/index', function () {
     return view('front.tesindex', ['display_pdf' => false]);
