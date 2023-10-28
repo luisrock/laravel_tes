@@ -32,17 +32,21 @@
         <div class="block-content">
             <div class="tab-pane fade fade-up active show" id="tema-stf" role="tabpanel">
                 @foreach ($tribunais as $tribunal => $log_types)
-                    <div
-                        class="font-size-h4 font-w600 p-2 mb-4 border-left border-4x border-primary bg-body-light trib-texto-quantidade">
+                    @php
+                        $color = config('tes_constants.lista_tribunais.' . strtoupper($tribunal) . '.color');
+                    @endphp
+                    <div class="font-size-h4 font-w600 p-2 mb-4 border-left border-4x bg-body-light trib-texto-quantidade"
+                        style="border-color: {{ $color }} !important;">
                         {{ config('tes_constants.lista_tribunais.' . strtoupper($tribunal) . '.name') }} -
                         {{ strtoupper($tribunal) }}
                     </div>
 
                     @if (!empty($log_types['news']))
-                        <table class="table table-striped table-vcenter table-results" style="border: 1px solid #87a0dc;">
+                        <table class="table table-striped table-vcenter table-results"
+                            style="border: 1px solid {{ $color }};">
                             <tbody>
                                 <tr>
-                                    <td style="background: #87a0dc;">
+                                    <td style="background: {{ $color }};">
                                         <h4 class="h5 mt-3 mb-2" style="color: #fff;">
                                             Novidades ({{ strtoupper($tribunal) }})
                                         </h4>
@@ -53,13 +57,14 @@
                                         <td>
                                             @if ($log->tipo == 'súmula')
                                                 <h4 class="h5 mt-3 mb-2">
-                                                    <a href="{{ $log->link }}">
+                                                    <a href="{{ $log->link }}" style="color: {{ $color }}">
                                                         {{ $log->original->titulo }} - {{ strtoupper($tribunal) }}</a>
                                                 </h4>
                                             @elseif($log->tipo == 'tese')
                                                 <h4 class="h5 mt-3 mb-2">
-                                                    <a href="{{ $log->link }}">
-                                                        Tema {{ $log->original->numero }} - {{ strtoupper($tribunal) }}</a>
+                                                    <a href="{{ $log->link }}" style="color: {{ $color }}">
+                                                        Tema {{ $log->original->numero }} -
+                                                        {{ strtoupper($tribunal) }}</a>
                                                 </h4>
                                             @endif
                                             <p class="d-sm-block" style="font-weight: bold;">
@@ -70,7 +75,8 @@
                                                     {{ date('d/m/Y', strtotime($log->created_at)) }}
                                                 </span>
                                                 <span class="text-muted" style="font-size: 0.8em;">
-                                                    Acesse&nbsp; <a href="{{ $log->link }}"> aqui</a>.
+                                                    Acesse&nbsp; <a href="{{ $log->link }}"
+                                                        style="color: {{ $color }}"> aqui</a>.
                                                 </span>
                                             </div>
                                         </td>
@@ -81,10 +87,11 @@
                     @endif
 
                     @if (!empty($log_types['updates']))
-                        <table class="table table-striped table-vcenter table-results" style="border: 1px solid #87a0dc;">
+                        <table class="table table-striped table-vcenter table-results"
+                            style="border: 1px solid {{ $color }};">
                             <tbody>
                                 <tr>
-                                    <td style="background: #87a0dc;">
+                                    <td style="background: {{ $color }}">
                                         <h4 class="h5 mt-3 mb-2" style="color: #fff;">
                                             Alterações ({{ strtoupper($tribunal) }})
                                         </h4>
@@ -94,7 +101,7 @@
                                     <tr>
                                         <td>
                                             <h4 class="h5 mt-3 mb-2">
-                                                <a href="{{ $log->link }}">
+                                                <a href="{{ $log->link }}" style="color: {{ $color }}">
                                                     @if ($log->tipo == 'súmula')
                                                         Súmula {{ $log->numero }}
                                                     @elseif($log->tipo == 'tese')
@@ -114,7 +121,8 @@
                                                     {{ date('d/m/Y', strtotime($log->updated_at)) }}
                                                 </span>
                                                 <span class="text-muted" style="font-size: 0.8em;">
-                                                    Acesse&nbsp; <a href="{{ $log->link }}"> aqui</a>.
+                                                    Acesse&nbsp; <a href="{{ $log->link }}"
+                                                        style="color: {{ $color }}"> aqui</a>.
                                                 </span>
                                             </div>
                                         </td>
