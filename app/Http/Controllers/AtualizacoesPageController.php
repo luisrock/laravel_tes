@@ -26,16 +26,19 @@ class AtualizacoesPageController extends Controller
     }
     public function index()
     {
+        $unwanted_cols = ['ramos', 'situacao']; //Tenho dúvidas se não vamos perder algo... Checar depois
+
         $display_pdf = '';
         $logs = DB::table('update_log')
             ->select('*')
-            //get last 20 lines
+            //where update_at is less or equal than  7 days ago
+            ->where('updated_at', '>=', DB::raw('DATE_SUB(NOW(), INTERVAL 7 DAY)'))
             ->orderBy('id', 'desc')
-            ->limit(100)
             ->get();
 
         $tribunais = [];
         foreach ($logs as $log) {
+            $col_altered = $log->col_altered;
             $tribunal = $log->tribunal;
             $updated_at = $log->updated_at;
             $created_at = $log->created_at;
@@ -50,35 +53,52 @@ class AtualizacoesPageController extends Controller
                 $tribunais[$tribunal]['news'] = [];
             }
             if ($created_at) {
-                if (count($tribunais[$tribunal]['news']) < 10) {
-                    //get the original with $log->tema_id
-                    $original = $this->get_original_by_item_id($tribunal, $log->item_id, $log->tipo);
-                    if (empty($original)) {
-                        continue;
-                    }
-                    if (empty($original->texto)) {
-                        $original->texto = $original->tese_texto ?? "";
-                    }
-                    if (empty($original->texto)) {
-                        $original->texto = $original->tese ?? "";
-                    }
-                    if (empty($original->texto)) {
-                        $original->texto = $original->tema_texto ?? "";
-                    }
-                    if (empty($original->texto)) {
-                        $original->texto = $original->tema ?? "";
-                    }
-                    $log->original = $original;
-                    $tribunais[$tribunal]['news'][] = $log;
+                // if (count($tribunais[$tribunal]['news']) < 3000) {
+                //get the original with $log->tema_id
+                $original = $this->get_original_by_item_id($tribunal, $log->item_id, $log->tipo);
+                if (empty($original)) {
+                    continue;
                 }
+                if (empty($original->texto)) {
+                    $original->texto = $original->tese_texto ?? "";
+                }
+                if (empty($original->texto)) {
+                    $original->texto = $original->tese ?? "";
+                }
+                if (empty($original->texto)) {
+                    $original->texto = $original->tema_texto ?? "";
+                }
+                if (empty($original->texto)) {
+                    $original->texto = $original->tema ?? "";
+                }
+                $log->original = $original;
+                $tribunais[$tribunal]['news'][] = $log;
+                // }
             } else {
-                if (count($tribunais[$tribunal]['updates']) < 10) {
-                    $tribunais[$tribunal]['updates'][] = $log;
+                if (in_array($col_altered, $unwanted_cols)) {
+                    continue;
                 }
+                if (trim($log->old_value) === trim($log->new_value)) {
+                    continue;
+                }
+                // if (count($tribunais[$tribunal]['updates']) < 3000) {
+                $tribunais[$tribunal]['updates'][] = $log;
+                // }
             }
         }
 
-        //dd($tribunais);
+        //sort tribunais by tribunal, beginning with STF, then STJ, then the others
+        $tribunais = collect($tribunais)->sortBy(function ($value, $key) {
+            if ($key === 'stf') {
+                return 1;
+            }
+            if ($key === 'stj') {
+                return 2;
+            }
+            return 3;
+        })->toArray();
+
+        // dd($tribunais);
 
         $description = 'Recentes atualizações de Teses de Repercussão e Repetitivos e de Súmulas dos tribunais superiores (STF, STJ, TST) e de outros órgãos federais relevantes (TNU, FONAJE/CNJ, CEJ/CJF, TCU, CARF)';
         return view('front.atualizacoes', compact('tribunais', 'display_pdf', 'description'));

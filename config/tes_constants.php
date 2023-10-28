@@ -11,6 +11,7 @@ return [
     ],
     'lista_tribunais' => [
         'STF' => [
+            'color' => '#87a0dc',
             'name' => 'Supremo Tribunal Federal',
             'trib_url' => 'https://jurisprudencia.stf.jus.br/pages/search',
             'request' => 'stf_request',
@@ -24,6 +25,7 @@ return [
             'db' => false // pesquisa = busca via API; temas = busca via db
         ],
         'TST' => [
+            'color' => '#F39C12',
             'name' => 'Tribunal Superior do Trabalho',
             'trib_url' => 'https://jurisprudencia.tst.jus.br/',
             'request' => 'tst_request',
@@ -37,6 +39,7 @@ return [
             'db' => true
         ],
         'STJ' => [
+            'color' => '#e3342f',
             'name' => 'Superior Tribunal de Justiça',
             'trib_url' => 'https://scon.stj.jus.br/SCON/',
             'request' => 'stj_request',
@@ -50,6 +53,7 @@ return [
             'db' => true
         ],
         'TNU' => [
+            'color' => '#F39C12',
             'name' => 'Turma Nacional de Uniformização dos Juizados Especiais Federais',
             'trib_url' => 'https://www2.cjf.jus.br/jurisprudencia/tnu/',
             'request' => 'tnu_request',
@@ -64,6 +68,7 @@ return [
             'db' => true
         ],
         'TCU' => [
+            'color' => '#F39C12',
             'name' => 'Tribunal de Contas da União',
             'trib_url' => 'https://pesquisa.apps.tcu.gov.br/#/pesquisa/jurisprudencia',
             'request' => 'tcu_request',
@@ -74,6 +79,7 @@ return [
             'db' => false
         ],
         'CARF' => [
+            'color' => '#F39C12',
             'trib_url' => 'http://idg.carf.fazenda.gov.br/jurisprudencia/sumulas-carf',
             'request' => 'carf_request',
             'to_match_sum' => 'titulo,texto',
@@ -86,6 +92,7 @@ return [
             'db' => true
         ],
         'FONAJE' => [
+            'color' => '#F39C12',
             'name' => 'Fórum Nacional de Juizados Especiais',
             'trib_url' => 'https://www.cnj.jus.br/corregedoria-nacional-de-justica/redescobrindo-os-juizados-especiais/enunciados-fonaje/',
             'request' => 'fonaje_request',
@@ -99,6 +106,7 @@ return [
             'db' => true
         ],
         'CEJ' => [
+            'color' => '#F39C12',
             'name' => 'Centro de Estudos Judiciários do Conselho da Justiça Federal',
             'trib_url' => 'https://www.cjf.jus.br/enunciados/',
             'request' => 'cej_request',
