@@ -25,7 +25,7 @@
                 Últimas Atualizações do Site
             </h2>
 
-            <select id="dateFilter" class="form-control" style="width: auto;">
+            <select id="dateFilter" class="form-control" style="width: auto;" multiple>
                 <option value="all">Todas as datas</option>
                 <!-- As datas serão populadas aqui via jQuery -->
             </select>
@@ -177,11 +177,11 @@
                 $('#dateFilter').append('<option value="' + date + '">' + date + '</option>');
             });
 
-            // Evento para filtrar as linhas baseado na data selecionada
+            // Evento para filtrar as linhas baseado nas datas selecionadas
             $('#dateFilter').on('change', function() {
-                let selectedDate = $(this).val();
+                let selectedDates = $(this).val();
 
-                if (selectedDate == "all") {
+                if (selectedDates.includes("all")) {
                     $('table.table-results tbody tr').show();
                     $('.tribunal-header').show();
                 } else {
@@ -189,7 +189,7 @@
 
                     $('table.table-results tbody tr').each(function() {
                         let rowDate = $(this).find('span.text-muted[data-date]').data('date');
-                        if (rowDate == selectedDate) {
+                        if (selectedDates.includes(rowDate)) {
                             $(this).show();
                         }
                     });
