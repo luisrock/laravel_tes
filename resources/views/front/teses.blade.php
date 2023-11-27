@@ -77,14 +77,15 @@
                                                 @if ($tes->isCancelada) style="display: flex;justify-content: flex-end;font-size: 0.8em;color:red !important">
                                             @else
                                             style="display: flex;justify-content: flex-end;font-size: 0.8em;"> @endif
-                                                {{ $tes->relator }}, {{ $tes->acordao }}. {{ $tes->tempo }}. </span>
+                                                {{ $tes->relator }}, {{ $tes->acordao }} ({{ $tes->situacao }}).
+                                                {{ $tes->tempo }} </span>
                                             @elseif($tribunal == 'STJ')
                                                 <span class="text-muted"
                                                     @if ($tes->isCancelada) style="display: flex;justify-content: flex-end;font-size: 0.8em;color:red !important">
                                                 @else
                                                 style="display: flex;justify-content: flex-end;font-size: 0.8em;"> @endif
                                                     {{ $tes->orgao }}. Situação: {{ $tes->situacao }}.
-                                                    {{ $tes->tempo }}. </span>
+                                                    {{ $tes->tempo }} </span>
                                         @endif
                                     </td>
                                 </tr>

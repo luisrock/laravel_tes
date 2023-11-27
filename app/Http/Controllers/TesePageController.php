@@ -55,36 +55,50 @@ class TesePageController extends Controller
         // dd($tese);
         if ($tribunal == 'STF') {
 
-            if (!Str::endsWith($tese->tema_texto, '.')) {
-                $tese->tema_texto = $tese->tema_texto . '.';
+            if (!empty($tese->tema_texto)) {
+                if (!Str::endsWith($tese->tema_texto, '.')) {
+                    $tese->tema_texto = $tese->tema_texto . '.';
+                }
             }
-
-            if (!Str::endsWith($tese->tese_texto, '.')) {
-                $tese->tese_texto = $tese->tese_texto . '.';
+            if ($have_tese) {
+                if (!Str::endsWith($tese->tese_texto, '.')) {
+                    $tese->tese_texto = $tese->tese_texto . '.';
+                }
             }
         } else if ($tribunal == 'STJ') {
             $tese->tema_texto = $tese->numero . " - " . $tese->tema;
         }
 
-        $text = "$tribunal, Tema {$tese->tema_texto} TESE: {$tese->tese_texto}";
+        $text = "$tribunal, Tema {$tese->tema_texto}";
+        if (!empty($tese->tese_texto)) {
+            $text .= " TESE: {$tese->tese_texto}";
+        }
         $text = trim($text);
         //remove double spaces inside
         $text = preg_replace('/\s+/', ' ', $text);
 
         if ($tribunal == 'STF') {
             //add to_be_copied property
-            $text .= " " . $tese->relator . ', ' . $tese->acordao . '. ';
+            $text .= " " . $tese->relator . ', ' . $tese->acordao;
+            if (!empty($tese->situacao)) {
+                $text .= " ($tese->situacao). ";
+            } else {
+                $text .= ". ";
+            }
             $tese->tempo = '';
             if (isset($tese->aprovadaEm) && $tese->aprovadaEm) {
                 $tese->tempo = "Aprovada em {$tese->aprovadaEm}";
             }
+
             if ($tese->tempo) {
                 $text .= $tese->tempo;
             }
+
+
             $tese->titulo = "TEMA {$tese->numero}";
             $tese->questao = "QUESTÃO: " . preg_replace('/^\d+ - /', '', $tese->tema_texto);
             $tese->texto = $tese->tese_texto;
-            $tese->text_muted = "{$tese->tempo}.";
+            $tese->text_muted = "$tese->relator, $tese->acordao ($tese->situacao). $tese->tempo.";
         } else if ($tribunal == 'STJ') {
 
             //add to_be_copied property
@@ -110,6 +124,7 @@ class TesePageController extends Controller
         }
 
         //if there is no "." at the end of the text, add it
+        $text = trim($text);
         if (!Str::endsWith($text, '.')) {
             $text = $text . '.';
         }
@@ -117,7 +132,7 @@ class TesePageController extends Controller
         if ($have_tese) {
             $tese->to_be_copied = $text;
         } else {
-            $tese->to_be_copied = ' ';
+            $tese->to_be_copied = $text;
         }
 
 

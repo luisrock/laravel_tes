@@ -41,6 +41,8 @@ class AllStfTesesPageController extends Controller
             $tese->isCancelada = 0;
             if (isset($tese->aprovadaEm) && $tese->aprovadaEm) {
                 $tese->tempo = "Aprovada em {$tese->aprovadaEm}";
+            } else {
+                $tese->tempo = "";
             }
             $tese->tema_pure_text = preg_replace('/^\d+ - /', '', $tese->tema_texto);
         }
