@@ -63,17 +63,22 @@
                                             {{ $tese->titulo }}
                                         @endif
                                     </h4>
-                                    <p class="d-sm-block" style="">
-                                        {{ $tese->questao }}
-                                    </p>
-                                    <p class="d-sm-block" style="font-weight: bold;">
-                                        {{ $tese->texto }}
-                                    </p>
-                                    <span class="text-muted"
-                                        style="display: flex;justify-content: flex-end;font-size: 0.8em;">
-                                        {{ $tese->text_muted }}
-                                    </span>
-
+                                    @if (!empty($tese->questao))
+                                        <p class="d-sm-block" style="">
+                                            {{ $tese->questao }}
+                                        </p>
+                                    @endif
+                                    @if (!empty($tese->texto))
+                                        <p class="d-sm-block" style="font-weight: bold;">
+                                            {{ $tese->texto }}
+                                        </p>
+                                    @endif
+                                    @if (!empty($tese->text_muted))
+                                        <span class="text-muted"
+                                            style="display: flex;justify-content: flex-end;font-size: 0.8em;">
+                                            {{ $tese->text_muted }}
+                                        </span>
+                                    @endif
                                     @if (!empty($tese->to_be_copied))
                                         <button class="btn btn-rounded btn-outline-primary btn-sm mr-1 mb-3 btn-copy-text">
                                             <span>
@@ -129,7 +134,7 @@
                         <p class="d-sm-block" style="">
                             Consulte a fonte
                             <a href="{{ $tese->link }}" target="_blank">
-                                aqui</a>.
+                                aqui</a>
                         </p>
                     @endif
 

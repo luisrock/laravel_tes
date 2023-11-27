@@ -115,3 +115,5 @@ Route::prefix('admin')->group(function () {
         Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('admin');
     });
 });
+
+Route::get('/newsletters', [App\Http\Controllers\CampaignsPageController::class, 'index'])->name('newsletterspage');
