@@ -142,8 +142,13 @@
                                 class="font-w600" href="{{ route('searchpage') }}">Pesquisar</a>
                         @endif
 
-                        @if (Route::currentRouteName() != 'atualizacoespage')
+                        {{-- substituindo a página de atualizacoes pela de newsletter no front.
+                        as atualizacoes ficam só para mim  --}}
+                        {{-- @if (Route::currentRouteName() != 'atualizacoespage')
                             | <a class="font-w600" href="{{ route('atualizacoespage') }}">Atualizações</a>
+                        @endif --}}
+                        @if (Route::currentRouteName() != 'newsletterspage')
+                            | <a class="font-w600" href="{{ route('newsletterspage') }}">Atualizações</a>
                         @endif
                         @auth
                             @if (in_array(Auth::user()->email, config('tes_constants.admins')))
