@@ -50,6 +50,7 @@ Route::get('/tema/{tema?}', [App\Http\Controllers\TemaPageController::class, 'in
 Route::get('/temas', [App\Http\Controllers\AllTemasPageController::class, 'index'])->name('alltemaspage');
 
 //Page for Atualizações
+//desativada para os visitantes. Por ora, só eu irei usar
 Route::get('/atualizacoes', [App\Http\Controllers\AtualizacoesPageController::class, 'index'])->name('atualizacoespage');
 
 //Page to thank the user for sending email for newsletter (proofcourse)
