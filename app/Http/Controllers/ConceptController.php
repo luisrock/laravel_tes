@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -73,34 +74,33 @@ class ConceptController extends Controller
     public function generateConcept(Request $request)
     {
         $messages = $request->input('messages');
-        if(!is_array($messages) || empty($messages)) {
+        if (!is_array($messages) || empty($messages)) {
             return response()->json(['success' => false, 'message' => 'Mensagens de prompt ausentes. Por favor, resolva isso e tente novamente.']);
         }
+
         $model = $request->input('model');
-        if($model != 'gpt-4' && $model != 'gpt-3.5-turbo') {
-            return response()->json(['success' => false, 'message' => 'Modelo inválido. Por favor, resolva isso e tente novamente.']);
-        }
+
         $apiKey = env('OPENAI_API_KEY');
-        if(empty($apiKey)) {
+        if (empty($apiKey)) {
             return response()->json(['success' => false, 'message' => 'Chave de API ausente. Por favor, resolva isso e tente novamente.']);
         }
-        
+
         try {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'Authorization' => 'Bearer ' . $apiKey
             ])->post('https://api.openai.com/v1/chat/completions', [
-                'model' => $model,
-                'messages' => $messages,
-                'max_tokens' => 4000,
-                'n' => 1,
-                'stop' => null,
-                'temperature' => 0.3
-            ]);
+                        'model' => $model,
+                        'messages' => $messages,
+                        'max_tokens' => 4000,
+                        'n' => 1,
+                        'stop' => null,
+                        'temperature' => 0.3
+                    ]);
 
 
             $responseData = $response->json();
-            if(is_array($responseData['choices']) && !empty($responseData['choices'][0]['message']) && !empty($responseData['choices'][0]['message']['content'])) {
+            if (is_array($responseData['choices']) && !empty($responseData['choices'][0]['message']) && !empty($responseData['choices'][0]['message']['content'])) {
                 $concept = $responseData['choices'][0]['message']['content'];
             } else {
                 $responseData = json_encode($responseData);
