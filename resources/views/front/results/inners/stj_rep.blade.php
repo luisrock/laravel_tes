@@ -1,4 +1,9 @@
 @foreach ($output['tese']['hits'] as $rep)
+    @php
+        if (empty($rep['trib_rep_tese'])) {
+            $rep['trib_rep_tese'] = '[aguarda julgamento]';
+        }
+    @endphp
     <tr>
         <td>
             <div style="display:flex; justify-content:space-between;">
