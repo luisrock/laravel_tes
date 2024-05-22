@@ -64,6 +64,8 @@ class TesePageController extends Controller
                 if (!Str::endsWith($tese->tese_texto, '.')) {
                     $tese->tese_texto = $tese->tese_texto . '.';
                 }
+            } else {
+                $tese->tese_texto = '[aguarda julgamento]';
             }
         } else if ($tribunal == 'STJ') {
             $tese->tema_texto = $tese->numero . " - " . $tese->tema;
@@ -72,6 +74,8 @@ class TesePageController extends Controller
         $text = "$tribunal, Tema {$tese->tema_texto}";
         if (!empty($tese->tese_texto)) {
             $text .= " TESE: {$tese->tese_texto}";
+        } else {
+            $text .= " TESE: [aguarda julgamento]";
         }
         $text = trim($text);
         //remove double spaces inside
