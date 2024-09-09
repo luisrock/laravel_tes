@@ -22,7 +22,7 @@ return [
                 'sumulas' => ['sumulas'],
                 'teses' => ['teses']
             ],
-            'db' => false // pesquisa = busca via API; temas = busca via db
+            'db' => true // if false, pesquisa = busca via API; temas = busca via db | true, both via db
         ],
         'TST' => [
             'color' => '#F39C12',
