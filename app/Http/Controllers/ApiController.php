@@ -143,9 +143,25 @@ class ApiController extends Controller
             ], 404);
         }
 
+        // Converter para array para manipulação
+        $teseArray = (array) $tese;
+        
+        // Tratar tema_texto APENAS para STF
+        if ($tribunal === 'STF') {
+            // Verificar possíveis nomes do campo tema
+            $camposTema = ['tema_texto', 'tema'];
+            
+            foreach ($camposTema as $campo) {
+                if (isset($teseArray[$campo]) && !empty($teseArray[$campo])) {
+                    // Remove qualquer quantidade de dígitos + hífen do início
+                    $teseArray[$campo] = preg_replace('/^\d+\s*-\s*/', '', $teseArray[$campo]);
+                }
+            }
+        }
+
         return response()->json([
             'success' => true,
-            'data' => $tese
+            'data' => $teseArray
         ]);
     }
 }
