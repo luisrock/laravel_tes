@@ -37,4 +37,10 @@ Route::post('/carf.php',[App\Http\Controllers\ApiController::class, 'index']);
 Route::post('/fonaje.php',[App\Http\Controllers\ApiController::class, 'index']);
 Route::post('/cej.php',[App\Http\Controllers\ApiController::class, 'index']);
 
+// New endpoints for individual sumulas and teses
+Route::middleware('bearer.token')->group(function () {
+    Route::get('/sumula/{tribunal}/{numero}', [App\Http\Controllers\ApiController::class, 'getSumula']);
+    Route::get('/tese/{tribunal}/{numero}', [App\Http\Controllers\ApiController::class, 'getTese']);
+});
+
 
