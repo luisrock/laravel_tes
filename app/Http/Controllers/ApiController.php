@@ -66,4 +66,86 @@ class ApiController extends Controller
         return $final_result; 
         
     } //end public function
+
+    public function getSumula($tribunal, $numero)
+    {
+        // Validate tribunal
+        $tribunal = strtoupper($tribunal);
+        if (!in_array($tribunal, ['STF', 'STJ'])) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Tribunal não suportado. Use STF ou STJ.'
+            ], 400);
+        }
+
+        // Validate numero
+        if (!is_numeric($numero)) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Número deve ser um valor numérico.'
+            ], 400);
+        }
+
+        // Map tribunal to table
+        $table = strtolower($tribunal) . '_sumulas';
+
+        // Get sumula by numero
+        $sumula = DB::table($table)
+            ->select('*')
+            ->where('numero', $numero)
+            ->first();
+
+        if (!$sumula) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Súmula não encontrada.'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $sumula
+        ]);
+    }
+
+    public function getTese($tribunal, $numero)
+    {
+        // Validate tribunal
+        $tribunal = strtoupper($tribunal);
+        if (!in_array($tribunal, ['STF', 'STJ'])) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Tribunal não suportado. Use STF ou STJ.'
+            ], 400);
+        }
+
+        // Validate numero
+        if (!is_numeric($numero)) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Número deve ser um valor numérico.'
+            ], 400);
+        }
+
+        // Map tribunal to table
+        $table = strtolower($tribunal) . '_teses';
+
+        // Get tese by numero
+        $tese = DB::table($table)
+            ->select('*')
+            ->where('numero', $numero)
+            ->first();
+
+        if (!$tese) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Tese não encontrada.'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $tese
+        ]);
+    }
 }
