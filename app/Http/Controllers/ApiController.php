@@ -273,6 +273,20 @@ class ApiController extends Controller
                 $tribunal_upper = strtoupper($tribunal);
                 $tribunal_array = $lista_tribunais[$tribunal_upper];
                 $output_tribunal = tes_search_db($keyword, $tribunal_lower, $tribunal_array);
+                
+                // Tratar trib_rep_tema para teses do STF
+                if ($tribunal === 'STF' && isset($output_tribunal['tese']['hits'])) {
+                    foreach ($output_tribunal['tese']['hits'] as &$hit) {
+                        if (isset($hit['trib_rep_tema']) && !empty($hit['trib_rep_tema'])) {
+                            // Extrair número do início (antes do hífen)
+                            if (preg_match('/^(\d+)\s*-\s*(.+)$/', $hit['trib_rep_tema'], $matches)) {
+                                $hit['trib_rep_numero'] = $matches[1];
+                                $hit['trib_rep_tema'] = trim($matches[2]);
+                            }
+                        }
+                    }
+                }
+                
                 $themeOutput[$tribunal_lower] = $output_tribunal;
             }
 
