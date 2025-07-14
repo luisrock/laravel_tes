@@ -164,4 +164,136 @@ class ApiController extends Controller
             'data' => $teseArray
         ]);
     }
+
+    public function getRandomThemes($limit = null, $minJudgments = null)
+    {
+        // Set default values if parameters are not provided
+        if ($limit === null) {
+            $limit = 5; // default limit
+        }
+        if ($minJudgments === null) {
+            $minJudgments = 2; // default min_judgments
+        }
+
+        // Validate parameters
+        if (!is_numeric($limit) || $limit < 1 || $limit > 50) {
+            return response()->json([
+                'success' => false,
+                'error' => 'O parâmetro limit deve ser um número entre 1 e 50.'
+            ], 400);
+        }
+
+        if (!is_numeric($minJudgments) || $minJudgments < 1) {
+            return response()->json([
+                'success' => false,
+                'error' => 'O parâmetro min_judgments deve ser um número maior que 0.'
+            ], 400);
+        }
+
+        // Get all valid themes from pesquisas table WITHOUT ordering to allow random selection
+        $temas = DB::table('pesquisas')
+            ->select('id', 'keyword', 'label', 'slug', 'concept', 'concept_validated_at')
+            ->whereNull('checked_at')
+            ->whereNotNull('created_at')
+            ->whereNotNull('slug')
+            ->get()
+            ->all(); // transforma em array para poder usar shuffle
+
+        // Embaralha os temas para garantir aleatoriedade
+        shuffle($temas);
+
+        $lista_tribunais = Config::get('tes_constants.lista_tribunais');
+        $selectedThemes = [];
+        $themesChecked = 0;
+
+        foreach ($temas as $tema) {
+            $keyword = $tema->keyword;
+            $stfCount = 0;
+            $stjCount = 0;
+
+            // Check STF results
+            if ($lista_tribunais['STF']['db']) {
+                $stf_output = tes_search_db($keyword, 'stf', $lista_tribunais['STF']);
+                $stfCount = $stf_output['sumula']['total'] + $stf_output['tese']['total'];
+            }
+
+            // Check STJ results
+            if ($lista_tribunais['STJ']['db']) {
+                $stj_output = tes_search_db($keyword, 'stj', $lista_tribunais['STJ']);
+                $stjCount = $stj_output['sumula']['total'] + $stj_output['tese']['total'];
+            }
+
+            // Check if total STF + STJ judgments meet the minimum requirement
+            if (($stfCount + $stjCount) >= $minJudgments) {
+                $selectedThemes[] = $tema;
+                
+                if (count($selectedThemes) >= $limit) {
+                    break;
+                }
+            }
+
+            $themesChecked++;
+            
+            // Prevent infinite loop - if we've checked all themes and don't have enough
+            if ($themesChecked >= count($temas)) {
+                break;
+            }
+        }
+
+        if (empty($selectedThemes)) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Nenhum tema encontrado com pelo menos ' . $minJudgments . ' julgados do STF ou STJ.'
+            ], 404);
+        }
+
+        // Sort selected themes alphabetically by label (or keyword if label is empty)
+        usort($selectedThemes, function($a, $b) {
+            $labelA = $a->label ?? $a->keyword;
+            $labelB = $b->label ?? $b->keyword;
+            return strcasecmp($labelA, $labelB);
+        });
+
+        // Build response with full theme data
+        $response = [];
+        foreach ($selectedThemes as $tema) {
+            $keyword = $tema->keyword;
+            $label = $tema->label ?? $keyword;
+            
+            // Get all tribunal results for this theme
+            $tribunais = array_keys($lista_tribunais);
+            $themeOutput = [];
+
+            foreach ($tribunais as $tribunal) {
+                if ($lista_tribunais[$tribunal]['db'] === false && $tribunal !== 'STF') {
+                    continue;
+                }
+
+                $tribunal_lower = strtolower($tribunal);
+                $tribunal_upper = strtoupper($tribunal);
+                $tribunal_array = $lista_tribunais[$tribunal_upper];
+                $output_tribunal = tes_search_db($keyword, $tribunal_lower, $tribunal_array);
+                $themeOutput[$tribunal_lower] = $output_tribunal;
+            }
+
+            $response[] = [
+                'id' => $tema->id,
+                'keyword' => $tema->keyword,
+                'label' => $label,
+                'slug' => $tema->slug,
+                'concept' => $tema->concept,
+                'concept_validated_at' => $tema->concept_validated_at,
+                'url' => url('/tema/' . $tema->slug),
+                'tribunais' => $themeOutput
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $response,
+            'total_found' => count($response),
+            'requested_limit' => $limit,
+            'min_judgments_required' => $minJudgments
+        ]);
+    }
 }

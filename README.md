@@ -197,12 +197,108 @@ curl -X GET "https://teses.test/api/tese/stj/1303" \
 }
 ```
 
+#### 🔍 5. Buscar Temas Aleatórios (Com Autenticação)
+
+**GET** `/api/random-themes/{limit?}/{min_judgments?}`
+
+> **Observação:** Todos os parâmetros são opcionais. Se não informar nenhum, o endpoint retorna 5 temas com pelo menos 2 julgados STF+STJ (valores padrão).
+>
+> - `/api/random-themes` → retorna 5 temas, mínimo 2 julgados STF+STJ (padrão)
+> - `/api/random-themes/3` → retorna 3 temas, mínimo 2 julgados STF+STJ (padrão)
+> - `/api/random-themes/3/5` → retorna 3 temas, mínimo 5 julgados STF+STJ
+
+**Parâmetros:**
+- `limit` (integer, opcional): Número de temas a retornar (1-50, padrão: 5)
+- `min_judgments` (integer, opcional): Mínimo de julgados STF+STJ (padrão: 2)
+
+**Exemplo:**
+```bash
+curl -X GET "https://teses.test/api/random-themes/5/2" \
+  -H "Authorization: Bearer seu-token-secreto-aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json"
+```
+
+**Resposta de Sucesso (200):**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 123,
+      "keyword": "base de cálculo do iss",
+      "label": "Base de Cálculo do ISS",
+      "slug": "base-de-clculo-do-iss",
+      "concept": "O Imposto Sobre Serviços (ISS) é um tributo...",
+      "concept_validated_at": "2024-01-15T10:30:00.000000Z",
+      "url": "https://teses.test/tema/base-de-clculo-do-iss",
+      "tribunais": {
+        "stf": {
+          "sumula": {
+            "total": 0,
+            "hits": []
+          },
+          "tese": {
+            "total": 2,
+            "hits": [
+              {
+                "trib_rep_titulo": "RE 1285845",
+                "trib_rep_tema": "TEMA: 1135 - Inclusão do Imposto sobre Serviços...",
+                "trib_rep_tese": "É constitucional a inclusão do Imposto Sobre Serviços...",
+                "trib_rep_data": "21/06/2021",
+                "trib_rep_id": 758
+              }
+            ]
+          }
+        },
+        "stj": {
+          "sumula": {
+            "total": 1,
+            "hits": [
+              {
+                "trib_sum_titulo": "Súmula 524",
+                "trib_sum_numero": "524",
+                "trib_sum_texto": "No tocante à base de cálculo, o ISSQN incide...",
+                "trib_sum_id": 524
+              }
+            ]
+          },
+          "tese": {
+            "total": 2,
+            "hits": [
+              {
+                "trib_rep_titulo": "Tema/Repetitivo 634",
+                "trib_rep_tema": "QUESTÃO: Discute-se a inclusão do ISS...",
+                "trib_rep_tese": "O valor suportado pelo beneficiário do serviço...",
+                "trib_rep_data": "14/07/2025",
+                "trib_rep_id": 634
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "total_found": 5,
+  "requested_limit": 5,
+  "min_judgments_required": 2
+}
+```
+
+**Resposta de Erro (404):**
+```json
+{
+  "success": false,
+  "error": "Nenhum tema encontrado com pelo menos 2 julgados do STF ou STJ."
+}
+```
+
 ### Códigos de Status HTTP
 
 - **200**: Sucesso
 - **400**: Parâmetros inválidos
 - **401**: Token de autenticação inválido ou não fornecido (apenas endpoints com autenticação)
-- **404**: Súmula/Tese não encontrada
+- **404**: Súmula/Tese não encontrada ou nenhum tema encontrado
 
 ### Tribunais Suportados
 
@@ -264,6 +360,16 @@ curl -X GET "https://teses.test/api/sumula/stf/269" \
 
 # Buscar tese 1234 do STF
 curl -X GET "https://teses.test/api/tese/stf/1234" \
+  -H "Authorization: Bearer seu-token" \
+  -H "Content-Type: application/json"
+
+# Buscar 5 temas aleatórios com pelo menos 2 julgados STF+STJ
+curl -X GET "https://teses.test/api/random-themes/5/2" \
+  -H "Authorization: Bearer seu-token" \
+  -H "Content-Type: application/json"
+
+# Buscar 10 temas aleatórios com pelo menos 3 julgados STF+STJ
+curl -X GET "https://teses.test/api/random-themes/10/3" \
   -H "Authorization: Bearer seu-token" \
   -H "Content-Type: application/json"
 ```
