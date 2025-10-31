@@ -33,32 +33,24 @@ class AjaxController extends Controller
         }
 
         $request->validate([
-            'check' => 'required|in:0,1',
             'create' => 'required|in:0,1',
             'id' => 'numeric'
         ]);
 
-        $check = $request['check'];
         $create = $request['create'];
         $id = $request['id'];
         $label = $request['label'];
 
-        if ($check == 1) {
-            //update checked_at
-            $affected = DB::table('pesquisas')
-                ->where('id', $id)
-                ->update(
-                    [
-                        'checked_at' => DB::raw('NOW()')
-                    ]
-                );
-        } else if ($create == 1) {
-            //update created_at, label
+        if ($create == 1) {
+            // Ao criar uma página, preenchemos tanto created_at quanto checked_at
+            // Isso porque ao criar, o admin já está implicitamente verificando/aprovando
+            // a página para aparecer publicamente em /temas e na API
             $affected = DB::table('pesquisas')
                 ->where('id', $id)
                 ->update(
                     [
                         'created_at' => DB::raw('NOW()'),
+                        'checked_at' => DB::raw('NOW()'),
                         'label' => $label,
                         'slug' => slugify($label)
                     ]

@@ -1,0 +1,289 @@
+/**
+ * Admin Dashboard Styles
+ * Estilos específicos para a área administrativa
+ * APENAS NOVOS ESTILOS - Não sobrescreve os existentes
+ */
+
+/* ==================== FILTROS E CONTROLES (NOVOS) ==================== */
+.admin-controls {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.admin-controls-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end;
+    margin-bottom: 15px;
+}
+
+.admin-control-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.admin-control-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+.admin-control-group select,
+.admin-control-group input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
+
+.admin-control-group select:focus,
+.admin-control-group input:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+/* ==================== ESTATÍSTICAS (NOVAS) ==================== */
+.admin-stats {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    padding: 15px 0;
+    border-top: 1px solid #dee2e6;
+}
+
+.admin-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 15px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+    font-size: 0.9rem;
+}
+
+.admin-stat-label {
+    font-weight: 600;
+    color: #6c757d;
+}
+
+.admin-stat-value {
+    font-weight: 700;
+    color: #495057;
+    font-size: 1rem;
+}
+
+/* ==================== SELEÇÃO EM MASSA (NOVO) ==================== */
+.batch-controls {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 12px 20px;
+    margin-bottom: 15px;
+}
+
+.batch-controls-inner {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.batch-selection-info {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-left: auto;
+}
+
+.tema-checkbox {
+    margin-right: 8px;
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+}
+
+.tema-checkbox:hover {
+    transform: scale(1.1);
+}
+
+.td-tema.selected {
+    background-color: #fff3cd !important;
+    border-left: 4px solid #ffc107 !important;
+}
+
+.batch-actions {
+    padding: 15px;
+    background: #fff3cd;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ffc107;
+    display: none;
+}
+
+.batch-actions.active {
+    display: block;
+}
+
+#delete-selected {
+    font-weight: bold;
+}
+
+#delete-selected:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+/* ==================== PAGINAÇÃO (NOVA) ==================== */
+.admin-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.pagination-info {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.pagination-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.pagination-controls button {
+    padding: 6px 12px;
+    border: 1px solid #dee2e6;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.pagination-controls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #e9ecef;
+}
+
+.pagination-controls button.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+    font-weight: 600;
+}
+
+.pagination-controls button:first-child,
+.pagination-controls button:nth-child(2),
+.pagination-controls button:nth-last-child(2),
+.pagination-controls button:last-child {
+    font-weight: bold;
+    min-width: 40px;
+}
+
+.pagination-controls span {
+    display: inline-block;
+    padding: 6px;
+    color: #6c757d;
+    font-weight: bold;
+}
+
+/* ==================== LOADING (NOVO) ==================== */
+.admin-loading {
+    text-align: center;
+    padding: 40px;
+    color: #6c757d;
+}
+
+.admin-loading i {
+    font-size: 2rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    .admin-controls-row {
+        flex-direction: column;
+    }
+    
+    .admin-control-group {
+        width: 100%;
+        min-width: 100%;
+    }
+    
+    .admin-stats {
+        flex-direction: column;
+    }
+    
+    .admin-stat-item {
+        width: 100%;
+    }
+    
+    .batch-controls-inner {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .batch-selection-info {
+        flex-direction: column;
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}
+
+/* ==================== TABELA DE TEMAS (MELHORIAS) ==================== */
+#temas-container .table {
+    margin-bottom: 0;
+}
+
+#temas-container .table thead th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+    vertical-align: middle;
+}
+
+#temas-container .table tbody tr.selected {
+    background-color: #fff3cd !important;
+}
+
+#temas-container .table tbody tr.hide-created.selected {
+    background-color: #fff3cd !important;
+}
+
+#temas-container .table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+#temas-container .table tbody tr.selected:hover {
+    background-color: #ffe69c !important;
+}
+
+#temas-container .table tbody td {
+    vertical-align: middle;
+}
+
