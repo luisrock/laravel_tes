@@ -19,6 +19,7 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    @yield('admin-styles')
 </head>
 
 <body>
@@ -82,6 +83,7 @@
         </main>
     </div>
     @yield('adminjs')
+    @yield('admin-scripts')
     @yield('atualizacoesjs')
 </body>
 

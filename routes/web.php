@@ -114,6 +114,7 @@ Route::prefix('admin')->group(function () {
     // Add other routes with different permissions requirements
     Route::middleware(['admin_access:manage_all'])->group(function () {
         Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('admin');
+        Route::get('/get-temas', [App\Http\Controllers\HomeController::class, 'getTemas'])->name('admin.getTemas');
     });
 });
 

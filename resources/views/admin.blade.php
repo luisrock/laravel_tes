@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@section('admin-styles')
+    <link href="{{ asset('assets/css/admin.css') }}" rel="stylesheet">
+@endsection
+
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
@@ -27,79 +31,125 @@
         
         <div class="col-md-12" style="margin-top:50px">
             <div class="card">
-                <div class="card-header" style="display:flex; justify-content: space-between;">
+                <div class="card-header" style="display:flex; justify-content: space-between; align-items: center;">
                     <a href="{{ route('alltemaspage') }}">Temas</a>
-                    <div>
-                    <button id="toggle-forms">hide forms</button>
-                    <button id="toggle-created">hide created</button>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button id="toggle-created">hide created</button>
                     </div>
                 </div>
 
                 <div class="card-body">
+                    <!-- CSRF Token para JavaScript -->
+                    @csrf
 
-                <div class="block-content">
-            <div class="table-responsive">
-                <table class="table table-vcenter table-bordered">
-                    <tbody>
-                        <tr>
-                        @foreach ($temas as $k => $t)
-                        @php
-                        $st_checked = '';
-                        $lb_checked = 'check';
-                        $st_created = '';
-                        $lb_created = 'create';
-                        $class_created = '';
-                        $class_checked = '';
-                        if($t->checked_at){
-                            $st_checked = 'checked disabled';
-                            $lb_checked = 'checked';
-                            $st_created = 'disabled';
-                            $class_checked = 'td-tema-checked';
-                        }
+                    <!-- Controles de Filtro e Paginação -->
+                    <div class="admin-controls">
+                        <div class="admin-controls-row">
+                            <!-- Busca -->
+                            <div class="admin-control-group">
+                                <label for="search-input">Buscar</label>
+                                <input type="text" id="search-input" placeholder="Digite keyword ou label..." class="form-control">
+                            </div>
 
-                        if($t->created_at){
-                            $st_created = 'checked disabled';
-                            $lb_created = 'created';
-                            $st_checked = 'disabled';
-                            if(!empty($t->slug)) {
-                                $class_created = 'td-tema-created';
-                            }
-                        }
-                        @endphp
-                            <td class="font-w600 font-size-sm td-tema {{ $class_created }} {{ $class_checked }}">
-                                <span class="span-label">
-                                @if($class_created)
-                                <a href="{{ route('temapage') . '/' . $t->slug }}">{{ $t->keyword }}</a>
-                                @else
-                                {{ $t->keyword }}
-                                @endif
+                            <!-- Filtro por Status -->
+                            <div class="admin-control-group">
+                                <label for="filter-status">Filtrar por Status</label>
+                                <select id="filter-status" class="form-control">
+                                    <option value="all">Todos</option>
+                                    <option value="not_created" selected>Não Criados</option>
+                                    <option value="created">Criados</option>
+                                    <option value="checked">Verificados</option>
+                                    <option value="pending">Pendentes (não criados e não verificados)</option>
+                                </select>
+                            </div>
+
+                            <!-- Ordenar por -->
+                            <div class="admin-control-group">
+                                <label for="order-by">Ordenar por</label>
+                                <select id="order-by" class="form-control">
+                                    <option value="keyword">Alfabética (Keyword)</option>
+                                    <option value="results" selected>Número de Resultados</option>
+                                    <option value="created_at">Data de Criação</option>
+                                </select>
+                            </div>
+
+                            <!-- Direção -->
+                            <div class="admin-control-group">
+                                <label for="order-direction">Direção</label>
+                                <select id="order-direction" class="form-control">
+                                    <option value="asc">Crescente (A-Z, 0-9)</option>
+                                    <option value="desc" selected>Decrescente (Z-A, 9-0)</option>
+                                </select>
+                            </div>
+
+                            <!-- Por página -->
+                            <div class="admin-control-group">
+                                <label for="per-page">Por página</label>
+                                <select id="per-page" class="form-control">
+                                    <option value="30">30</option>
+                                    <option value="60" selected>60</option>
+                                    <option value="120">120</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Estatísticas -->
+                        <div class="admin-stats">
+                            <div class="admin-stat-item">
+                                <span class="admin-stat-label">Total:</span>
+                                <span class="admin-stat-value" id="stat-total">{{ $stats['total'] }}</span>
+                            </div>
+                            <div class="admin-stat-item">
+                                <span class="admin-stat-label">Criados:</span>
+                                <span class="admin-stat-value" id="stat-created">{{ $stats['created'] }}</span>
+                            </div>
+                            <div class="admin-stat-item">
+                                <span class="admin-stat-label">Verificados:</span>
+                                <span class="admin-stat-value" id="stat-checked">{{ $stats['checked'] }}</span>
+                            </div>
+                            <div class="admin-stat-item">
+                                <span class="admin-stat-label">Pendentes:</span>
+                                <span class="admin-stat-value" id="stat-pending">{{ $stats['pending'] }}</span>
+                            </div>
+                            <div class="admin-stat-item">
+                                <span class="admin-stat-label">Exibindo:</span>
+                                <span class="admin-stat-value" id="stat-showing">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Controles de Seleção em Massa -->
+                    <div class="batch-controls" id="batch-controls">
+                        <div class="batch-controls-inner">
+                            <button id="select-all-page" class="btn btn-sm btn-outline-primary">
+                                <i class="fa fa-check-square-o"></i> Marcar todos desta página
+                            </button>
+                            <button id="deselect-all" class="btn btn-sm btn-outline-secondary" style="display: none;">
+                                <i class="fa fa-square-o"></i> Desmarcar todos
+                            </button>
+                            <div class="batch-selection-info" id="batch-selection-info" style="display: none;">
+                                <span class="badge badge-warning" style="font-size: 1rem; padding: 8px 15px;">
+                                    <strong id="selected-count">0</strong> selecionados
                                 </span>
-                                <code> ({{$t->results}})</code>
-                                <span class="badge badge-pill badge-info toggle-form-tema" style="color: white; cursor:pointer;">action</span>
-                                <span class="badge badge-pill del-form-tema" style="color: red;cursor: pointer;background-color: #fff;border: solid 1px red;" data-tema-id="{{ $t->id }}">del</span>
-                                <form action="" class="form-tema" id="{{$k}}" data-tema-id="{{ $t->id }}">
-                                    @csrf
-                                    <div class="form-check" id="div-create-{{$k}}" style="color: green;">
-                                        <input type="checkbox" class="form-check-input" name="create" id="create-{{$k}}" value="1" {{$st_created}}>
-                                        <label class="form-check-label" for="create-{{$k}}">{{$lb_created}}</label>
-                                    </div>
-                                    <input class="form-control form-control-sm" type="text" id="inputLabel-{{$k}}" value="{{ $t->label ?? '' }}" style="display:none">
-                                    <div class="form-check" id="div-check-{{$k}}" style="color: red;">
-                                        <input type="checkbox" class="form-check-input" name="check" id="check-{{$k}}" value="1" {{$st_checked}}>
-                                        <label class="form-check-label" for="check-{{$k}}">{{$lb_checked}}</label>
-                                    </div>
-                                    <input type="submit" value="go" class="btn-submit" style="float: right; display:none;">
-                                </form>
-                            </td>
-                            @if(is_int(($k + 1)/3))
-                        </tr>
-                        <tr>
-                            @endif
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                                <button id="delete-selected" class="btn btn-sm btn-danger">
+                                    <i class="fa fa-trash"></i> Deletar selecionados
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                <div class="block-content" id="temas-container">
+                    <div class="admin-loading">
+                        <i class="fa fa-spinner fa-spin"></i>
+                        <p>Carregando temas...</p>
+                    </div>
+                </div>
+
+                <!-- Paginação -->
+                <div class="admin-pagination" id="pagination-container" style="display: none;">
+                    <div class="pagination-info" id="pagination-info"></div>
+                    <div class="pagination-controls" id="pagination-controls"></div>
+                </div>
                     
                 </div>
 
@@ -109,186 +159,23 @@
 </div>
 @endsection
 
-@section('adminjs')
+@section('admin-scripts')
 <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+<script src="{{ asset('assets/js/admin.js') }}"></script>
+@endsection
+
+@section('adminjs')
 <script>
+// Definir URLs das rotas para o admin.js
+var adminRoutes = {
+    store: "{{ route('adminstore') }}",
+    delete: "{{ route('admindel') }}",
+    getTemas: "{{ route('admin.getTemas') }}"
+};
 
-$( document ).ready(function() {
-
-    //Primeira letra maiúsula, salvo se a palavra tiver menos de 3 caracteres
-    function titleCase(str, limit = 3) {
-        var splitStr = str.toLowerCase().split(' ');
-        for (var i = 0; i < splitStr.length; i++) {
-            if(splitStr[i].length < limit) {
-                continue;
-            }
-            splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);     
-        }
-        // Directly return the joined string
-        return splitStr.join(' '); 
-    }
-
-    //Para ficar mais fácil a visualização dos criados e não criados
-    $('.td-tema-created').css('background-color', '#80808040');
-
-    $("#toggle-forms").on('click', function() {
-        if($('.form-tema').is(":hidden")) {
-            $('.form-tema').show()
-            $('.del-form-tema').hide()
-            $(this).text('hide forms')
-        } else {
-            $('.form-tema').hide()
-            $('.del-form-tema').show()
-            $(this).text('show forms')
-        }
-    });
-
-    $("#toggle-created").on('click', function() {
-        if($('.td-tema-created').is(":hidden")) {
-            $('.td-tema-created').show()
-            $(this).text('hide created')
-        } else {
-            $('.td-tema-created').hide()
-            $(this).text('show created')
-        }
-    });
-
-    $(".toggle-form-tema").on('click', function() {
-        let form = $(this).siblings('form')
-        form.parent().children('.del-form-tema').removeClass('warning')
-            .removeClass('badge-danger')
-            .removeAttr('style')
-            .text('del')
-            .css('color', 'red')
-            .css('cursor', 'pointer')
-            .css('background-color', '#fff')
-            .css('border', 'solid 1px red');
-
-        if(form.is(":hidden")) {
-            form.show()
-            $(this).siblings('.del-form-tema').hide()
-        } else {
-            form.hide()
-            $(this).siblings('.del-form-tema').show()
-        }
-    });
-    
-    $("input[name='create']").change(function() {
-        let form = $(this).parents('form')
-        let id = form.attr('id')
-        let btnSubmit = form.children('.btn-submit')
-        let inputLabel = $("#inputLabel-" + id)
-        let divCheck = $("#div-check-" + id)
-        if(this.checked) {
-            inputLabel.show()
-            inputLabel.val(titleCase(form.parent().children('span.span-label').text().replace(/['"]+/g, '')).trim());
-            btnSubmit.show()
-            divCheck.hide()
-        } else{
-            inputLabel.hide()
-            btnSubmit.hide()
-            divCheck.show()
-        }
-    });
-
-    $("input[name='check']").change(function() {
-        let form = $(this).parents('form')
-        let id = form.attr('id')
-        let btnSubmit = form.children('.btn-submit')
-        let inputLabel = $("#inputLabel-" + id)
-        let divCreate = $("#div-create-" + id)
-        if(this.checked) {
-            inputLabel.hide()
-            divCreate.hide()
-            btnSubmit.show()
-        } else{
-            // inputLabel.hide()
-            divCreate.show()
-            btnSubmit.hide()
-            
-        }
-    });
-
-    //Form Submission
-    $('.form-tema').on('submit', function(e){
-        e.preventDefault();
-        let form = $(this);
-        let td = form.parent();
-        let formId = form.attr('id');
-        let temaId = form.attr('data-tema-id');
-        let inputLabel = $("#inputLabel-" + formId).val()
-        let create = ($("#create-" + formId).prop("checked") == true) ? 1 : 0;
-        let check = ($("#check-" + formId).prop("checked") == true) ? 1 : 0;
-        let token = $("input[name='_token']").val();
-        let data = {
-            'id' : temaId,
-            'label' : inputLabel,
-            'create' : create,
-            'check' : check,
-            '_token' : token
-        }
-
-        // console.log(data);
-        // return;
-        form.children('.btn-submit').hide();
-
-        $.ajax({
-        url: "{{route('adminstore')}}",
-        type:"POST",
-        data: data,
-        success:function(response){
-            if(response.hasOwnProperty('success') && response['success'] == 1) {
-                // $("#div-create-" + formId).show();
-                // $("#div-check-" + formId).show();
-                $("#create-" + formId).prop("disabled", true).parent().show();
-                $("#check-" + formId).prop("disabled", true).parent().show();
-                $("#inputLabel-" + formId).prop("disabled", true).show();
-                if(!inputLabel) {
-                    $("#inputLabel-" + formId).hide();
-                }
-                td.addClass('td-tema-created');
-            }
-          //console.log(response);
-        },
-       });
-    })
-
-
-    //Del tema
-    $('.del-form-tema').on('click', function(e){
-        e.preventDefault();
-        let btn = $(this);
-        if(btn.hasClass('warning') === false) {
-            btn.addClass('warning').addClass('badge-danger').removeAttr( 'style' ).css('color', '#fff').css('cursor', 'pointer');
-            btn.text("Tem certeza?");
-            return false;
-        } 
-        let siblingForm = btn.parent().children('form');
-        let temaId = btn.attr('data-tema-id');
-        let token = siblingForm.children("input[name='_token']").val();
-        let data = {
-            'id' : temaId,
-            '_token' : token
-        }
-        siblingForm.hide();
-
-        $.ajax({
-        url: "{{route('admindel')}}",
-        type:"POST",
-        data: data,
-        success:function(response){
-            if(response.hasOwnProperty('success') && response['success'] == 1) {
-                btn.parent().html(siblingForm.parent().children('a').text()).css("background-color", "#ff00004f");
-            }
-          //console.log(response);
-        },
-       });
-    })
-
-
-
-
-});
-
+// Atualizar URLs no admin.js se necessário
+if (typeof window.adminRoutes === 'undefined') {
+    window.adminRoutes = adminRoutes;
+}
 </script>
 @endsection
