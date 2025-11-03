@@ -970,6 +970,24 @@ function call_request_api($tribunal_lower, $param)
 //Searching db (main function)
 function tes_search_db($keyword, $tribunal_lower, $tribunal_array)
 {
+  // Criar chave única para o cache baseada na busca
+  $cache_key = 'search_' . $tribunal_lower . '_' . md5($keyword);
+  
+  // Tentar usar cache, com fallback seguro se der erro
+  try {
+    return Cache::remember($cache_key, 3600, function() use ($keyword, $tribunal_lower, $tribunal_array) {
+      return tes_search_db_execute($keyword, $tribunal_lower, $tribunal_array);
+    });
+  } catch (\Exception $e) {
+    // Se cache falhar, executar busca normalmente
+    \Log::warning('Cache de busca falhou, executando sem cache: ' . $e->getMessage());
+    return tes_search_db_execute($keyword, $tribunal_lower, $tribunal_array);
+  }
+}
+
+//Função auxiliar que executa a busca (extraída para ser usada com ou sem cache)
+function tes_search_db_execute($keyword, $tribunal_lower, $tribunal_array)
+{
 
   $tese_name = $tribunal_array['tese_name'];
 
