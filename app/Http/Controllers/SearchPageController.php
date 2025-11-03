@@ -22,7 +22,17 @@ class SearchPageController extends Controller
         $display_pdf = '';
         //Initial view (no search)
         if (empty($request->query())) {
-            return view('front.search', compact('lista_tribunais', 'display_pdf'));
+            // Buscar temas mais consultados
+            $popular_themes = DB::table('pesquisas')
+                ->select('id', 'keyword', 'label', 'slug', 'views_count')
+                ->whereNotNull('slug')
+                ->where('slug', '!=', '')
+                ->where('views_count', '>', 0)
+                ->orderBy('views_count', 'desc')
+                ->limit(12)
+                ->get();
+            
+            return view('front.search', compact('lista_tribunais', 'display_pdf', 'popular_themes'));
         }
 
         //User is searching. Prepare and return results

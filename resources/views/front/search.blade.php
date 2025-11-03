@@ -112,6 +112,36 @@
 </div>
 <!-- END Search -->
 
+<!-- Temas Mais Consultados -->
+@if(isset($popular_themes) && $popular_themes->count() > 0)
+<div class="content">
+    <div class="block">
+        <div class="block-header block-header-default">
+            <h3 class="block-title">🔥 Temas Mais Consultados</h3>
+            <div class="block-options">
+                <span class="text-muted">Explore os temas mais populares</span>
+            </div>
+        </div>
+        <div class="block-content">
+            <div class="row">
+                @foreach($popular_themes as $theme)
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                    <a href="{{ url('/tema/' . $theme->slug) }}" class="block block-link-shadow text-center" style="text-decoration: none;">
+                        <div class="block-content block-content-full">
+                            <div class="font-size-sm font-w600 text-primary">
+                                {{ $theme->label ?? $theme->keyword }}
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+<!-- END Temas Mais Consultados -->
+
 @yield('content_results')
 
 <!-- END Page Content -->
