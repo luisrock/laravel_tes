@@ -249,6 +249,31 @@
         </div>
         <!-- END Results -->
 
+        <!-- Temas Relacionados -->
+        @if(isset($related_themes) && $related_themes->count() > 0)
+        <div class="block" style="{{ $display_pdf }}">
+            <div class="block-header block-header-default">
+                <h3 class="block-title">📚 Temas Relacionados</h3>
+            </div>
+            <div class="block-content">
+                <div class="row">
+                    @foreach($related_themes as $theme)
+                    <div class="col-md-4 col-sm-6 mb-3">
+                        <a href="{{ url('/tema/' . $theme->slug) }}" class="block block-link-shadow text-center" style="text-decoration: none;">
+                            <div class="block-content block-content-full">
+                                <div class="font-size-h6 font-w600 text-primary">
+                                    {{ $theme->label ?? $theme->keyword }}
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+        @endif
+        <!-- END Temas Relacionados -->
+
     </div>
 
 

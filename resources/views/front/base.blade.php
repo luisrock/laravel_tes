@@ -86,15 +86,20 @@
     <!-- google adsense -->
     {{-- pausado em 10/10/2023 --}}
     {{-- retomado em 30/10/2023 --}}
+    @if(config('app.env') === 'production')
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6476437932373204"
         crossorigin="anonymous"></script>
+    @endif
     <!-- END google adsense -->
 
     <!-- Pixel Code for https://proofcourse.com/ -->
+    @if(config('app.env') === 'production')
     <script defer src="https://proofcourse.com/pixel/g5ptl75ocv5t93oo54rbvw4r8uxspxz3"></script>
+    @endif
     <!-- END Pixel Code -->
 
     <!-- Matomo -->
+    @if(config('app.env') === 'production')
     <script>
         var _paq = window._paq = window._paq || [];
         /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
@@ -112,6 +117,7 @@
             s.parentNode.insertBefore(g, s);
         })();
     </script>
+    @endif
     <!-- End Matomo Code -->
 
 </head>
