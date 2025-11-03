@@ -48,6 +48,14 @@ class AllStjSumulasPageController extends Controller
         $label = 'Súmulas do Superior Tribunal de Justiça - STJ';
         $sumula_route = 'stjsumulapage';
         $description = "Relação de $label, com os respectivos textos";
+        
+        // Breadcrumb
+        $breadcrumb = [
+            ['name' => 'Início', 'url' => url('/')],
+            ['name' => 'Índice', 'url' => url('/index')],
+            ['name' => 'Súmulas STJ', 'url' => null]
+        ];
+        
         $admin = false;
         if (auth()->check()) {
             //check the email
@@ -57,6 +65,6 @@ class AllStjSumulasPageController extends Controller
             }
         }
         // dd($sumulas);
-        return view('front.sumulas', compact('tribunal', 'sumulas', 'count', 'label', 'description', 'admin', 'display_pdf', 'sumula_route'));
+        return view('front.sumulas', compact('tribunal', 'sumulas', 'count', 'label', 'description', 'admin', 'display_pdf', 'sumula_route', 'breadcrumb'));
     } //end public function
 }

@@ -143,6 +143,14 @@ class TesePageController extends Controller
         $display_pdf = false;
         $label = "TEMA {$tese->numero} do $tribunal_nome_completo - $tribunal";
         $description = $label;
+        
+        // Breadcrumb
+        $breadcrumb = [
+            ['name' => 'Início', 'url' => url('/')],
+            ['name' => 'Índice', 'url' => url('/index')],
+            ['name' => "Teses $tribunal", 'url' => route($alltesesroute)],
+            ['name' => "Tema {$tese->numero}", 'url' => null]
+        ];
 
         $admin = false;
         if (auth()->check()) {
@@ -153,6 +161,6 @@ class TesePageController extends Controller
             }
         }
         // dd($teses);
-        return view('front.tese', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute'));
+        return view('front.tese', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb'));
     } //end public function
 }

@@ -49,6 +49,14 @@ class AllStfSumulasPageController extends Controller
         $label = 'Súmulas do Supremo Tribunal Federal - STF';
         $sumula_route = 'stfsumulapage';
         $description = "Relação de $label, com os respectivos textos";
+        
+        // Breadcrumb
+        $breadcrumb = [
+            ['name' => 'Início', 'url' => url('/')],
+            ['name' => 'Índice', 'url' => url('/index')],
+            ['name' => 'Súmulas STF', 'url' => null]
+        ];
+        
         $admin = false;
         if (auth()->check()) {
             //check the email
@@ -58,6 +66,6 @@ class AllStfSumulasPageController extends Controller
             }
         }
         // dd($sumulas);
-        return view('front.sumulas', compact('tribunal', 'sumulas', 'count', 'label', 'description', 'admin', 'display_pdf', 'sumula_route'));
+        return view('front.sumulas', compact('tribunal', 'sumulas', 'count', 'label', 'description', 'admin', 'display_pdf', 'sumula_route', 'breadcrumb'));
     } //end public function
 }
