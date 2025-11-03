@@ -1,0 +1,1 @@
+Analise toda a base de código e me diga quando estiver pronto para receber a sua tarefa. Não precisa me explicar o código, apenas responda "estou pronto", depois de fazer toda a análise. DIga também que modelo de IA é voce.
