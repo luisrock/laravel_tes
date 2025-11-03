@@ -101,8 +101,9 @@ $related_themes = DB::table('pesquisas')
 - ✅ Comando `php artisan matomo:sync` para popular dados do Matomo
 - ✅ Incremento automático em tempo real no `TemaPageController`
 - ✅ Seção "🔥 Temas Mais Consultados" na home
-- ✅ Grid responsivo com 12 temas + contador de visualizações
+- ✅ Grid responsivo com 12 temas mais populares
 - ✅ 72 temas sincronizados com sucesso
+- ✅ Integração Matomo + contador interno (hybrid approach)
 
 **Comando de Sincronização Semanal:**
 ```bash
@@ -155,9 +156,12 @@ DB::table('pesquisas')->where('id', $id)->increment('views_count');
     <div class="row">
         @foreach($popular_themes as $theme)
         <div class="col-md-3 col-sm-6 mb-3">
-            <a href="/tema/{{ $theme->slug }}" class="btn btn-outline-primary btn-block">
-                {{ $theme->label ?? $theme->keyword }}
-                <span class="badge badge-light ml-2">{{ number_format($theme->views_count) }}</span>
+            <a href="/tema/{{ $theme->slug }}" class="block block-link-shadow text-center">
+                <div class="block-content block-content-full">
+                    <div class="font-size-sm font-w600 text-primary">
+                        {{ $theme->label ?? $theme->keyword }}
+                    </div>
+                </div>
             </a>
         </div>
         @endforeach
