@@ -44,6 +44,9 @@ class TemaPageController extends Controller
             $concept_validated_at = '';
         }
 
+        // Incrementar contador de visualizações
+        DB::table('pesquisas')->where('id', $id)->increment('views_count');
+
         // Buscar temas relacionados para internal linking
         $related_themes = $this->getRelatedThemes($id, $keyword);
 
