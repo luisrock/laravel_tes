@@ -28,6 +28,14 @@ class AllStjTesesPageController extends Controller
         $label = 'Temas Repetitivos e Teses Vinculantes do Superior Tribunal de Justiça - STJ';
         $tese_route = 'stjtesepage';
         $description = "Relação de $label";
+        
+        // Breadcrumb
+        $breadcrumb = [
+            ['name' => 'Início', 'url' => url('/')],
+            ['name' => 'Índice', 'url' => url('/index')],
+            ['name' => 'Teses STJ', 'url' => null]
+        ];
+        
         $admin = false;
         if (auth()->check()) {
             //check the email
@@ -50,6 +58,6 @@ class AllStjTesesPageController extends Controller
         }
 
         // dd($teses);
-        return view('front.teses', compact('tribunal', 'teses', 'count', 'label', 'description', 'admin', 'display_pdf', 'tese_route'));
+        return view('front.teses', compact('tribunal', 'teses', 'count', 'label', 'description', 'admin', 'display_pdf', 'tese_route', 'breadcrumb'));
     } //end public function
 }

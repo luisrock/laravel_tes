@@ -32,6 +32,14 @@
     </div>
     <!-- END Hero -->
 
+    <!-- Breadcrumb -->
+    @if(isset($breadcrumb))
+    <div class="content content-full pt-2 pb-0">
+        <x-breadcrumb :items="$breadcrumb" />
+    </div>
+    @endif
+    <!-- END Breadcrumb -->
+
     <div class="content" id="content-results">
 
         <!-- Results -->

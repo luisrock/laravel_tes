@@ -29,6 +29,15 @@
     </div>
     <!-- END Hero -->
 
+    <!-- Breadcrumb -->
+    <div class="content content-full pt-2 pb-0">
+        <x-breadcrumb :items="[
+            ['name' => 'Início', 'url' => url('/')],
+            ['name' => 'Índice', 'url' => null]
+        ]" />
+    </div>
+    <!-- END Breadcrumb -->
+
     <div class="content" id="content-results">
 
         <div class="block-content tab-content overflow-hidden">

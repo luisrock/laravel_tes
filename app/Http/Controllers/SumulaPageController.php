@@ -117,6 +117,14 @@ class SumulaPageController extends Controller
         $display_pdf = false;
         $label = "{$sumula->titulo} do $tribunal_nome_completo - $tribunal";
         $description = "{$sumula->titulo} do $tribunal_nome_completo - $tribunal";
+        
+        // Breadcrumb
+        $breadcrumb = [
+            ['name' => 'Início', 'url' => url('/')],
+            ['name' => 'Índice', 'url' => url('/index')],
+            ['name' => "Súmulas $tribunal", 'url' => route($allsumulasroute)],
+            ['name' => $sumula->titulo, 'url' => null]
+        ];
 
         $admin = false;
         if (auth()->check()) {
@@ -127,6 +135,6 @@ class SumulaPageController extends Controller
             }
         }
         // dd($sumulas);
-        return view('front.sumula', compact('tribunal', 'tribunal_nome_completo', 'sumula', 'label', 'description', 'admin', 'display_pdf', 'allsumulasroute'));
+        return view('front.sumula', compact('tribunal', 'tribunal_nome_completo', 'sumula', 'label', 'description', 'admin', 'display_pdf', 'allsumulasroute', 'breadcrumb'));
     } //end public function
 }

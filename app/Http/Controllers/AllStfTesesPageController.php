@@ -28,6 +28,14 @@ class AllStfTesesPageController extends Controller
         $label = 'Teses Vinculantes do Supremo Tribunal Federal - STF';
         $tese_route = 'stftesepage';
         $description = "Relação de $label, com os respectivos textos";
+        
+        // Breadcrumb
+        $breadcrumb = [
+            ['name' => 'Início', 'url' => url('/')],
+            ['name' => 'Índice', 'url' => url('/index')],
+            ['name' => 'Teses STF', 'url' => null]
+        ];
+        
         $admin = false;
         if (auth()->check()) {
             //check the email
@@ -48,6 +56,6 @@ class AllStfTesesPageController extends Controller
         }
 
         // dd($teses);
-        return view('front.teses', compact('tribunal', 'teses', 'count', 'label', 'description', 'admin', 'display_pdf', 'tese_route'));
+        return view('front.teses', compact('tribunal', 'teses', 'count', 'label', 'description', 'admin', 'display_pdf', 'tese_route', 'breadcrumb'));
     } //end public function
 }
