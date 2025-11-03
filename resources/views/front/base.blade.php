@@ -93,9 +93,7 @@
     <!-- END google adsense -->
 
     <!-- Pixel Code for https://proofcourse.com/ -->
-    @if(config('app.env') === 'production')
-    <script defer src="https://proofcourse.com/pixel/g5ptl75ocv5t93oo54rbvw4r8uxspxz3"></script>
-    @endif
+    {{-- Removido em 03/11/2025 - causava loading infinito --}}
     <!-- END Pixel Code -->
 
     <!-- Matomo -->
