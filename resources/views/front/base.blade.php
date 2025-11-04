@@ -26,16 +26,23 @@
 
     <meta name="description" content="{{ $description ?? config('tes_constants.options.meta_description') }}">
     <meta name="author" content="Mauro Lopes">
+    <meta name="keywords" content="teses, súmulas, stf, stj, tst, tnu, jurisprudência, repercussão geral, repetitivos">
 
     <link href="{{ $canonical_url ?? Request::url() }}" rel="canonical">
 
-    <!-- Open Graph Meta -->
-    <meta property="og:title" content="Teses e Súmulas">
-    <meta property="og:site_name" content="tesesesumulas">
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="@yield('page-title') - Teses & Súmulas">
+    <meta property="og:site_name" content="Teses & Súmulas">
     <meta property="og:description" content="{{ $description ?? config('tes_constants.options.meta_description') }}">
-    <meta property="og:type" content="website">
-    <!--         <meta property="og:url" content="">
-        <meta property="og:image" content=""> -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="{{ $canonical_url ?? Request::url() }}">
+    <meta property="og:locale" content="pt_BR">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="@yield('page-title') - Teses & Súmulas">
+    <meta name="twitter:description" content="{{ $description ?? config('tes_constants.options.meta_description') }}">
+    <meta name="twitter:site" content="@tesesesumulas">
 
     <!-- Icons -->
     <link rel="apple-touch-icon" sizes="57x57" href='{{ url('assets/img/icons/apple-icon-57x57.png') }}'>
