@@ -119,3 +119,15 @@ Route::prefix('admin')->group(function () {
 });
 
 Route::get('/newsletters', [App\Http\Controllers\CampaignsPageController::class, 'index'])->name('newsletterspage');
+
+// Editable Content Routes
+Route::get('/{slug}', [App\Http\Controllers\EditableContentController::class, 'show'])
+    ->where('slug', 'precedentes-vinculantes-cpc')
+    ->name('content.show');
+
+Route::middleware(['admin_access:manage_all'])->group(function () {
+    Route::get('/admin/content/{slug}/edit', [App\Http\Controllers\EditableContentController::class, 'edit'])
+        ->name('content.edit');
+    Route::put('/admin/content/{slug}', [App\Http\Controllers\EditableContentController::class, 'update'])
+        ->name('content.update');
+});
