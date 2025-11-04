@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Jobs\SearchToDbPesquisas;
+use App\Models\EditableContent;
 
 class SearchPageController extends Controller
 {
@@ -32,7 +33,20 @@ class SearchPageController extends Controller
                 ->limit(12)
                 ->get();
             
-            return view('front.search', compact('lista_tribunais', 'display_pdf', 'popular_themes'));
+            // Buscar conteúdo editável da home (precedentes)
+            $precedentes_home = EditableContent::where('slug', 'precedentes-home')
+                ->where('published', true)
+                ->first();
+            
+            // Verificar se usuário é admin
+            $admin = false;
+            if (auth()->check()) {
+                if (in_array(auth()->user()->email, config('tes_constants.admins'))) {
+                    $admin = true;
+                }
+            }
+            
+            return view('front.search', compact('lista_tribunais', 'display_pdf', 'popular_themes', 'precedentes_home', 'admin'));
         }
 
         //User is searching. Prepare and return results

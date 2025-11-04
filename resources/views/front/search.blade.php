@@ -35,6 +35,16 @@
 <div class="content" style="{{ $display_pdf }}">
     <form method="GET" id="trib-form">
 
+        @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <i class="fa fa-check-circle mr-2"></i>
+            <strong>{{ session('success') }}</strong>
+        </div>
+        @endif
+
         @if ($errors->any())
         <div class="alert alert-danger">
             <ul>
@@ -119,21 +129,41 @@
 </div>
 <!-- END Search -->
 
+<!-- Precedentes Vinculantes CPC -->
+@if($precedentes_home)
+<div class="content" style="{{ $display_pdf }}">
+    <div class="block">
+        <div class="block-header block-header-default">
+            <h2 class="block-title">{{ $precedentes_home->title }}</h2>
+            <div class="block-options">
+                <span class="badge badge-success">Guia Completo</span>
+                @if($admin)
+                    <a href="{{ route('content.edit', 'precedentes-home') }}" class="btn btn-sm btn-primary ml-2" title="Editar conteúdo">
+                        <i class="fa fa-pencil"></i> Editar
+                    </a>
+                @endif
+            </div>
+        </div>
+        <div class="block-content">
+            {!! $precedentes_home->content !!}
+        </div>
+    </div>
+</div>
+@endif
+<!-- END Precedentes Vinculantes CPC -->
+
 <!-- Temas Mais Consultados -->
 @if(isset($popular_themes) && $popular_themes->count() > 0)
 <div class="content">
     <div class="block">
         <div class="block-header block-header-default">
             <h3 class="block-title">🔥 Temas Mais Consultados</h3>
-            <div class="block-options">
-                <span class="text-muted">Explore os temas mais populares</span>
-            </div>
         </div>
         <div class="block-content">
             <div class="row">
                 @foreach($popular_themes as $theme)
                 <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
-                    <a href="{{ url('/tema/' . $theme->slug) }}" class="block block-link-shadow text-center" style="text-decoration: none;">
+                    <a href="{{ url('/tema/' . $theme->slug) }}" class="block block-link-shadow block-bordered text-center" style="text-decoration: none;">
                         <div class="block-content block-content-full">
                             <div class="font-size-sm font-w600 text-primary">
                                 {{ $theme->label ?? $theme->keyword }}
