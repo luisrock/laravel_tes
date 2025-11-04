@@ -215,6 +215,12 @@
     </div>
     <!-- END Page Container -->
 
+    <!-- Botão Voltar ao Topo -->
+    <button id="back-to-top" class="btn btn-primary" title="Voltar ao topo" style="{{ $display_pdf }}">
+        <i class="fa fa-arrow-up"></i>
+    </button>
+    <!-- END Botão Voltar ao Topo -->
+
     <script src='{{ url('assets/js/tescustom.core.min.js') }}'></script>
     <script src='{{ url('assets/js/tescustom.app.min.js') }}'></script>
     <script src='{{ url('assets/js/tes.js') }}'></script>
@@ -222,6 +228,40 @@
     @yield('adminjs')
     @yield('atualizacoesjs')
     @yield('scripts')
+    
+    <!-- Script Botão Voltar ao Topo -->
+    <script>
+    (function() {
+        const backToTopBtn = document.getElementById('back-to-top');
+        if (!backToTopBtn) return;
+        
+        // Mostrar/ocultar botão baseado no scroll
+        let scrollTimeout;
+        window.addEventListener('scroll', function() {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(function() {
+                if (window.pageYOffset > 300) {
+                    backToTopBtn.style.display = 'flex';
+                    backToTopBtn.style.opacity = '0';
+                    setTimeout(() => backToTopBtn.style.opacity = '1', 10);
+                } else {
+                    backToTopBtn.style.opacity = '0';
+                    setTimeout(() => backToTopBtn.style.display = 'none', 300);
+                }
+            }, 100);
+        });
+        
+        // Ação do clique - scroll suave para o topo
+        backToTopBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    })();
+    </script>
+    <!-- END Script Botão Voltar ao Topo -->
 
 </body>
 

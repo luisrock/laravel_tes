@@ -61,6 +61,28 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Busca Rápida -->
+            <div class="block-content block-content-full bg-body-light">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="fa fa-search"></i>
+                        </span>
+                    </div>
+                    <input type="text" class="form-control form-control-alt" id="quick-search-temas" placeholder="🔍 Filtrar temas nesta página..." autocomplete="off">
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-secondary" id="clear-search-temas" style="display: none;">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <small class="form-text text-muted">
+                    <span id="search-results-count"></span>
+                </small>
+            </div>
+            <!-- END Busca Rápida -->
+            
             <div class="block-content">
                 <div class="table-responsive">
                     <table class="table table-vcenter table-bordered">
@@ -72,18 +94,18 @@
                                 </tr>
                             </thead> -->
                         <tbody>
-                            <tr>
+                            <tr class="tema-row">
                                 @foreach ($temas as $k => $t)
                                     @php
                                         $style = $admin && $t->concept && $t->concept_validated_at ? 'background-color: #c3d1c3;' : '';
                                     @endphp
-                                    <td class="font-w600 font-size-sm" style="{{ $style }}">
+                                    <td class="font-w600 font-size-sm tema-item" style="{{ $style }}" data-tema-text="{{ strtolower($t->label ?? str_replace('"', '', $t->keyword)) }}">
                                         <a
                                             href="{{ route('temapage') }}/{{ $t->slug }}">{{ $t->label ?? str_replace('"', '', $t->keyword) }}</a>
                                     </td>
                                     @if (is_int(($k + 1) / 3))
                             </tr>
-                            <tr>
+                            <tr class="tema-row">
                                 @endif
                                 @endforeach
                         </tbody>
@@ -99,4 +121,120 @@
 
     <!-- END Page Content -->
 
+@endsection
+
+@section('scripts')
+<script>
+(function() {
+    const searchInput = document.getElementById('quick-search-temas');
+    const clearBtn = document.getElementById('clear-search-temas');
+    const resultsCount = document.getElementById('search-results-count');
+    const temaItems = document.querySelectorAll('.tema-item');
+    const temaRows = document.querySelectorAll('.tema-row');
+    const totalTemas = temaItems.length;
+    
+    // Função para atualizar contagem
+    function updateCount(visible) {
+        if (searchInput.value.trim() === '') {
+            resultsCount.textContent = '';
+        } else {
+            resultsCount.textContent = `Mostrando ${visible} de ${totalTemas} temas`;
+        }
+    }
+    
+    // Função de busca com debounce
+    let searchTimeout;
+    function performSearch() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(function() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            let visibleCount = 0;
+            
+            if (searchTerm === '') {
+                // Mostrar todos
+                temaItems.forEach(item => {
+                    item.style.display = '';
+                });
+                temaRows.forEach(row => {
+                    row.style.display = '';
+                });
+                clearBtn.style.display = 'none';
+                updateCount(totalTemas);
+                return;
+            }
+            
+            // Filtrar
+            temaItems.forEach(item => {
+                const temaText = item.getAttribute('data-tema-text');
+                if (temaText.includes(searchTerm)) {
+                    item.style.display = '';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Ocultar linhas vazias
+            temaRows.forEach(row => {
+                const visibleCells = Array.from(row.querySelectorAll('.tema-item')).filter(
+                    cell => cell.style.display !== 'none'
+                );
+                if (visibleCells.length === 0) {
+                    row.style.display = 'none';
+                } else {
+                    row.style.display = '';
+                }
+            });
+            
+            clearBtn.style.display = 'block';
+            updateCount(visibleCount);
+            
+            // Destacar termos encontrados
+            highlightTerms(searchTerm);
+        }, 200); // Debounce de 200ms
+    }
+    
+    // Função para destacar termos
+    function highlightTerms(term) {
+        temaItems.forEach(item => {
+            if (item.style.display === 'none') return;
+            
+            const link = item.querySelector('a');
+            if (!link) return;
+            
+            const originalText = link.textContent;
+            const regex = new RegExp(`(${term})`, 'gi');
+            
+            // Remover highlights anteriores
+            link.innerHTML = originalText;
+            
+            // Adicionar novo highlight
+            if (term && originalText.toLowerCase().includes(term)) {
+                const highlightedText = originalText.replace(regex, '<mark style="background-color: #fff3cd; padding: 1px 3px; border-radius: 2px;">$1</mark>');
+                link.innerHTML = highlightedText;
+            }
+        });
+    }
+    
+    // Event listeners
+    searchInput.addEventListener('input', performSearch);
+    searchInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Escape') {
+            clearSearch();
+        }
+    });
+    
+    // Limpar busca
+    function clearSearch() {
+        searchInput.value = '';
+        performSearch();
+        searchInput.focus();
+    }
+    
+    clearBtn.addEventListener('click', clearSearch);
+    
+    // Focar no campo ao carregar (opcional)
+    // searchInput.focus();
+})();
+</script>
 @endsection

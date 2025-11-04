@@ -77,14 +77,21 @@
             <input class="btn btn-sm btn-primary" id="btn-send-trib-form" type="submit" value="pesquisar">
         </div>
 
-        <div class="spinner-border text-primary" id="spinning" role="status" style="display:none;">
-            <!--                         <span class="sr-only">Buscando...</span> -->
-        </div>
-        <div id="loading-text" style="display:none;">
-            Acessando a base do órgão...
-        </div>
-
     </form>
+    
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Carregando...</span>
+        </div>
+        <div class="loading-text">
+            Buscando jurisprudência...
+        </div>
+        <div class="loading-subtext">
+            Consultando base de dados dos tribunais
+        </div>
+    </div>
+    <!-- END Loading Overlay -->
     @auth
         @php $toStore = false; @endphp
         @if(in_array(Auth::user()->email, ['mauluis@gmail.com','trator70@gmail.com','ivanaredler@gmail.com']))
@@ -148,6 +155,42 @@
 
 @endsection
 
+
+<!-- Script Loading State -->
+<script>
+(function() {
+    const form = document.getElementById('trib-form');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    
+    if (form && loadingOverlay) {
+        form.addEventListener('submit', function(e) {
+            // Validar se há keyword e tribunal selecionado
+            const keyword = form.querySelector('input[name="q"]').value.trim();
+            const tribunal = form.querySelector('input[name="tribunal"]:checked');
+            
+            if (keyword.length >= 3 && tribunal) {
+                // Mostrar loading
+                loadingOverlay.classList.add('active');
+                document.body.classList.add('loading');
+            }
+        });
+    }
+    
+    // Função global para testar loading manualmente (pode usar no console)
+    window.testLoading = function(seconds = 3) {
+        console.log('🔄 Mostrando loading por ' + seconds + ' segundos...');
+        loadingOverlay.classList.add('active');
+        document.body.classList.add('loading');
+        
+        setTimeout(function() {
+            loadingOverlay.classList.remove('active');
+            document.body.classList.remove('loading');
+            console.log('✅ Loading ocultado!');
+        }, seconds * 1000);
+    };
+})();
+</script>
+<!-- END Script Loading State -->
 
 @if($toStore ?? '')
     
