@@ -76,7 +76,8 @@ class TemaPageController extends Controller
 
         //dd($output);
 
-        $description = $label . ' - Conheça as Teses de Repercussão e de Repetitivos e as Súmulas dos tribunais superiores (STF, STJ, TST) e de outros órgãos relevantes federais (TNU, FONAJE/CNJ, CEJ/CJF, TCU, CARF) sobre o tema ' . $label;
+        // Gerar meta description dinâmica otimizada para SEO
+        $description = $this->generateMetaDescription($label, $output);
         
         $html = view('front.tema', compact('id', 'keyword', 'label', 'output', 'display_pdf', 'description', 'concept', 'concept_validated_at', 'related_themes'));
         return $html;
@@ -130,6 +131,104 @@ class TemaPageController extends Controller
             // Em caso de erro, retornar coleção vazia para não quebrar a página
             \Log::error('Erro ao buscar temas relacionados: ' . $e->getMessage());
             return collect([]);
+        }
+    }
+
+    /**
+     * Gera meta description otimizada baseada nos resultados reais
+     * Focada em aumentar CTR no Google Search
+     */
+    private function generateMetaDescription($label, $output)
+    {
+        try {
+            // Contar resultados por tipo
+            $total_sumulas = 0;
+            $total_teses = 0;
+            $tribunais_com_resultado = [];
+            
+            foreach($output as $tribunal => $data) {
+                // Ignorar 'total_count' e outras keys que não são tribunais
+                if(!is_array($data) || $tribunal === 'total_count') {
+                    continue;
+                }
+                
+                $tribunal_upper = strtoupper($tribunal);
+                
+                // Contar súmulas - estrutura correta: $data['sumula']['total']
+                if(isset($data['sumula']['total']) && $data['sumula']['total'] > 0) {
+                    $total_sumulas += $data['sumula']['total'];
+                    $tribunais_com_resultado[] = $tribunal_upper;
+                }
+                
+                // Contar teses/repercussão/repetitivos - estrutura correta: $data['tese']['total']
+                if(isset($data['tese']['total']) && $data['tese']['total'] > 0) {
+                    $total_teses += $data['tese']['total'];
+                    if(!in_array($tribunal_upper, $tribunais_com_resultado)) {
+                        $tribunais_com_resultado[] = $tribunal_upper;
+                    }
+                }
+                
+                // Para STF: $data['repercussao']['total']
+                if(isset($data['repercussao']['total']) && $data['repercussao']['total'] > 0) {
+                    $total_teses += $data['repercussao']['total'];
+                    if(!in_array($tribunal_upper, $tribunais_com_resultado)) {
+                        $tribunais_com_resultado[] = $tribunal_upper;
+                    }
+                }
+                
+                // Para STJ: $data['repetitivos']['total']
+                if(isset($data['repetitivos']['total']) && $data['repetitivos']['total'] > 0) {
+                    $total_teses += $data['repetitivos']['total'];
+                    if(!in_array($tribunal_upper, $tribunais_com_resultado)) {
+                        $tribunais_com_resultado[] = $tribunal_upper;
+                    }
+                }
+            }
+            
+            $total_resultados = $total_sumulas + $total_teses;
+            $tribunais_com_resultado = array_unique($tribunais_com_resultado);
+            
+            // Construir description otimizada
+            if($total_resultados > 0) {
+                $description = $label . ': ';
+                
+                // Adicionar contagem de resultados com singular/plural correto
+                if($total_teses > 0 && $total_sumulas > 0) {
+                    $teses_texto = $total_teses === 1 ? 'tese' : 'teses';
+                    $sumulas_texto = $total_sumulas === 1 ? 'súmula' : 'súmulas';
+                    $description .= "Encontre {$total_teses} {$teses_texto} e {$total_sumulas} {$sumulas_texto}";
+                } elseif($total_teses > 0) {
+                    $teses_texto = $total_teses === 1 ? 'tese jurisprudencial' : 'teses jurisprudenciais';
+                    $description .= "Encontre {$total_teses} {$teses_texto}";
+                } else {
+                    $sumulas_texto = $total_sumulas === 1 ? 'súmula' : 'súmulas';
+                    $description .= "Encontre {$total_sumulas} {$sumulas_texto}";
+                }
+                
+                // Adicionar tribunais
+                if(count($tribunais_com_resultado) > 0) {
+                    $description .= ' de ' . implode(', ', $tribunais_com_resultado);
+                }
+                
+                // Adicionar data de atualização
+                $description .= '. Atualizado em ' . date('d/m/Y') . '.';
+                
+            } else {
+                // Fallback para quando não há resultados
+                $description = $label . ' - Pesquise súmulas e teses jurisprudenciais nos tribunais superiores (STF, STJ, TST, TNU). Jurisprudência atualizada.';
+            }
+            
+            // Garantir que não ultrapasse 160 caracteres (limite ideal para Google)
+            if(strlen($description) > 160) {
+                $description = substr($description, 0, 157) . '...';
+            }
+            
+            return $description;
+            
+        } catch (\Exception $e) {
+            // Fallback em caso de erro
+            \Log::error('Erro ao gerar meta description: ' . $e->getMessage());
+            return $label . ' - Teses e Súmulas dos tribunais superiores. Atualizado em ' . date('d/m/Y') . '.';
         }
     }
 }
