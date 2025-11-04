@@ -221,6 +221,7 @@
     <script src='{{ url('assets/js/tes_tema_concept.js') }}'></script>
     @yield('adminjs')
     @yield('atualizacoesjs')
+    @yield('scripts')
 
 </body>
 

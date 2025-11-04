@@ -103,6 +103,12 @@ class TesePageController extends Controller
             $tese->questao = "QUESTÃO: " . preg_replace('/^\d+ - /', '', $tese->tema_texto);
             $tese->texto = $tese->tese_texto;
             $tese->text_muted = "$tese->relator, $tese->acordao ($tese->situacao). $tese->tempo.";
+            
+            // Gerar link de fallback se estiver vazio, nulo ou com hífen
+            if ((empty($tese->link) || $tese->link == '-') && !empty($tese->acordao)) {
+                // Usar o mesmo formato dos links válidos: busca por acordão
+                $tese->link = "https://jurisprudencia.stf.jus.br/pages/search?base=acordaos&sinonimo=true&plural=true&page=1&&pageSize=10&sort=_score&sortBy=desc&isAdvance=true&classeNumeroIncidente=" . urlencode($tese->acordao);
+            }
         } else if ($tribunal == 'STJ') {
 
             //add to_be_copied property
@@ -142,7 +148,9 @@ class TesePageController extends Controller
 
         $display_pdf = false;
         $label = "TEMA {$tese->numero} do $tribunal_nome_completo - $tribunal";
-        $description = $label;
+        
+        // Gerar meta description otimizada
+        $description = $this->generateMetaDescription($tribunal, $tese->numero, $tese->tema_texto, $tese->tese_texto);
         
         // Breadcrumb
         $breadcrumb = [
@@ -160,7 +168,103 @@ class TesePageController extends Controller
                 $admin = true;
             }
         }
+        
+        // Buscar temas relacionados baseados em palavras-chave similares
+        $related_themes = $this->getRelatedThemes($tese->tema_texto ?? $tese->tese_texto ?? '', $tese->numero);
+        
         // dd($teses);
-        return view('front.tese', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb'));
+        return view('front.tese', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes'));
     } //end public function
+    
+    /**
+     * Gera meta description otimizada para teses específicas
+     * Trunca inteligentemente a tese para 155 caracteres
+     */
+    private function generateMetaDescription($tribunal, $numero, $tema_texto, $tese_texto)
+    {
+        try {
+            // Começar com "Tema X [Tribunal]:"
+            $description = "Tema {$numero} {$tribunal}: ";
+            
+            // Usar a tese se existir, senão usar o tema
+            $conteudo = !empty($tese_texto) && $tese_texto !== '[aguarda julgamento]' 
+                ? $tese_texto 
+                : $tema_texto;
+            
+            // Limpar texto
+            $conteudo = trim($conteudo);
+            $conteudo = preg_replace('/\s+/', ' ', $conteudo); // Remove espaços duplos
+            $conteudo = preg_replace('/^\d+ - /', '', $conteudo); // Remove "número - " do início
+            
+            // Calcular espaço disponível (155 total - prefixo)
+            $prefixo_length = strlen($description);
+            $espaco_disponivel = 155 - $prefixo_length - 3; // -3 para "..."
+            
+            // Truncar inteligentemente
+            if (strlen($conteudo) > $espaco_disponivel) {
+                // Tentar cortar em uma palavra completa
+                $conteudo_truncado = substr($conteudo, 0, $espaco_disponivel);
+                $ultimo_espaco = strrpos($conteudo_truncado, ' ');
+                
+                if ($ultimo_espaco !== false && $ultimo_espaco > ($espaco_disponivel * 0.8)) {
+                    // Cortar na última palavra se não perder muito conteúdo
+                    $conteudo = substr($conteudo, 0, $ultimo_espaco) . '...';
+                } else {
+                    // Cortar direto e adicionar ...
+                    $conteudo = $conteudo_truncado . '...';
+                }
+            }
+            
+            $description .= $conteudo;
+            
+            return $description;
+            
+        } catch (\Exception $e) {
+            // Fallback em caso de erro
+            \Log::error('Erro ao gerar meta description de tese: ' . $e->getMessage());
+            return "Tema {$numero} {$tribunal} - Jurisprudência atualizada dos tribunais superiores.";
+        }
+    }
+    
+    /**
+     * Busca temas relacionados baseados em palavras-chave similares
+     */
+    private function getRelatedThemes($texto_tese, $numero_atual)
+    {
+        try {
+            // Extrair palavras-chave do texto da tese
+            $palavras = explode(' ', strtolower($texto_tese));
+            
+            // Filtrar palavras relevantes (mais de 4 caracteres, não comuns)
+            $palavras_comuns = ['sobre', 'para', 'pela', 'pelo', 'pelos', 'pelas', 'entre', 'desde', 'quando', 'sendo', 'tese', 'tema', 'questão'];
+            $keywords = array_filter($palavras, function($palavra) use ($palavras_comuns) {
+                return strlen($palavra) > 4 && !in_array($palavra, $palavras_comuns);
+            });
+            
+            // Pegar as 5 primeiras palavras relevantes
+            $keywords = array_slice(array_values($keywords), 0, 5);
+            
+            if (empty($keywords)) {
+                return collect([]);
+            }
+            
+            // Buscar na tabela pesquisas (temas)
+            $query = DB::table('pesquisas')
+                ->select('id', 'keyword', 'label', 'slug')
+                ->whereNotNull('slug')
+                ->where(function($q) use ($keywords) {
+                    foreach($keywords as $keyword) {
+                        $q->orWhere('keyword', 'LIKE', "%{$keyword}%");
+                    }
+                });
+            
+            $related = $query->limit(6)->get();
+            
+            return $related;
+            
+        } catch (\Exception $e) {
+            \Log::error('Erro ao buscar temas relacionados: ' . $e->getMessage());
+            return collect([]);
+        }
+    }
 }
