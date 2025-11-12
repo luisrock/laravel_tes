@@ -130,11 +130,11 @@
 <!-- END Search -->
 
 <!-- Precedentes Vinculantes CPC -->
-@if($precedentes_home)
+@if(!empty($precedentes_home ?? null))
 <div class="content" style="{{ $display_pdf }}">
     <div class="block">
         <div class="block-header block-header-default">
-            <h2 class="block-title">{{ $precedentes_home->title }}</h2>
+            <h2 class="block-title">{{ optional($precedentes_home)->title ?? '' }}</h2>
             <div class="block-options">
                 <span class="badge badge-success">Guia Completo</span>
                 @if($admin)
@@ -145,7 +145,7 @@
             </div>
         </div>
         <div class="block-content">
-            {!! $precedentes_home->content !!}
+            {!! optional($precedentes_home)->content ?? '' !!}
         </div>
     </div>
 </div>
