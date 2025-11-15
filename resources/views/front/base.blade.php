@@ -125,6 +125,12 @@
     @endif
     <!-- End Matomo Code -->
 
+    <!-- Pixel Code - https://proof.maurolopes.com.br/ -->
+    @if(config('app.env') === 'production')
+    <script defer src="https://proof.maurolopes.com.br/pixel/k8r0O33PgwZCwU1fFfKU9yHbhXEOAn2a"></script>
+    @endif
+    <!-- END Pixel Code -->
+
 </head>
 
 <body>
