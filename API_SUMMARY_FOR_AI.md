@@ -35,9 +35,11 @@ Accept: application/json
 ```
 
 **Validações:**
-- `tese_texto`: obrigatório, string, máximo 65535 caracteres
+- `tese_texto`: nullable, string, máximo 65535 caracteres
+- **Não aceita string vazia `""`** - retorna erro 422 para proteger contra erro acidental
+- **Aceita `null`** para limpar o campo (limpa o texto da tese)
 - Texto puro (sem HTML/Markdown)
-- Substitui completamente o valor atual (null, "", ou texto existente)
+- Substitui completamente o valor atual (null ou texto existente)
 
 ## Parâmetros URL
 - `tribunal`: "STF" ou "STJ" (case-insensitive)
@@ -59,9 +61,10 @@ Accept: application/json
 ```
 
 ## Respostas de Erro
-- **400**: Parâmetros inválidos
+- **400**: Parâmetros inválidos (tribunal ou número)
 - **401**: Token ausente/inválido
 - **404**: Tese não encontrada
+- **422**: String vazia não permitida (use `null` ou DELETE para limpar)
 
 ## Exemplo Python
 ```python
@@ -90,9 +93,30 @@ response = requests.post(url, headers=headers, json=data)
 print(response.json())
 ```
 
+## Limpar Texto da Tese
+
+**Opção 1: POST com null**
+```python
+data = {"tese_texto": None}  # ou null no JSON
+response = requests.post(url, headers=headers, json=data)
+```
+
+**Opção 2: DELETE específico (recomendado para limpeza explícita)**
+```
+DELETE /api/tese/{tribunal}/{numero}/tese_texto
+```
+
+```python
+url = f"{BASE_URL}/api/tese/stf/1438/tese_texto"
+response = requests.delete(url, headers=headers)
+```
+
+**⚠️ String vazia não é permitida:** Enviar `{"tese_texto": ""}` retorna erro 422 para proteger contra erros acidentais.
+
 ## Observações Importantes
 1. Busca por **número** (não ID)
 2. Substitui completamente o valor atual
-3. Aceita string vazia `""` para limpar
-4. Apenas STF e STJ suportados
-5. Texto é armazenado sem processamento
+3. **String vazia `""` retorna erro** - use `null` ou DELETE para limpar
+4. **DELETE remove apenas o campo `tese_texto`** - não remove a tese inteira
+5. Apenas STF e STJ suportados
+6. Texto é armazenado sem processamento
