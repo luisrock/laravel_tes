@@ -197,7 +197,58 @@ curl -X GET "https://teses.test/api/tese/stj/1303" \
 }
 ```
 
-#### 🔍 5. Buscar Temas Aleatórios (Com Autenticação)
+#### ✏️ 5. Atualizar Tese por Número (Com Autenticação)
+
+**POST** `/api/tese/{tribunal}/{numero}`
+
+**Parâmetros URL:**
+- `tribunal` (string): STF ou STJ
+- `numero` (integer): Número da tese
+
+**Body (JSON):**
+```json
+{
+  "tese_texto": "Texto da tese que será atualizado"
+}
+```
+
+**Validações:**
+- `tese_texto`: obrigatório, string, máximo 65535 caracteres
+- Texto puro (sem HTML ou Markdown)
+- Substitui completamente o valor atual (null, "", ou texto existente)
+
+**Exemplo:**
+```bash
+curl -X POST "https://teses.test/api/tese/stf/1438" \
+  -H "Authorization: Bearer seu-token-secreto-aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "tese_texto": "É constitucional a admissão de trabalhadores..."
+  }'
+```
+
+**Resposta de Sucesso (200):**
+```json
+{
+  "success": true,
+  "message": "Tese atualizada com sucesso.",
+  "data": {
+    "id": 33061,
+    "numero": 1438,
+    "tema_texto": "...",
+    "tese_texto": "É constitucional a admissão de trabalhadores...",
+    // ... outros campos
+  }
+}
+```
+
+**Respostas de Erro:**
+- **400**: Parâmetros inválidos (tribunal, número, ou tese_texto ausente/inválido)
+- **401**: Token não fornecido ou inválido
+- **404**: Tese não encontrada
+
+#### 🔍 6. Buscar Temas Aleatórios (Com Autenticação)
 
 **GET** `/api/random-themes/{limit?}/{min_judgments?}`
 
@@ -362,6 +413,12 @@ curl -X GET "https://teses.test/api/sumula/stf/269" \
 curl -X GET "https://teses.test/api/tese/stf/1234" \
   -H "Authorization: Bearer seu-token" \
   -H "Content-Type: application/json"
+
+# Atualizar tese 1438 do STF
+curl -X POST "https://teses.test/api/tese/stf/1438" \
+  -H "Authorization: Bearer seu-token" \
+  -H "Content-Type: application/json" \
+  -d '{"tese_texto": "Texto da tese aqui"}'
 
 # Buscar 5 temas aleatórios com pelo menos 2 julgados STF+STJ
 curl -X GET "https://teses.test/api/random-themes/5/2" \
