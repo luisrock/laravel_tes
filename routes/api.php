@@ -42,6 +42,7 @@ Route::middleware('bearer.token')->group(function () {
     Route::get('/sumula/{tribunal}/{numero}', [App\Http\Controllers\ApiController::class, 'getSumula']);
     Route::get('/tese/{tribunal}/{numero}', [App\Http\Controllers\ApiController::class, 'getTese']);
     Route::post('/tese/{tribunal}/{numero}', [App\Http\Controllers\ApiController::class, 'updateTese']);
+    Route::delete('/tese/{tribunal}/{numero}/tese_texto', [App\Http\Controllers\ApiController::class, 'deleteTeseTexto']);
     Route::get('/random-themes', [App\Http\Controllers\ApiController::class, 'getRandomThemes']);
     Route::get('/random-themes/{limit}', [App\Http\Controllers\ApiController::class, 'getRandomThemes']);
     Route::get('/random-themes/{limit}/{min_judgments}', [App\Http\Controllers\ApiController::class, 'getRandomThemes']);

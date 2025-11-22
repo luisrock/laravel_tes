@@ -243,12 +243,62 @@ curl -X POST "https://teses.test/api/tese/stf/1438" \
 }
 ```
 
+**Validações:**
+- `tese_texto`: obrigatório, string, máximo 65535 caracteres
+- **Não aceita string vazia `""`** - retorna erro 422 para alertar sobre possível erro acidental
+- **Aceita `null`** para limpar o campo (alternativa ao DELETE)
+- Texto puro (sem HTML ou Markdown)
+- Substitui completamente o valor atual
+
 **Respostas de Erro:**
-- **400**: Parâmetros inválidos (tribunal, número, ou tese_texto ausente/inválido)
+- **400**: Parâmetros inválidos (tribunal ou número inválido)
+- **401**: Token não fornecido ou inválido
+- **404**: Tese não encontrada
+- **422**: String vazia não permitida (use `null` ou DELETE para limpar)
+
+**Observações:**
+- Use `null` no campo `tese_texto` para limpar o texto
+- Para limpeza explícita e segura, use o endpoint DELETE abaixo
+
+#### 🗑️ 6. Remover Texto da Tese (Com Autenticação)
+
+**DELETE** `/api/tese/{tribunal}/{numero}/tese_texto`
+
+Remove apenas o campo `tese_texto` da tese (não remove a tese inteira). Forma explícita e segura de limpar o texto.
+
+**Parâmetros URL:**
+- `tribunal` (string): STF ou STJ
+- `numero` (integer): Número da tese
+
+**Exemplo:**
+```bash
+curl -X DELETE "https://teses.test/api/tese/stf/1438/tese_texto" \
+  -H "Authorization: Bearer seu-token-secreto-aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json"
+```
+
+**Resposta de Sucesso (200):**
+```json
+{
+  "success": true,
+  "message": "Texto da tese removido com sucesso.",
+  "data": {
+    "id": 33061,
+    "numero": 1438,
+    "tema_texto": "...",
+    "tese_texto": "",
+    // ... outros campos
+  }
+}
+```
+
+**Respostas de Erro:**
+- **400**: Parâmetros inválidos (tribunal ou número inválido)
 - **401**: Token não fornecido ou inválido
 - **404**: Tese não encontrada
 
-#### 🔍 6. Buscar Temas Aleatórios (Com Autenticação)
+#### 🔍 7. Buscar Temas Aleatórios (Com Autenticação)
 
 **GET** `/api/random-themes/{limit?}/{min_judgments?}`
 
@@ -419,6 +469,17 @@ curl -X POST "https://teses.test/api/tese/stf/1438" \
   -H "Authorization: Bearer seu-token" \
   -H "Content-Type: application/json" \
   -d '{"tese_texto": "Texto da tese aqui"}'
+
+# Limpar texto da tese 1438 (usando null no POST)
+curl -X POST "https://teses.test/api/tese/stf/1438" \
+  -H "Authorization: Bearer seu-token" \
+  -H "Content-Type: application/json" \
+  -d '{"tese_texto": null}'
+
+# Remover texto da tese 1438 explicitamente (usando DELETE)
+curl -X DELETE "https://teses.test/api/tese/stf/1438/tese_texto" \
+  -H "Authorization: Bearer seu-token" \
+  -H "Content-Type: application/json"
 
 # Buscar 5 temas aleatórios com pelo menos 2 julgados STF+STJ
 curl -X GET "https://teses.test/api/random-themes/5/2" \
