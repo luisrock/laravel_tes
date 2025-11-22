@@ -41,6 +41,7 @@ Route::post('/cej.php',[App\Http\Controllers\ApiController::class, 'index']);
 Route::middleware('bearer.token')->group(function () {
     Route::get('/sumula/{tribunal}/{numero}', [App\Http\Controllers\ApiController::class, 'getSumula']);
     Route::get('/tese/{tribunal}/{numero}', [App\Http\Controllers\ApiController::class, 'getTese']);
+    Route::post('/tese/{tribunal}/{numero}', [App\Http\Controllers\ApiController::class, 'updateTese']);
     Route::get('/random-themes', [App\Http\Controllers\ApiController::class, 'getRandomThemes']);
     Route::get('/random-themes/{limit}', [App\Http\Controllers\ApiController::class, 'getRandomThemes']);
     Route::get('/random-themes/{limit}/{min_judgments}', [App\Http\Controllers\ApiController::class, 'getRandomThemes']);

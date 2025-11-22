@@ -165,6 +165,86 @@ class ApiController extends Controller
         ]);
     }
 
+    public function updateTese($tribunal, $numero, Request $request)
+    {
+        // Validate tribunal
+        $tribunal = strtoupper($tribunal);
+        if (!in_array($tribunal, ['STF', 'STJ'])) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Tribunal não suportado. Use STF ou STJ.'
+            ], 400);
+        }
+
+        // Validate numero
+        if (!is_numeric($numero)) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Número deve ser um valor numérico.'
+            ], 400);
+        }
+
+        // Validate tese_texto in request
+        $validated = $request->validate([
+            'tese_texto' => 'required|string|max:65535'
+        ], [
+            'tese_texto.required' => 'O campo tese_texto é obrigatório.',
+            'tese_texto.string' => 'O campo tese_texto deve ser uma string.',
+            'tese_texto.max' => 'O campo tese_texto excede o tamanho máximo permitido.'
+        ]);
+
+        $tese_texto = $validated['tese_texto'];
+
+        // Map tribunal to table
+        $table = strtolower($tribunal) . '_teses';
+
+        // Check if tese exists
+        $tese = DB::table($table)
+            ->select('*')
+            ->where('numero', $numero)
+            ->first();
+
+        if (!$tese) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Tese não encontrada.'
+            ], 404);
+        }
+
+        // Update tese_texto
+        DB::table($table)
+            ->where('numero', $numero)
+            ->update(['tese_texto' => $tese_texto]);
+
+        // Get updated tese
+        $teseUpdated = DB::table($table)
+            ->select('*')
+            ->where('numero', $numero)
+            ->first();
+
+        // Converter para array para manipulação
+        $teseArray = (array) $teseUpdated;
+        
+        // Tratar tema_texto APENAS para STF (igual getTese)
+        if ($tribunal === 'STF') {
+            // Verificar possíveis nomes do campo tema
+            $camposTema = ['tema_texto', 'tema'];
+            
+            foreach ($camposTema as $campo) {
+                if (isset($teseArray[$campo]) && !empty($teseArray[$campo])) {
+                    // Remove qualquer quantidade de dígitos + hífen do início
+                    $teseArray[$campo] = preg_replace('/^\d+\s*-\s*/', '', $teseArray[$campo]);
+                }
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tese atualizada com sucesso.',
+            'data' => $teseArray
+        ]);
+    }
+
     public function getRandomThemes($limit = null, $minJudgments = null)
     {
         // Set default values if parameters are not provided
