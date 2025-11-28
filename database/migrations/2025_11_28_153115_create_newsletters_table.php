@@ -16,7 +16,7 @@ class CreateNewslettersTable extends Migration
         Schema::create('newsletters', function (Blueprint $table) {
             $table->id();
             $table->string('sendy_id')->nullable()->index();
-            $table->string('subject');
+            $table->text('subject');
             $table->string('slug')->unique();
             $table->longText('html_content')->nullable();
             $table->longText('plain_text')->nullable();

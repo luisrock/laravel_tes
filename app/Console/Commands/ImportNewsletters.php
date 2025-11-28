@@ -64,8 +64,29 @@ class ImportNewsletters extends Command
                 continue;
             }
 
-            // Create slug
-            $slug = Str::slug($title);
+            // Create slug with smart truncation
+            $tempTitle = $title;
+            while (true) {
+                $slug = Str::slug($tempTitle);
+                if (strlen($slug) <= 200) {
+                    break;
+                }
+                
+                // Find last occurrence of "-" (Str::slug replaces / with -)
+                // But wait, Str::slug removes / completely or replaces with separator?
+                // Default separator is '-'.
+                // If we want to respect the "/" structure from the title, we should do logic on title BEFORE slugging.
+                
+                $lastSlash = strrpos($tempTitle, '/');
+                if ($lastSlash === false) {
+                    $slug = substr($slug, 0, 200);
+                    break;
+                }
+                
+                $tempTitle = substr($tempTitle, 0, $lastSlash);
+                $tempTitle = trim($tempTitle);
+            }
+
             // Ensure unique slug
             $slugCount = 1;
             $originalSlug = $slug;
