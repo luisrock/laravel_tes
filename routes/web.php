@@ -119,6 +119,7 @@ Route::prefix('admin')->group(function () {
 });
 
 Route::get('/newsletters', [App\Http\Controllers\CampaignsPageController::class, 'index'])->name('newsletterspage');
+Route::get('/newsletter/{slug}', [App\Http\Controllers\NewsletterController::class, 'show'])->name('newsletter.show');
 
 // Editable Content Routes
 Route::get('/{slug}', [App\Http\Controllers\EditableContentController::class, 'show'])

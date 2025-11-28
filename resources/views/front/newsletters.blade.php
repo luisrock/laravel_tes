@@ -69,16 +69,16 @@
                                 <tr>
                                     <td>
                                         <h4 class="h5 mt-3 mb-2">
-                                            <a href="{{ $campaign['link'] }}">{{ $campaign['title'] }}</a>
+                                            <a href="{{ route('newsletter.show', $campaign->slug) }}">{{ $campaign->subject }}</a>
                                         </h4>
 
                                         <p class="d-sm-block text-muted">
-                                        <div>{!! $campaign['description'] !!}</div>
+                                            {{ \Illuminate\Support\Str::limit(html_entity_decode(strip_tags($campaign->plain_text ?? $campaign->html_content)), 200) }}
                                         </p>
 
                                         <span class="text-muted"
                                             style="display: flex;justify-content: flex-end;font-size: 0.8em;">
-                                            Envio: {{ $campaign['pubDate'] }}
+                                            Envio: {{ $campaign->sent_at ? $campaign->sent_at->format('d/m/Y') : '' }}
                                         </span>
 
                                     </td>
@@ -87,6 +87,10 @@
                         </tbody>
 
                     </table>
+                    
+                    <div class="mt-4">
+                        {{ $campaigns->links() }}
+                    </div>
                 </div>
             </div>
         </div>
