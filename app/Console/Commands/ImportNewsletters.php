@@ -14,53 +14,48 @@ class ImportNewsletters extends Command
 
     public function handle()
     {
-        $feedUrl = 'https://newsletter.maurolopes.com.br/campaigns-rss?a=L9xHzUpwhmUIoYCP8NXF7DiR6YlwhU&i=1';
-        $this->info("Fetching RSS feed from $feedUrl...");
+        $this->info("Connecting to Sendy database...");
 
-        // Suppress libxml errors
-        libxml_use_internal_errors(true);
-        
+        // Sendy DB Configuration (from env or hardcoded as per user preference in this context)
+        // Ideally should be in config/database.php, but for now we use the known credentials
+        $sourceDb = [
+            'host' => 'localhost',
+            'user' => 'forge_sendyuser',
+            'pass' => '69fh9hwww7evgggutx6u',
+            'name' => 'forge_sendy',
+        ];
+
         try {
-            $content = file_get_contents($feedUrl);
-            if (!$content) {
-                $this->error("Failed to fetch RSS feed content.");
-                return 1;
-            }
-            
-            // Fix unescaped ampersands which break simplexml
-            $content = str_replace('&', '&amp;', $content);
-            
-            $rss = simplexml_load_string($content);
-            if (!$rss) {
-                $this->error("Failed to parse RSS feed.");
-                foreach(libxml_get_errors() as $error) {
-                    $this->error($error->message);
-                }
-                return 1;
-            }
-        } catch (\Exception $e) {
-            $this->error("Exception: " . $e->getMessage());
+            $pdo = new \PDO("mysql:host={$sourceDb['host']};dbname={$sourceDb['name']};charset=utf8mb4", $sourceDb['user'], $sourceDb['pass']);
+            $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        } catch (\PDOException $e) {
+            $this->error("Failed to connect to Sendy DB: " . $e->getMessage());
             return 1;
         }
 
+        // Fetch campaigns that are sent, belong to app 1, and from "Newsletter T&S"
+        // Order by ID DESC to get latest first
+        $sql = "SELECT id, title, html_text, plain_text, sent 
+                FROM campaigns 
+                WHERE sent != '' 
+                AND app = 1 
+                AND from_name = 'Newsletter T&S' 
+                ORDER BY id DESC";
+        
+        $stmt = $pdo->query($sql);
+        
         $count = 0;
-        foreach ($rss->channel->item as $item) {
-            $link = (string) $item->link;
-            $title = (string) $item->title;
-            $pubDate = (string) $item->pubDate;
-            $sendyId = md5($link); // Use link hash as ID since we don't have real ID
+        $skipped = 0;
 
-            $this->info("Processing: $title");
+        while ($campaign = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            $sendyId = $campaign['id'];
+            $title = $campaign['title'];
+
+            $this->info("Processing: $title (ID: $sendyId)");
 
             if (Newsletter::where('sendy_id', $sendyId)->exists()) {
                 $this->info(" - Already exists. Skipping.");
-                continue;
-            }
-
-            // Scrape content
-            $htmlContent = $this->scrapeContent($link);
-            if (!$htmlContent) {
-                $this->error(" - Failed to scrape content from $link");
+                $skipped++;
                 continue;
             }
 
@@ -71,11 +66,6 @@ class ImportNewsletters extends Command
                 if (strlen($slug) <= 200) {
                     break;
                 }
-                
-                // Find last occurrence of "-" (Str::slug replaces / with -)
-                // But wait, Str::slug removes / completely or replaces with separator?
-                // Default separator is '-'.
-                // If we want to respect the "/" structure from the title, we should do logic on title BEFORE slugging.
                 
                 $lastSlash = strrpos($tempTitle, '/');
                 if ($lastSlash === false) {
@@ -94,14 +84,28 @@ class ImportNewsletters extends Command
                 $slug = $originalSlug . '-' . $slugCount++;
             }
 
+            $htmlContent = $campaign['html_text'];
+            $plainText = $campaign['plain_text'];
+            if (empty($plainText)) {
+                $plainText = strip_tags($htmlContent);
+            }
+            $plainText = html_entity_decode($plainText, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+            $sentAt = $campaign['sent'];
+            if (is_numeric($sentAt)) {
+                $sentAt = Carbon::createFromTimestamp($sentAt);
+            } else {
+                $sentAt = Carbon::parse($sentAt);
+            }
+
             try {
                 Newsletter::create([
                     'sendy_id' => $sendyId,
-                    'subject' => Str::limit($title, 250),
+                    'subject' => $title, // Full title, no truncation (DB is TEXT)
                     'slug' => $slug,
-                    'html_content' => mb_convert_encoding($htmlContent, 'UTF-8', 'UTF-8'),
-                    'plain_text' => html_entity_decode(mb_convert_encoding(strip_tags($htmlContent), 'UTF-8', 'UTF-8')),
-                    'sent_at' => Carbon::parse($pubDate),
+                    'html_content' => $htmlContent, // Raw content, cleaning happens in Accessor
+                    'plain_text' => $plainText,
+                    'sent_at' => $sentAt,
                 ]);
                 $this->info(" - Imported successfully.");
                 $count++;
@@ -110,29 +114,7 @@ class ImportNewsletters extends Command
             }
         }
 
-        $this->info("Import completed. $count newsletters imported.");
+        $this->info("Import completed. $count imported, $skipped skipped.");
         return 0;
-    }
-
-    private function scrapeContent($url)
-    {
-        try {
-            $html = file_get_contents($url);
-            if (!$html) return null;
-
-            // Extract body content only
-            if (preg_match('/<body[^>]*>(.*?)<\/body>/is', $html, $matches)) {
-                // Clean up some common email clutter if needed
-                $content = $matches[1];
-                
-                // Fix relative links if any (though email usually has absolute)
-                
-                return $content;
-            }
-            
-            return $html; // Fallback to full HTML
-        } catch (\Exception $e) {
-            return null;
-        }
     }
 }
