@@ -50,10 +50,30 @@
 
                 <div class="tab-pane fade fade-up active show" role="tabpanel">
 
+                    <!-- Search Container -->
+                    <div id="search-container" class="d-none mb-3 p-3 bg-white border rounded shadow-sm">
+                        <div class="input-group">
+                            <input type="text" class="form-control form-control-lg" id="table-search-input" 
+                                placeholder="Pesquisar por número, texto{{ $tribunal == 'STJ' ? ', órgão julgador' : '' }}...">
+                            <div class="input-group-append">
+                                <button class="btn btn-secondary" type="button" id="clear-search-btn" style="display:none;">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <small class="text-muted ml-1">Digite para filtrar instantaneamente.</small>
+                    </div>
+                    <!-- END Search Container -->
+
                     <div
-                        class="font-size-h4 font-w600 p-2 mb-4 border-left border-4x border-primary bg-body-light trib-texto-quantidade">
-                        <code>Súmulas</code> - {{ $tribunal }}
-                        (resultados: <code>{{ $count }}</code>)
+                        class="d-flex justify-content-between align-items-center font-size-h4 font-w600 p-2 mb-4 border-left border-4x border-primary bg-body-light trib-texto-quantidade">
+                        <div>
+                            <code>Súmulas</code> - {{ $tribunal }}
+                            (resultados: <code>{{ $count }}</code>)
+                        </div>
+                        <button class="btn btn-sm btn-alt-primary" id="toggle-search-btn">
+                            <i class="fa fa-search mr-1"></i> Buscar
+                        </button>
                     </div>
 
                     <table class="table table-striped table-vcenter table-results">
@@ -109,4 +129,8 @@
     </div>
 
 
+@endsection
+
+@section('scripts')
+    <script src="{{ asset('assets/js/tes_search_filter.js') }}"></script>
 @endsection
