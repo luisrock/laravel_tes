@@ -46,6 +46,9 @@ Route::middleware('bearer.token')->group(function () {
     Route::get('/random-themes', [App\Http\Controllers\ApiController::class, 'getRandomThemes']);
     Route::get('/random-themes/{limit}', [App\Http\Controllers\ApiController::class, 'getRandomThemes']);
     Route::get('/random-themes/{limit}/{min_judgments}', [App\Http\Controllers\ApiController::class, 'getRandomThemes']);
+    
+    // Newsletter API
+    Route::get('/newsletters', [App\Http\Controllers\NewsletterApiController::class, 'index']);
 });
 
 
