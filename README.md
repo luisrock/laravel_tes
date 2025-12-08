@@ -1,5 +1,70 @@
 ## Teses & Súmulas (Laravel Site)
 
+### Dashboard Administrativo
+
+O painel em `/admin` oferece navegação centralizada para todas as áreas administrativas:
+
+- **Temas & Pesquisas** - Gestão de temas com estatísticas em tempo real
+- **Quizzes** - Criação e gestão de quizzes jurídicos
+- **Banco de Perguntas** - Perguntas reutilizáveis em múltiplos quizzes
+- **Estatísticas** - Dashboard com gráficos e métricas de desempenho
+- **Newsletters** - Visualização de newsletters publicadas
+- **Tags** - Gestão de tags para categorização
+
+### Sistema de Quizzes Jurídicos (Novo - Dez/2024)
+
+O site agora conta com um sistema completo de quizzes para testar conhecimentos sobre teses do STF e STJ.
+
+**Documentação completa:** Consulte o arquivo `QUIZ_IMPLEMENTATION.md` para detalhes técnicos da implementação.
+
+#### Principais Recursos
+
+- **Interface Admin** (`/admin/quizzes`)
+  - CRUD de quizzes e perguntas
+  - Perguntas reutilizáveis (N:N com quizzes)
+  - Dashboard de estatísticas com gráficos
+  - Gestão de tags e categorias
+  - Paleta de cores customizável por quiz
+  - **Controle de visibilidade na home** (botão toggle para mostrar/ocultar seção de quizzes)
+
+- **Interface Pública** (`/quizzes`)
+  - Lista de quizzes com filtros (categoria, tribunal, dificuldade)
+  - Execução do quiz com barra de progresso
+  - Feedback imediato ou ao final (configurável)
+  - Página de resultados com revisão de respostas
+  - Espaço para anúncios entre questões
+  - **Links internos** na home e páginas de teses
+
+- **API REST** (`/api/quizzes`, `/api/questions`)
+  - CRUD completo via API
+  - Criação em lote de perguntas (integração com IA)
+  - Mesma autenticação Bearer Token do restante da API
+
+#### Estrutura do Banco
+```
+quiz_categories     - Categorias jurídicas (Direito Civil, Penal, etc.)
+quizzes             - Quizzes com config (tribunal, dificuldade, cor, etc.)
+questions           - Banco de perguntas reutilizáveis
+question_options    - Alternativas de cada pergunta
+quiz_question       - Pivot N:N entre quiz e perguntas
+question_tags       - Tags para perguntas
+quiz_attempts       - Tentativas registradas
+quiz_answers        - Respostas individuais
+```
+
+#### URLs Principais
+```
+/admin                      - Dashboard administrativo central
+/admin/temas                - Gestão de temas/pesquisas
+/admin/quizzes              - Gerenciar quizzes (admin)
+/admin/questions            - Banco de perguntas (admin)
+/admin/quizzes/stats        - Estatísticas (admin)
+/quizzes                    - Lista pública de quizzes
+/quiz/{slug}                - Executar um quiz
+```
+
+---
+
 ### Prepare local
 
 1. create db tes
@@ -503,3 +568,113 @@ curl -X GET "https://teses.test/api/random-themes/10/3" \
 ### Rate Limiting
 
 A API possui rate limiting configurado pelo Laravel para prevenir abuso. Consulte a documentação do Laravel para mais detalhes sobre configuração de throttling.
+
+---
+
+## API de Quizzes (Novo - Dez/2024)
+
+A API de quizzes utiliza a mesma autenticação Bearer Token das outras APIs.
+
+### Endpoints de Quizzes
+
+#### Listar Quizzes
+```bash
+GET /api/quizzes
+GET /api/quizzes?status=published&tribunal=STJ&category_id=3
+```
+
+#### Criar Quiz
+```bash
+POST /api/quizzes
+{
+  "title": "Prescrição no Direito Civil",
+  "description": "Teste seus conhecimentos...",
+  "tribunal": "STJ",
+  "category_id": 3,
+  "difficulty": "medium",
+  "estimated_time": 5,
+  "color": "#912F56",
+  "status": "published"
+}
+```
+
+#### Adicionar Perguntas ao Quiz
+```bash
+POST /api/quizzes/{quiz_id}/questions
+{
+  "question_ids": [1, 2, 3]
+}
+```
+
+### Endpoints de Perguntas
+
+#### Listar Perguntas
+```bash
+GET /api/questions
+GET /api/questions?category_id=3&difficulty=medium
+```
+
+#### Criar Pergunta
+```bash
+POST /api/questions
+{
+  "text": "Qual é o prazo prescricional para...",
+  "explanation": "Conforme art. 206 do CC...",
+  "category_id": 3,
+  "difficulty": "medium",
+  "options": [
+    {"letter": "A", "text": "3 anos", "is_correct": false},
+    {"letter": "B", "text": "5 anos", "is_correct": true},
+    {"letter": "C", "text": "10 anos", "is_correct": false},
+    {"letter": "D", "text": "2 anos", "is_correct": false}
+  ]
+}
+```
+
+#### Criar Perguntas em Lote (para integração com IA)
+```bash
+POST /api/questions/bulk
+{
+  "questions": [
+    {
+      "text": "Pergunta 1...",
+      "category_id": 3,
+      "difficulty": "easy",
+      "options": [...]
+    },
+    {
+      "text": "Pergunta 2...",
+      "category_id": 3,
+      "difficulty": "medium",
+      "options": [...]
+    }
+  ]
+}
+```
+
+#### Buscar Perguntas
+```bash
+GET /api/questions/search?q=prescrição&category_id=3
+```
+
+### Listar Categorias
+```bash
+GET /api/quizzes/categories
+```
+
+**Resposta:**
+```json
+{
+  "success": true,
+  "data": [
+    {"id": 1, "name": "Direito Administrativo", "slug": "direito-administrativo"},
+    {"id": 2, "name": "Direito Ambiental", "slug": "direito-ambiental"},
+    {"id": 3, "name": "Direito Civil", "slug": "direito-civil"},
+    ...
+  ]
+}
+```
+
+### Documentação Completa
+
+Para documentação detalhada da implementação, incluindo schema do banco, todas as rotas e sugestões de melhorias futuras, consulte o arquivo `QUIZ_IMPLEMENTATION.md`.

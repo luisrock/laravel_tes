@@ -167,6 +167,9 @@
                         @if (Route::currentRouteName() != 'newsletterspage')
                             | <a class="font-w600" href="{{ route('newsletterspage') }}">Atualizações</a>
                         @endif
+                        @if (Route::currentRouteName() != 'quizzes.index')
+                            | <a class="font-w600" href="{{ route('quizzes.index') }}">Quizzes</a>
+                        @endif
                         @auth
                             @if (in_array(Auth::user()->email, config('tes_constants.admins')))
                                 | <a href="{{ route('admin') }}">Admin</a>

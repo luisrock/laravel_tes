@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Jobs\SearchToDbPesquisas;
 use App\Models\EditableContent;
+use App\Models\Quiz;
 
 class SearchPageController extends Controller
 {
@@ -38,6 +39,22 @@ class SearchPageController extends Controller
                 ->where('published', true)
                 ->first();
             
+            // Verificar se a seção de quizzes deve aparecer na home
+            $quizzesHomeVisible = EditableContent::where('slug', 'quizzes-home-visibility')
+                ->where('published', true)
+                ->exists();
+            
+            // Buscar quizzes em destaque apenas se estiver habilitado
+            $featured_quizzes = collect();
+            if ($quizzesHomeVisible) {
+                $featured_quizzes = Quiz::published()
+                    ->withCount('questions')
+                    ->having('questions_count', '>', 0)
+                    ->orderBy('views_count', 'desc')
+                    ->limit(3)
+                    ->get();
+            }
+            
             // Verificar se usuário é admin
             $admin = false;
             if (auth()->check()) {
@@ -46,7 +63,7 @@ class SearchPageController extends Controller
                 }
             }
             
-            return view('front.search', compact('lista_tribunais', 'display_pdf', 'popular_themes', 'precedentes_home', 'admin'));
+            return view('front.search', compact('lista_tribunais', 'display_pdf', 'popular_themes', 'precedentes_home', 'admin', 'featured_quizzes'));
         }
 
         //User is searching. Prepare and return results
