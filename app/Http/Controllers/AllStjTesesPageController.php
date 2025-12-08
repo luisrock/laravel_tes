@@ -27,7 +27,10 @@ class AllStjTesesPageController extends Controller
 
         $label = 'Temas Repetitivos e Teses Vinculantes do Superior Tribunal de Justiça - STJ';
         $tese_route = 'stjtesepage';
-        $description = "Relação de $label";
+        
+        // Meta description dinâmica para melhor CTR
+        $dataAtual = now()->format('m/Y');
+        $description = "Consulte {$count} temas repetitivos do STJ com a tese firmada. Pesquisa por número ou assunto. Atualizado em {$dataAtual}.";
         
         // Breadcrumb
         $breadcrumb = [

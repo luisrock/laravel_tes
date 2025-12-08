@@ -48,7 +48,9 @@ class AllStfSumulasPageController extends Controller
         $tribunal = 'STF';
         $label = 'Súmulas do Supremo Tribunal Federal - STF';
         $sumula_route = 'stfsumulapage';
-        $description = "Relação de $label, com os respectivos textos";
+        
+        // Meta description dinâmica para melhor CTR
+        $description = "Consulte {$count} Súmulas do STF, incluindo as vinculantes, com texto completo.";
         
         // Breadcrumb
         $breadcrumb = [
