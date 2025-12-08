@@ -49,6 +49,32 @@ Route::middleware('bearer.token')->group(function () {
     
     // Newsletter API
     Route::get('/newsletters', [App\Http\Controllers\NewsletterApiController::class, 'index']);
+    
+    // Quiz API
+    Route::prefix('quizzes')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\QuizApiController::class, 'index']);
+        Route::get('/categories', [App\Http\Controllers\Api\QuizApiController::class, 'categories']);
+        Route::get('/{identifier}', [App\Http\Controllers\Api\QuizApiController::class, 'show']);
+        Route::post('/', [App\Http\Controllers\Api\QuizApiController::class, 'store']);
+        Route::put('/{id}', [App\Http\Controllers\Api\QuizApiController::class, 'update']);
+        Route::delete('/{id}', [App\Http\Controllers\Api\QuizApiController::class, 'destroy']);
+        Route::post('/{quizId}/questions', [App\Http\Controllers\Api\QuizApiController::class, 'addQuestion']);
+        Route::delete('/{quizId}/questions/{questionId}', [App\Http\Controllers\Api\QuizApiController::class, 'removeQuestion']);
+        Route::put('/{quizId}/questions/reorder', [App\Http\Controllers\Api\QuizApiController::class, 'reorderQuestions']);
+    });
+    
+    // Questions API
+    Route::prefix('questions')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\QuestionApiController::class, 'index']);
+        Route::get('/search', [App\Http\Controllers\Api\QuestionApiController::class, 'search']);
+        Route::get('/tags', [App\Http\Controllers\Api\QuestionApiController::class, 'tags']);
+        Route::post('/tags', [App\Http\Controllers\Api\QuestionApiController::class, 'createTag']);
+        Route::get('/{id}', [App\Http\Controllers\Api\QuestionApiController::class, 'show']);
+        Route::post('/', [App\Http\Controllers\Api\QuestionApiController::class, 'store']);
+        Route::post('/bulk', [App\Http\Controllers\Api\QuestionApiController::class, 'bulkStore']);
+        Route::put('/{id}', [App\Http\Controllers\Api\QuestionApiController::class, 'update']);
+        Route::delete('/{id}', [App\Http\Controllers\Api\QuestionApiController::class, 'destroy']);
+    });
 });
 
 

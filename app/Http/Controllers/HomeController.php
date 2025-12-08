@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
+use App\Models\Quiz;
+use App\Models\Question;
+use App\Models\QuizCategory;
+use App\Models\QuizAttempt;
 
 class HomeController extends Controller
 {
@@ -19,11 +23,39 @@ class HomeController extends Controller
     }
 
     /**
-     * Show the application dashboard.
+     * Show the admin dashboard.
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function index()
+    {
+        // Estatísticas de Temas/Pesquisas
+        $stats = [
+            'total' => DB::table('pesquisas')->count(),
+            'created' => DB::table('pesquisas')->whereNotNull('created_at')->count(),
+            'checked' => DB::table('pesquisas')->whereNotNull('checked_at')->count(),
+            'pending' => DB::table('pesquisas')->whereNull('created_at')->whereNull('checked_at')->count(),
+        ];
+
+        // Estatísticas de Quizzes
+        $quizStats = [
+            'total' => Quiz::count(),
+            'published' => Quiz::where('status', 'published')->count(),
+            'questions' => Question::count(),
+            'categories' => QuizCategory::count(),
+            'attempts' => QuizAttempt::count(),
+            'completed' => QuizAttempt::where('status', 'completed')->count(),
+        ];
+
+        return view('admin.dashboard', compact('stats', 'quizStats'));
+    }
+
+    /**
+     * Show the temas management page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function temas()
     {
         Artisan::call('queue:work --stop-when-empty');
 
@@ -35,7 +67,7 @@ class HomeController extends Controller
             'pending' => DB::table('pesquisas')->whereNull('created_at')->whereNull('checked_at')->count(),
         ];
 
-        return view('admin', compact('stats'));
+        return view('admin.temas', compact('stats'));
     }
 
     /**

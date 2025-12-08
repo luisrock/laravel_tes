@@ -8,28 +8,21 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">{{ __('Dashboard') }}</div>
-
-                <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
-                    @endif
-
-                    {{ __('You are logged in!') }}
-                    @auth
-                    @if(in_array(Auth::user()->email, ['mauluis@gmail.com','trator70@gmail.com','ivanaredler@gmail.com']))
-                    <br><a href="{{ route('searchpage') }}">Pesquisa</a> | <a href="{{ route('alltemaspage') }}">Temas</a> 
-                    @endif
-                    @endauth
+            <!-- Header com navegação -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>Temas & Pesquisas</h2>
+                    <p class="text-muted mb-0">Gerencie os temas de pesquisa do site</p>
                 </div>
-
+                <div>
+                    <a href="{{ route('admin') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+                    </a>
+                </div>
             </div>
         </div>
         
-        <div class="col-md-12" style="margin-top:50px">
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-header" style="display:flex; justify-content: space-between; align-items: center;">
                     <a href="{{ route('alltemaspage') }}">Temas</a>

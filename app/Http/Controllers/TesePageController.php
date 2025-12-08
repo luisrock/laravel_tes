@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Models\Quiz;
 
 
 class TesePageController extends Controller
@@ -172,8 +173,11 @@ class TesePageController extends Controller
         // Buscar temas relacionados baseados em palavras-chave similares
         $related_themes = $this->getRelatedThemes($tese->tema_texto ?? $tese->tese_texto ?? '', $tese->numero);
         
+        // Buscar quizzes relacionados (por tribunal ou categoria)
+        $related_quizzes = $this->getRelatedQuizzes($tribunal, $tese->tema_texto ?? $tese->tese_texto ?? '');
+        
         // dd($teses);
-        return view('front.tese', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes'));
+        return view('front.tese', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes'));
     } //end public function
     
     /**
@@ -264,6 +268,47 @@ class TesePageController extends Controller
             
         } catch (\Exception $e) {
             \Log::error('Erro ao buscar temas relacionados: ' . $e->getMessage());
+            return collect([]);
+        }
+    }
+    
+    /**
+     * Busca quizzes relacionados ao tema/tese
+     */
+    private function getRelatedQuizzes($tribunal, $texto_tese)
+    {
+        try {
+            // Buscar quizzes publicados do mesmo tribunal
+            $quizzes = Quiz::published()
+                ->withCount('questions')
+                ->having('questions_count', '>', 0)
+                ->where(function($query) use ($tribunal, $texto_tese) {
+                    // Por tribunal
+                    $query->where('tribunal', strtoupper($tribunal));
+                    
+                    // Ou por palavras-chave no título/descrição
+                    if (!empty($texto_tese)) {
+                        $palavras = explode(' ', strtolower($texto_tese));
+                        $keywords = array_filter($palavras, function($p) {
+                            return strlen($p) > 5;
+                        });
+                        $keywords = array_slice(array_values($keywords), 0, 3);
+                        
+                        foreach ($keywords as $keyword) {
+                            $query->orWhere('title', 'LIKE', "%{$keyword}%")
+                                  ->orWhere('description', 'LIKE', "%{$keyword}%")
+                                  ->orWhere('meta_keywords', 'LIKE', "%{$keyword}%");
+                        }
+                    }
+                })
+                ->orderBy('views_count', 'desc')
+                ->limit(3)
+                ->get();
+            
+            return $quizzes;
+            
+        } catch (\Exception $e) {
+            \Log::error('Erro ao buscar quizzes relacionados: ' . $e->getMessage());
             return collect([]);
         }
     }

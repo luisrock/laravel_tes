@@ -114,12 +114,21 @@ Route::prefix('admin')->group(function () {
     // Add other routes with different permissions requirements
     Route::middleware(['admin_access:manage_all'])->group(function () {
         Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('admin');
+        Route::get('/temas', [App\Http\Controllers\HomeController::class, 'temas'])->name('admin.temas');
         Route::get('/get-temas', [App\Http\Controllers\HomeController::class, 'getTemas'])->name('admin.getTemas');
     });
 });
 
 Route::get('/newsletters', [App\Http\Controllers\CampaignsPageController::class, 'index'])->name('newsletterspage');
 Route::get('/newsletter/{slug}', [App\Http\Controllers\NewsletterController::class, 'show'])->name('newsletter.show');
+
+// Quiz Public Routes
+Route::get('/quizzes', [App\Http\Controllers\QuizController::class, 'index'])->name('quizzes.index');
+Route::get('/quizzes/categoria/{categorySlug}', [App\Http\Controllers\QuizController::class, 'byCategory'])->name('quizzes.category');
+Route::get('/quiz/{slug}', [App\Http\Controllers\QuizController::class, 'show'])->name('quiz.show');
+Route::post('/quiz/{quiz:slug}/answer', [App\Http\Controllers\QuizController::class, 'submitAnswer'])->name('quiz.answer');
+Route::get('/quiz/{slug}/resultado', [App\Http\Controllers\QuizController::class, 'results'])->name('quiz.results');
+Route::get('/quiz/{slug}/reiniciar', [App\Http\Controllers\QuizController::class, 'restart'])->name('quiz.restart');
 
 // Editable Content Routes
 Route::get('/{slug}', [App\Http\Controllers\EditableContentController::class, 'show'])
@@ -131,4 +140,39 @@ Route::middleware(['admin_access:manage_all'])->group(function () {
         ->name('content.edit');
     Route::put('/admin/content/{slug}', [App\Http\Controllers\EditableContentController::class, 'update'])
         ->name('content.update');
+    
+    // Quiz Admin Routes
+    Route::prefix('admin/quizzes')->name('admin.quizzes.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\QuizAdminController::class, 'index'])->name('index');
+        Route::post('/toggle-home', [App\Http\Controllers\Admin\QuizAdminController::class, 'toggleHomeVisibility'])->name('toggle-home');
+        Route::get('/create', [App\Http\Controllers\Admin\QuizAdminController::class, 'create'])->name('create');
+        Route::get('/stats', [App\Http\Controllers\Admin\QuizStatsController::class, 'index'])->name('stats');
+        Route::get('/stats/export', [App\Http\Controllers\Admin\QuizStatsController::class, 'export'])->name('stats.export');
+        Route::get('/stats/{quiz}', [App\Http\Controllers\Admin\QuizStatsController::class, 'quiz'])->name('stats.quiz');
+        Route::post('/', [App\Http\Controllers\Admin\QuizAdminController::class, 'store'])->name('store');
+        Route::get('/{quiz}/edit', [App\Http\Controllers\Admin\QuizAdminController::class, 'edit'])->name('edit');
+        Route::put('/{quiz}', [App\Http\Controllers\Admin\QuizAdminController::class, 'update'])->name('update');
+        Route::delete('/{quiz}', [App\Http\Controllers\Admin\QuizAdminController::class, 'destroy'])->name('destroy');
+        Route::get('/{quiz}/duplicate', [App\Http\Controllers\Admin\QuizAdminController::class, 'duplicate'])->name('duplicate');
+        Route::get('/{quiz}/questions', [App\Http\Controllers\Admin\QuizAdminController::class, 'questions'])->name('questions');
+        Route::post('/{quiz}/questions', [App\Http\Controllers\Admin\QuizAdminController::class, 'addQuestion'])->name('questions.add');
+        Route::delete('/{quiz}/questions/{question}', [App\Http\Controllers\Admin\QuizAdminController::class, 'removeQuestion'])->name('questions.remove');
+        Route::post('/{quiz}/questions/reorder', [App\Http\Controllers\Admin\QuizAdminController::class, 'reorderQuestions'])->name('questions.reorder');
+        Route::get('/{quiz}/questions/search', [App\Http\Controllers\Admin\QuizAdminController::class, 'searchQuestions'])->name('questions.search');
+    });
+    
+    // Questions Admin Routes
+    Route::prefix('admin/questions')->name('admin.questions.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\QuestionAdminController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\Admin\QuestionAdminController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Admin\QuestionAdminController::class, 'store'])->name('store');
+        Route::post('/inline', [App\Http\Controllers\Admin\QuestionAdminController::class, 'storeInline'])->name('store.inline');
+        Route::get('/{question}/edit', [App\Http\Controllers\Admin\QuestionAdminController::class, 'edit'])->name('edit');
+        Route::put('/{question}', [App\Http\Controllers\Admin\QuestionAdminController::class, 'update'])->name('update');
+        Route::delete('/{question}', [App\Http\Controllers\Admin\QuestionAdminController::class, 'destroy'])->name('destroy');
+        Route::get('/{question}/duplicate', [App\Http\Controllers\Admin\QuestionAdminController::class, 'duplicate'])->name('duplicate');
+        Route::get('/tags', [App\Http\Controllers\Admin\QuestionAdminController::class, 'tags'])->name('tags');
+        Route::post('/tags', [App\Http\Controllers\Admin\QuestionAdminController::class, 'storeTag'])->name('tags.store');
+        Route::delete('/tags/{tag}', [App\Http\Controllers\Admin\QuestionAdminController::class, 'destroyTag'])->name('tags.destroy');
+    });
 });

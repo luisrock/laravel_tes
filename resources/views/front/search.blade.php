@@ -179,6 +179,53 @@
 @endif
 <!-- END Temas Mais Consultados -->
 
+<!-- Quizzes Jurídicos -->
+@if(isset($featured_quizzes) && $featured_quizzes->count() > 0)
+<div class="content">
+    <div class="block">
+        <div class="block-header block-header-default">
+            <h3 class="block-title"><i class="fa fa-graduation-cap text-primary"></i> Teste seus Conhecimentos</h3>
+            <div class="block-options">
+                <a href="{{ route('quizzes.index') }}" class="btn btn-sm btn-primary">
+                    Ver Todos os Quizzes <i class="fa fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+        </div>
+        <div class="block-content">
+            <div class="row">
+                @foreach($featured_quizzes as $quiz)
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <a href="{{ route('quiz.show', $quiz->slug) }}" class="block block-rounded block-link-shadow h-100" style="text-decoration: none; border-left: 4px solid #5c80d1;">
+                        <div class="block-content block-content-full">
+                            <div class="font-w600 text-primary mb-2">
+                                {{ $quiz->title }}
+                            </div>
+                            <div class="font-size-sm text-muted">
+                                <span class="mr-2"><i class="fa fa-question-circle"></i> {{ $quiz->questions_count }} questões</span>
+                                @if($quiz->tribunal)
+                                <span class="mr-2"><i class="fa fa-building"></i> {{ $quiz->tribunal }}</span>
+                                @endif
+                                <span>
+                                    @if($quiz->difficulty == 'easy')
+                                        <span class="text-success"><i class="fa fa-signal"></i> Fácil</span>
+                                    @elseif($quiz->difficulty == 'hard')
+                                        <span class="text-danger"><i class="fa fa-signal"></i> Difícil</span>
+                                    @else
+                                        <span class="text-warning"><i class="fa fa-signal"></i> Médio</span>
+                                    @endif
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+<!-- END Quizzes Jurídicos -->
+
 @yield('content_results')
 
 <!-- END Page Content -->
