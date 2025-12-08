@@ -167,7 +167,11 @@
                         @if (Route::currentRouteName() != 'newsletterspage')
                             | <a class="font-w600" href="{{ route('newsletterspage') }}">Atualizações</a>
                         @endif
-                        @if (Route::currentRouteName() != 'quizzes.index')
+                        @php
+                            $quizzesVisible = \App\Models\EditableContent::where('slug', 'quizzes-home-visibility')
+                                ->where('published', true)->exists();
+                        @endphp
+                        @if ($quizzesVisible && Route::currentRouteName() != 'quizzes.index')
                             | <a class="font-w600" href="{{ route('quizzes.index') }}">Quizzes</a>
                         @endif
                         @auth
