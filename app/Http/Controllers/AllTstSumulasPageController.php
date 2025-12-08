@@ -49,7 +49,9 @@ class AllTstSumulasPageController extends Controller
         $tribunal = 'TST';
         $label = 'Súmulas do Tribunal Superior do Trabalho - TST';
         $sumula_route = 'tstsumulapage';
-        $description = "Relação de $label, com os respectivos textos";
+        
+        // Meta description dinâmica para melhor CTR
+        $description = "Consulte {$count} Súmulas do TST com texto completo.";
         
         // Breadcrumb
         $breadcrumb = [

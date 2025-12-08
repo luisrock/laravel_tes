@@ -42,7 +42,9 @@ class AllTnuSumulasPageController extends Controller
         $tribunal = 'TNU';
         $label = 'Súmulas da Turma Nacional de Uniformização dos Juizados Especiais Federais - TNU';
         $sumula_route = 'tnusumulapage';
-        $description = "Relação de $label, com os respectivos textos";
+        
+        // Meta description dinâmica para melhor CTR
+        $description = "Consulte {$count} Súmulas da TNU com texto completo.";
         
         // Breadcrumb
         $breadcrumb = [
