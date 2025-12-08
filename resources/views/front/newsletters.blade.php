@@ -73,7 +73,7 @@
                                         </h4>
 
                                         <p class="d-sm-block text-muted">
-                                            {{ \Illuminate\Support\Str::limit(html_entity_decode(strip_tags($campaign->plain_text ?? $campaign->html_content)), 200) }}
+                                            {{ \Illuminate\Support\Str::limit($campaign->preview_text, 200) }}
                                         </p>
 
                                         <span class="text-muted"
