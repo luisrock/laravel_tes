@@ -81,6 +81,9 @@
 
     @yield('styles')
 
+    {{-- Estilos globais do novo header/footer --}}
+    @include('partials.header-footer-styles')
+
     @if ($display_pdf == 'display:none;')
         <style>
             body,
@@ -140,7 +143,13 @@
         <!-- Main Container -->
         <main id="main-container">
 
+            {{-- Header Global --}}
+            @include('partials.header')
+
             @yield('content')
+
+            {{-- Footer Global --}}
+            @include('partials.footer')
 
         </main>
         <!-- END Main Container -->

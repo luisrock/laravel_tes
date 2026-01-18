@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ConceptController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\RefundRequestController;
 use SebastianBergmann\Template\Template;
 use Spatie\Honeypot\ProtectAgainstSpam;
 use App\Http\Controllers\RoleController;
@@ -175,4 +178,46 @@ Route::middleware(['admin_access:manage_all'])->group(function () {
         Route::post('/tags', [App\Http\Controllers\Admin\QuestionAdminController::class, 'storeTag'])->name('tags.store');
         Route::delete('/tags/{tag}', [App\Http\Controllers\Admin\QuestionAdminController::class, 'destroyTag'])->name('tags.destroy');
     });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Subscription Routes (Sistema de Assinaturas)
+|--------------------------------------------------------------------------
+*/
+
+// Página de planos (pública)
+Route::get('/assinar', [SubscriptionController::class, 'index'])->name('subscription.plans');
+
+// Checkout (requer auth)
+Route::middleware('auth')->group(function () {
+    Route::post('/assinar/checkout', [SubscriptionController::class, 'checkout'])
+        ->name('subscription.checkout');
+});
+
+// Callbacks do Stripe Checkout (sem auth para evitar perda de sessão)
+Route::get('/assinar/sucesso', [SubscriptionController::class, 'success'])
+    ->name('subscription.success');
+Route::get('/assinar/cancelado', [SubscriptionController::class, 'cancel'])
+    ->name('subscription.cancel');
+
+// AJAX para verificar status do checkout
+Route::get('/assinar/status', [SubscriptionController::class, 'checkProcessingStatus'])
+    ->name('subscription.check-status');
+
+// Webhook Stripe (sem CSRF - configurado em VerifyCsrfToken.php)
+Route::post('/stripe/webhook', [WebhookController::class, 'handleWebhook'])
+    ->name('cashier.webhook');
+
+// Rotas autenticadas de assinatura
+Route::middleware(['auth'])->prefix('minha-conta')->group(function () {
+    Route::get('/assinatura', [SubscriptionController::class, 'show'])
+        ->name('subscription.show');
+    Route::get('/assinatura/portal', [SubscriptionController::class, 'billingPortal'])
+        ->name('subscription.portal');
+    
+    Route::get('/estorno', [RefundRequestController::class, 'create'])
+        ->name('refund.create');
+    Route::post('/estorno', [RefundRequestController::class, 'store'])
+        ->name('refund.store');
 });

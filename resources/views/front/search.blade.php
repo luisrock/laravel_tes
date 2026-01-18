@@ -3,30 +3,6 @@
 @section('page-title', 'Pesquisa')
 
 @section('content')
-<!-- Hero -->
-<div class="bg-body-light" style="{{ $display_pdf }}">
-    <div class="content content-full">
-        <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
-            <h1 class="flex-sm-fill h3 my-2">
-                <a href="{{ url('/') }}">
-                Teses & Súmulas
-                </a>
-            </h1>
-            <span>
-                <a href="https://chrome.google.com/webstore/detail/teses-e-s%C3%BAmulas/biigfejcdpcpibfmffgmmndpjhnlcjfb?hl=pt-BR"
-                    class="badge badge-primary">Extensão para o Chrome</a>
-            </span>
-        </div>
-        <p>
-            Pesquisa Simplificada de Súmulas e Teses de Repetitivos e de Repercussão Geral
-            feita na base de dados de tribunais superiores
-            e outros órgãos relevantes, com geração opcional de PDF contendo os resultados.
-            Prepare seu estudo|aula|decisão|petição|parecer etc.
-        </p>
-    </div>
-</div>
-<!-- END Hero -->
-
 
 <!--mpdf  <h2>Teses e Súmulas</h2> mpdf-->
 

@@ -1,10 +1,183 @@
 # Especificações Técnicas: Sistema de Assinaturas
 
 **Documento:** ASSINATURA_SPECS.md  
-**Versão:** 1.0  
+**Versão:** 1.1  
 **Baseado em:** ASSINATURA_PLAN.md v1.4  
 **Criado em:** 18 de Janeiro de 2026  
+**Última Atualização:** 18 de Janeiro de 2026  
 **Projeto:** Teses e Súmulas (https://tesesesumulas.com.br/)  
+
+---
+
+## 🚀 STATUS DA IMPLEMENTAÇÃO
+
+> **Esta seção é atualizada a cada progresso para que futuros assistentes de IA possam retomar o trabalho.**
+
+### Fases Concluídas
+
+| Fase | Status | Data | Observações |
+|------|--------|------|-------------|
+| 1 - Infraestrutura Base | ✅ Concluída | 18/01/2026 | Cashier 13.17, migrations, models |
+| 2 - User Model + Services | ✅ Concluída | 18/01/2026 | Billable, StripeService, SubscriptionService |
+| 3 - Rotas e Controllers | ✅ Concluída | 18/01/2026 | 3 controllers, 10 rotas, webhook |
+| 4 - Middlewares | ✅ Concluída | 18/01/2026 | subscribed, feature:xxx |
+| 5 - Views Assinatura | ✅ Concluída | 18/01/2026 | 5 views minimalistas |
+| 5b - UI Global | ✅ Concluída | 18/01/2026 | Header/Footer novos, layout unificado |
+| 6 - Seed Features | ⏳ Próxima | - | Configurar plan_features |
+| 7-10 | 📋 Pendente | - | Filament, emails, testes, deploy Stripe |
+
+### UI Global Implementada (Fase 5b)
+
+```
+Partials criados em resources/views/partials/:
+├── header.blade.php          # Header responsivo com navegação
+├── footer.blade.php          # Footer dark com colunas de links
+└── header-footer-styles.blade.php  # CSS compartilhado
+
+Características:
+- Design minimalista full-width
+- Linha accent gradiente azul-roxo no topo
+- Logo "T&S" como ícone
+- Navegação: Pesquisar, Temas, Atualizações, Extensão Chrome
+- Responsivo com menu mobile hamburger
+- Footer dark com 3 colunas: Navegação, Recursos, Conta
+- Botão "Assinar" temporariamente escondido (comentado)
+
+Layouts atualizados:
+- front/base.blade.php: Inclui partials globalmente
+- layouts/app.blade.php: Login/registro com mesmo layout
+```
+
+### Próximos Passos
+
+### Arquivos Criados/Modificados
+
+```
+CRIADOS:
+├── config/subscription.php
+├── app/Models/PlanFeature.php
+├── app/Models/RefundRequest.php
+├── app/Models/StripeWebhookEvent.php
+├── app/Services/StripeService.php
+├── app/Services/SubscriptionService.php
+├── app/Http/Controllers/SubscriptionController.php
+├── app/Http/Controllers/WebhookController.php
+├── app/Http/Controllers/RefundRequestController.php
+├── app/Http/Middleware/EnsureUserIsSubscribed.php
+├── app/Http/Middleware/EnsureUserHasFeature.php
+└── database/migrations/
+    ├── 2026_01_18_000001_add_current_period_end_to_subscriptions.php
+    ├── 2026_01_18_000002_create_plan_features_table.php
+    ├── 2026_01_18_000003_create_refund_requests_table.php
+    └── 2026_01_18_000004_create_stripe_webhook_events_table.php
+
+MODIFICADOS:
+├── .env (adicionadas variáveis Stripe TEST)
+├── composer.json (adicionado laravel/cashier)
+├── app/Models/User.php (Billable + métodos)
+├── app/Providers/AppServiceProvider.php (singletons + validação)
+├── app/Http/Kernel.php (middlewares subscribed, feature)
+├── app/Http/Middleware/VerifyCsrfToken.php (exceção stripe/webhook)
+└── routes/web.php (10 rotas de assinatura)
+```
+
+### Rotas de Assinatura Implementadas
+
+| Método | URI | Nome | Descrição |
+|--------|-----|------|-----------|
+| GET | `/assinar` | subscription.plans | Página de planos |
+| POST | `/assinar/checkout` | subscription.checkout | Inicia checkout |
+| GET | `/assinar/sucesso` | subscription.success | Callback sucesso |
+| GET | `/assinar/cancelado` | subscription.cancel | Callback cancelamento |
+| GET | `/assinar/status` | subscription.check-status | AJAX verificação |
+| POST | `/stripe/webhook` | cashier.webhook | Webhook Stripe |
+| GET | `/minha-conta/assinatura` | subscription.show | Status assinatura |
+| GET | `/minha-conta/assinatura/portal` | subscription.portal | Billing Portal |
+| GET | `/minha-conta/estorno` | refund.create | Form estorno |
+| POST | `/minha-conta/estorno` | refund.store | Salvar estorno |
+
+### Configuração Stripe (Modo TEST)
+
+```
+Produtos configurados:
+- PRO: prod_ToerHJyGZMYe7B
+  - Mensal: price_1Sr1XhAabNZCbwvi9aJ6xbPW (R$ 29,90)
+  - Anual: price_1Sr1XhAabNZCbwvibpXbQtgH (R$ 99,90)
+- PREMIUM: prod_Toeskw6vqELPlc
+  - Mensal: price_1Sr1YqAabNZCbwvivbTXSsBp (R$ 49,90)
+  - Anual: price_1Sr1YqAabNZCbwviniLkzpH5 (R$ 499,90)
+```
+
+### Próxima Etapa: Fase 5 - Views
+
+Para continuar a implementação:
+1. Criar views em `resources/views/subscription/`
+   - `plans.blade.php` - Página de planos
+   - `success.blade.php` - Sucesso após checkout
+   - `cancel.blade.php` - Usuário desistiu
+   - `show.blade.php` - Status da assinatura
+   - `refund.blade.php` - Formulário de estorno
+2. Testar fluxo visual no navegador
+
+---
+
+## 📦 INSTRUÇÕES PARA DEPLOY EM PRODUÇÃO
+
+### Comandos Pré-Deploy (já incluídos no script Vito Deploy)
+
+O script de deploy já executa `composer install` e `php artisan migrate`, então as novas dependências e tabelas serão criadas automaticamente.
+
+### Configuração Manual Necessária no .env de Produção
+
+Adicionar as seguintes variáveis ao `.env` do servidor de produção:
+
+```env
+# Stripe (modo LIVE - usar chaves de produção!)
+STRIPE_KEY=pk_live_51MmeSnAabNZCbwvi...
+STRIPE_SECRET=sk_live_51MmeSnAabNZCbwvi...
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+
+# Produtos Stripe (PRODUÇÃO)
+STRIPE_PRODUCT_PRO=prod_ToedwoFT9ZWdne
+STRIPE_PRODUCT_PREMIUM=prod_Toeh7EqG1BrdI7
+
+# Cashier
+CASHIER_CURRENCY=brl
+CASHIER_CURRENCY_LOCALE=pt_BR
+```
+
+### Configurar Webhook no Stripe Dashboard (Produção)
+
+1. Acesse Stripe Dashboard → Developers → Webhooks
+2. Clique em "Add endpoint"
+3. URL: `https://tesesesumulas.com.br/stripe/webhook`
+4. Eventos a selecionar:
+   - `checkout.session.completed`
+   - `customer.subscription.created`
+   - `customer.subscription.updated`
+   - `customer.subscription.deleted`
+   - `invoice.payment_succeeded`
+   - `invoice.payment_failed`
+5. Copie o "Signing secret" e adicione ao `.env` como `STRIPE_WEBHOOK_SECRET`
+
+### Verificação Pós-Deploy
+
+```bash
+# Via SSH no servidor
+ssh vito@15.229.244.115
+
+# Verificar se migrations rodaram
+cd /home/vito/tesesesumulas.com.br
+php artisan migrate:status | grep 2026_01_18
+
+# Verificar se config está carregada
+php artisan tinker --execute="echo config('subscription.default_subscription_name');"
+# Deve retornar: default
+
+# Limpar cache se necessário
+php artisan config:clear
+php artisan cache:clear
+```
 
 ---
 
