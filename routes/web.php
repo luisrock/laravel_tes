@@ -187,30 +187,33 @@ Route::middleware(['admin_access:manage_all'])->group(function () {
 */
 
 // Página de planos (pública)
-Route::get('/assinar', [SubscriptionController::class, 'index'])->name('subscription.plans');
+Route::middleware('subscription.configured')->group(function () {
+    Route::get('/assinar', [SubscriptionController::class, 'index'])->name('subscription.plans');
 
-// Checkout (requer auth)
-Route::middleware('auth')->group(function () {
-    Route::post('/assinar/checkout', [SubscriptionController::class, 'checkout'])
-        ->name('subscription.checkout');
+    // Checkout (requer auth)
+    Route::middleware('auth')->group(function () {
+        Route::post('/assinar/checkout', [SubscriptionController::class, 'checkout'])
+            ->name('subscription.checkout');
+    });
+
+    // Callbacks do Stripe Checkout (sem auth para evitar perda de sessão)
+    Route::get('/assinar/sucesso', [SubscriptionController::class, 'success'])
+        ->name('subscription.success');
+    Route::get('/assinar/cancelado', [SubscriptionController::class, 'cancel'])
+        ->name('subscription.cancel');
+
+    // AJAX para verificar status do checkout
+    Route::get('/assinar/status', [SubscriptionController::class, 'checkProcessingStatus'])
+        ->name('subscription.check-status');
 });
-
-// Callbacks do Stripe Checkout (sem auth para evitar perda de sessão)
-Route::get('/assinar/sucesso', [SubscriptionController::class, 'success'])
-    ->name('subscription.success');
-Route::get('/assinar/cancelado', [SubscriptionController::class, 'cancel'])
-    ->name('subscription.cancel');
-
-// AJAX para verificar status do checkout
-Route::get('/assinar/status', [SubscriptionController::class, 'checkProcessingStatus'])
-    ->name('subscription.check-status');
 
 // Webhook Stripe (sem CSRF - configurado em VerifyCsrfToken.php)
 Route::post('/stripe/webhook', [WebhookController::class, 'handleWebhook'])
+    ->middleware('stripe.webhook')
     ->name('cashier.webhook');
 
 // Rotas autenticadas de assinatura
-Route::middleware(['auth'])->prefix('minha-conta')->group(function () {
+Route::middleware(['auth', 'subscription.configured'])->prefix('minha-conta')->group(function () {
     Route::get('/assinatura', [SubscriptionController::class, 'show'])
         ->name('subscription.show');
     Route::get('/assinatura/portal', [SubscriptionController::class, 'billingPortal'])

@@ -131,6 +131,16 @@
         color: white;
         text-decoration: none;
     }
+
+    .link-small {
+        color: #dc3545;
+        font-size: 0.85rem;
+        text-decoration: none;
+    }
+    .link-small:hover {
+        text-decoration: underline;
+        color: #c82333;
+    }
     
     .alert {
         padding: 15px 20px;
@@ -232,14 +242,16 @@
                 <a href="{{ route('subscription.portal') }}" class="btn-primary">
                     Gerenciar Assinatura
                 </a>
-                <a href="{{ route('refund.create') }}" class="btn-danger-outline">
-                    Solicitar Estorno
-                </a>
             </div>
             
             <p class="text-muted mt-3" style="font-size: 0.85rem;">
                 No portal, você pode atualizar seu cartão, trocar de plano ou cancelar.
             </p>
+            <div class="mt-2">
+                <a href="{{ route('refund.create') }}" class="link-small">
+                    Solicitar estorno
+                </a>
+            </div>
         </div>
         
         <div class="subscription-card">

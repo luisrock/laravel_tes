@@ -1163,6 +1163,19 @@ composer require filament/filament:^2.0
 
 ---
 
+## 18. Status Atual (Jan/2026)
+
+**Resumo rápido (implementado até agora):**
+- Guard suave em rotas de assinatura (`subscription.configured`).
+- Webhook protegido com `stripe.webhook` + correção no handler de `invoice.payment_succeeded`.
+- UI: link de estorno discreto em "Minha Assinatura".
+- Script de teste automatizado criado: `scripts/test-subscription-flow.sh`.
+- Fluxo validado em modo test via Stripe CLI.
+
+**Referência detalhada:** consulte `ASSINATURA_SPECS.md` (seções “STATUS DA IMPLEMENTAÇÃO” e “Testes Realizados”).
+
+---
+
 ## Anexo A: Glossário
 
 | Termo | Definição |

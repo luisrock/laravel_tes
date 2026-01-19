@@ -26,6 +26,14 @@
 | 6 - Seed Features | ⏳ Próxima | - | Configurar plan_features |
 | 7-10 | 📋 Pendente | - | Filament, emails, testes, deploy Stripe |
 
+### Atualizações Recentes (19/01/2026)
+- ✅ **Guard suave**: middleware `subscription.configured` bloqueia apenas rotas de assinatura quando faltar config (sem derrubar o site).
+- ✅ **Webhook Stripe protegido**: rota usa `stripe.webhook` (VerifyWebhookSignature).
+- ✅ **Webhook fix**: `invoice.payment_succeeded` agora retorna 200 (não chama método inexistente no Cashier).
+- ✅ **UI ajuste**: link "Solicitar estorno" ficou discreto na página "Minha Assinatura".
+- ✅ **Script de teste** criado: `scripts/test-subscription-flow.sh`.
+- ✅ **Fluxo testado end‑to‑end** com Stripe CLI + checkout real (modo test).
+
 ### UI Global Implementada (Fase 5b)
 
 ```
@@ -49,6 +57,10 @@ Layouts atualizados:
 ```
 
 ### Próximos Passos
+- **Fase 6 (Seed Features)**: popular `plan_features` para PRO/PREMIUM.
+- **Fase 7 (Notificações)**: implementar notifications + job de renovação.
+- **Fase 10 (Filament)**: painel admin e resources.
+- **Ajuste opcional**: remover chaves sensíveis do `.env.example` (deixar placeholders).
 
 ### Arquivos Criados/Modificados
 
@@ -118,6 +130,59 @@ Para continuar a implementação:
    - `show.blade.php` - Status da assinatura
    - `refund.blade.php` - Formulário de estorno
 2. Testar fluxo visual no navegador
+
+> **Nota:** As views já foram concluídas. O próximo passo real é **Fase 6 (Seed Features)**.
+
+---
+
+## ✅ Testes Realizados (19/01/2026)
+
+### Resultado
+- Checkout completo em modo **test** com cartão de teste.
+- Webhooks recebidos e processados com sucesso.
+- Página de sucesso confirmou apenas após webhook (`checkout.session.completed`).
+- "Minha Assinatura" exibiu status ativo e link de estorno discreto.
+
+### Checklist de Reteste (rápido)
+- [ ] `stripe listen` rodando e `STRIPE_WEBHOOK_SECRET` atualizado no `.env`
+- [ ] `php artisan config:clear`
+- [ ] Login com usuário de teste
+- [ ] Checkout concluído (cartão teste `4242 4242 4242 4242`)
+- [ ] `/assinar/sucesso?session_id=...` confirma após webhook
+- [ ] `/minha-conta/assinatura` mostra status correto
+- [ ] Cancelar assinatura de teste (opcional para repetir o fluxo)
+
+### Como testar (manual)
+1. Rodar Stripe CLI:
+   ```bash
+   stripe login
+   stripe listen --forward-to https://teses.test/stripe/webhook
+   ```
+2. Configurar `STRIPE_WEBHOOK_SECRET` no `.env` e rodar:
+   ```bash
+   php artisan config:clear
+   ```
+3. Criar usuário de teste (se necessário) e fazer login.
+4. Acessar `/assinar`, selecionar plano e concluir pagamento com cartão teste `4242 4242 4242 4242`.
+5. Verificar `/assinar/sucesso?session_id=cs_test_...` e `/minha-conta/assinatura`.
+
+### Script automatizado
+Arquivo: `scripts/test-subscription-flow.sh`
+
+Uso básico:
+```bash
+./scripts/test-subscription-flow.sh
+```
+
+Após concluir o checkout, rodar:
+```bash
+SESSION_ID=cs_test_xxx ./scripts/test-subscription-flow.sh
+```
+
+Para cancelar a assinatura de teste:
+```bash
+CANCEL_SUBSCRIPTION=1 ./scripts/test-subscription-flow.sh
+```
 
 ---
 

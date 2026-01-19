@@ -67,6 +67,8 @@ class Kernel extends HttpKernel
         'bearer.token' => \App\Http\Middleware\BearerTokenMiddleware::class,
         'subscribed' => \App\Http\Middleware\EnsureUserIsSubscribed::class,
         'feature' => \App\Http\Middleware\EnsureUserHasFeature::class,
+        'stripe.webhook' => \Laravel\Cashier\Http\Middleware\VerifyWebhookSignature::class,
+        'subscription.configured' => \App\Http\Middleware\EnsureSubscriptionConfigured::class,
 
     ];
     

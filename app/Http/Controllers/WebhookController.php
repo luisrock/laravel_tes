@@ -141,7 +141,7 @@ class WebhookController extends CashierWebhookController
             }
         }
 
-        return parent::handleInvoicePaymentSucceeded($payload);
+        return $this->successMethod();
     }
 
     /**

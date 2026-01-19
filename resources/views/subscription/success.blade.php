@@ -76,6 +76,13 @@
     .hidden {
         display: none;
     }
+
+    .timeout-message {
+        margin-top: 20px;
+        color: #666;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
 </style>
 @endsection
 
@@ -104,6 +111,10 @@
                 Aguarde enquanto confirmamos seu pagamento com o Stripe.<br>
                 Isso pode levar alguns segundos.
             </p>
+            <div id="timeout-message" class="timeout-message hidden">
+                Ainda estamos processando seu pagamento.<br>
+                Você pode aguardar mais alguns instantes ou verificar sua assinatura mais tarde.
+            </div>
         </div>
         
         {{-- Estado: Sucesso --}}
@@ -148,9 +159,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (attempts < maxAttempts) {
                     setTimeout(checkStatus, 1000);
                 } else {
-                    // Timeout - mostrar sucesso mesmo assim (webhook pode demorar)
-                    document.getElementById('processing-state').classList.add('hidden');
-                    document.getElementById('success-state').classList.remove('hidden');
+                    // Timeout - manter estado de processamento e orientar usuário
+                    document.getElementById('timeout-message').classList.remove('hidden');
                 }
             })
             .catch(error => {
