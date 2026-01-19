@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Jobs\SendRenewalReminders;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -26,6 +27,10 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         $schedule->command('newsletters:import')->dailyAt('04:00');
+
+        $schedule->job(new SendRenewalReminders())
+            ->dailyAt('10:00')
+            ->withoutOverlapping();
     }
 
     /**

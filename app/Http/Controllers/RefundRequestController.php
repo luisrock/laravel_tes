@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\RefundRequest;
+use App\Notifications\RefundRequestReceivedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -107,6 +108,16 @@ class RefundRequestController extends Controller
             'user_id' => $user->id,
             'subscription_id' => $subscription->id,
         ]);
+
+        try {
+            $user->notify(new RefundRequestReceivedNotification($refundRequest));
+        } catch (\Exception $e) {
+            Log::warning('Não foi possível enviar notificação de estorno', [
+                'refund_request_id' => $refundRequest->id,
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return redirect()->route('subscription.show')
             ->with('success', 'Sua solicitação de estorno foi enviada. Analisaremos em até 48 horas úteis.');

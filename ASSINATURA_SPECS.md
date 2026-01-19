@@ -23,8 +23,8 @@
 | 4 - Middlewares | ✅ Concluída | 18/01/2026 | subscribed, feature:xxx |
 | 5 - Views Assinatura | ✅ Concluída | 18/01/2026 | 5 views minimalistas |
 | 5b - UI Global | ✅ Concluída | 18/01/2026 | Header/Footer novos, layout unificado |
-| 6 - Seed Features | ⏳ Próxima | - | Configurar plan_features |
-| 7-10 | 📋 Pendente | - | Filament, emails, testes, deploy Stripe |
+| 6 - Seed Features | ✅ Concluída | 19/01/2026 | Seeder `no_ads` aplicado em PROD (PRO/PREMIUM) |
+| 7-10 | 📋 Pendente | - | Filament, notifications, job de renovação |
 
 ### Atualizações Recentes (19/01/2026)
 - ✅ **Guard suave**: middleware `subscription.configured` bloqueia apenas rotas de assinatura quando faltar config (sem derrubar o site).
@@ -32,7 +32,10 @@
 - ✅ **Webhook fix**: `invoice.payment_succeeded` agora retorna 200 (não chama método inexistente no Cashier).
 - ✅ **UI ajuste**: link "Solicitar estorno" ficou discreto na página "Minha Assinatura".
 - ✅ **Script de teste** criado: `scripts/test-subscription-flow.sh`.
+- ✅ **Bateria de testes** criada: `scripts/run-subscription-tests.sh` (PHPUnit + E2E opcional).
 - ✅ **Fluxo testado end‑to‑end** com Stripe CLI + checkout real (modo test).
+- ✅ **Fase 6 concluída**: `PlanFeaturesSeeder` criado e executado em produção (feature `no_ads` para PRO/PREMIUM).
+- ✅ **Histórico sanitizado**: removido `STRIPE_WEBHOOK_SECRET` do histórico do repositório.
 
 ### UI Global Implementada (Fase 5b)
 
@@ -57,10 +60,10 @@ Layouts atualizados:
 ```
 
 ### Próximos Passos
-- **Fase 6 (Seed Features)**: popular `plan_features` para PRO/PREMIUM.
 - **Fase 7 (Notificações)**: implementar notifications + job de renovação.
-- **Fase 10 (Filament)**: painel admin e resources.
-- **Ajuste opcional**: remover chaves sensíveis do `.env.example` (deixar placeholders).
+- **Fase 10 (Filament)**: painel admin com resources de assinatura.
+- **Definir escopo do admin**: manter CRUD focado em assinaturas ou ampliar para todas as tabelas.
+- **Ao final**: testes completos (PHPUnit + E2E + interface) e pre-commit obrigatório.
 
 ### Arquivos Criados/Modificados
 
@@ -77,6 +80,7 @@ CRIADOS:
 ├── app/Http/Controllers/RefundRequestController.php
 ├── app/Http/Middleware/EnsureUserIsSubscribed.php
 ├── app/Http/Middleware/EnsureUserHasFeature.php
+├── database/seeders/PlanFeaturesSeeder.php
 └── database/migrations/
     ├── 2026_01_18_000001_add_current_period_end_to_subscriptions.php
     ├── 2026_01_18_000002_create_plan_features_table.php
@@ -90,6 +94,7 @@ MODIFICADOS:
 ├── app/Providers/AppServiceProvider.php (singletons + validação)
 ├── app/Http/Kernel.php (middlewares subscribed, feature)
 ├── app/Http/Middleware/VerifyCsrfToken.php (exceção stripe/webhook)
+├── database/seeders/DatabaseSeeder.php (chama PlanFeaturesSeeder)
 └── routes/web.php (10 rotas de assinatura)
 ```
 
@@ -167,9 +172,21 @@ Para continuar a implementação:
 5. Verificar `/assinar/sucesso?session_id=cs_test_...` e `/minha-conta/assinatura`.
 
 ### Script automatizado
-Arquivo: `scripts/test-subscription-flow.sh`
+Arquivos:
+- `scripts/test-subscription-flow.sh` (E2E manual com Stripe CLI)
+- `scripts/run-subscription-tests.sh` (bateria rápida PHPUnit + E2E opcional)
 
-Uso básico:
+Uso básico (PHPUnit de assinatura):
+```bash
+./scripts/run-subscription-tests.sh
+```
+
+Para incluir o E2E com Stripe CLI:
+```bash
+RUN_E2E=1 ./scripts/run-subscription-tests.sh
+```
+
+Uso direto do E2E (já existente):
 ```bash
 ./scripts/test-subscription-flow.sh
 ```
@@ -183,6 +200,14 @@ Para cancelar a assinatura de teste:
 ```bash
 CANCEL_SUBSCRIPTION=1 ./scripts/test-subscription-flow.sh
 ```
+
+### Testes finais (ao final do projeto)
+- Rodar a bateria completa com E2E: `RUN_E2E=1 ./scripts/run-subscription-tests.sh`
+- Adicionar testes de interface web (navegação e páginas de assinatura)
+- Habilitar hook de pre-commit para bloquear commits com falha de testes
+- Checklist UI manual: `scripts/subscription-ui-checklist.md`
+- **Produção:** não rodar `php artisan test` nem `scripts/run-subscription-tests.sh` em PROD.
+- **Produção:** `scripts/send-subscription-test-emails.sh` é seguro (apenas envia emails).
 
 ---
 

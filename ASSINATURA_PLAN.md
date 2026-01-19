@@ -983,6 +983,13 @@ O Stripe envia automaticamente:
 3. Adicionar métricas ao dashboard
 4. Testes automatizados
 
+### Fase 9: Validação Final e Qualidade (Ao Final)
+1. Rodar bateria completa de testes de assinatura (unit/feature + E2E Stripe)
+2. Adicionar testes de interface web (fluxos: /assinar, sucesso, minha assinatura, estorno)
+3. Configurar hook de pre-commit para bloquear commits se os testes falharem
+4. Usar checklist UI manual: `scripts/subscription-ui-checklist.md`
+5. **Produção:** bloquear execução de testes automatizados em PROD
+
 ---
 
 ## 13. Checklist de Configuração Stripe
@@ -1171,6 +1178,11 @@ composer require filament/filament:^2.0
 - UI: link de estorno discreto em "Minha Assinatura".
 - Script de teste automatizado criado: `scripts/test-subscription-flow.sh`.
 - Fluxo validado em modo test via Stripe CLI.
+- Seed de `plan_features` aplicado em produção (feature `no_ads` para PRO/PREMIUM).
+
+**Próximos passos imediatos:**
+- Fase 7: notifications + job de renovação.
+- Fase 10: Filament (painel admin focado em assinaturas).
 
 **Referência detalhada:** consulte `ASSINATURA_SPECS.md` (seções “STATUS DA IMPLEMENTAÇÃO” e “Testes Realizados”).
 

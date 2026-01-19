@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\StripeWebhookEvent;
 use App\Models\User;
+use App\Notifications\SubscriptionCanceledNotification;
+use App\Notifications\WelcomeSubscriberNotification;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Laravel\Cashier\Http\Controllers\WebhookController as CashierWebhookController;
@@ -91,6 +94,18 @@ class WebhookController extends CashierWebhookController
             StripeWebhookEvent::where('stripe_object_id', $session['id'])
                 ->whereNull('user_id')
                 ->update(['user_id' => $clientReferenceId]);
+
+            $user = User::find($clientReferenceId);
+            if ($user) {
+                try {
+                    $user->notify(new WelcomeSubscriberNotification());
+                } catch (\Exception $e) {
+                    Log::error('Erro ao enviar email de boas-vindas', [
+                        'user_id' => $user->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
         }
 
         // O Cashier já gerencia a criação da subscription
@@ -115,6 +130,27 @@ class WebhookController extends CashierWebhookController
     {
         $subscription = $payload['data']['object'];
         $this->updateCurrentPeriodEnd($subscription);
+
+        $cancelAtPeriodEnd = $subscription['cancel_at_period_end'] ?? false;
+        $previousCancelAtPeriodEnd = $payload['data']['previous_attributes']['cancel_at_period_end'] ?? null;
+
+        if ($cancelAtPeriodEnd && $previousCancelAtPeriodEnd === false) {
+            $userId = $this->extractUserId('customer.subscription.updated', $subscription);
+            $user = $userId ? User::find($userId) : null;
+            $endsAtTimestamp = $subscription['current_period_end'] ?? null;
+            $endsAt = $endsAtTimestamp ? Carbon::createFromTimestamp($endsAtTimestamp) : null;
+
+            if ($user) {
+                try {
+                    $user->notify(new SubscriptionCanceledNotification($endsAt));
+                } catch (\Exception $e) {
+                    Log::error('Erro ao enviar email de cancelamento', [
+                        'user_id' => $user->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        }
 
         return parent::handleCustomerSubscriptionUpdated($payload);
     }

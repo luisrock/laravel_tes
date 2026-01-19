@@ -4,6 +4,12 @@ set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
+APP_ENV="${APP_ENV:-$(php -r "require 'vendor/autoload.php'; \$app=require 'bootstrap/app.php'; echo \$app->environment();" 2>/dev/null || echo 'unknown')}"
+if [[ "${APP_ENV}" == "production" || "${APP_ENV}" == "prod" ]]; then
+  echo "Este script não deve ser executado em produção."
+  exit 1
+fi
+
 TEST_EMAIL="${TEST_EMAIL:-teste@teses.test}"
 TEST_PASSWORD="${TEST_PASSWORD:-Teste@12345}"
 SESSION_ID="${SESSION_ID:-}"

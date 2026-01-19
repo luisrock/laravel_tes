@@ -11,6 +11,25 @@ O painel em `/admin` oferece navegação centralizada para todas as áreas admin
 - **Newsletters** - Visualização de newsletters publicadas
 - **Tags** - Gestão de tags para categorização
 
+### Emails Transacionais
+
+**Enviados pelo site (Laravel):**
+- Reset de senha
+- Verificação de email (se habilitada)
+- Boas-vindas à assinatura
+- Cancelamento de assinatura
+- Lembrete de renovação (7 dias antes)
+- Confirmação de solicitação de estorno
+
+**Enviados pelo Stripe:**
+- Recibos/invoices de pagamento
+- Falha de pagamento (Smart Retries)
+- Atualização de método de pagamento
+
+**Onde editar textos/layout:**
+- Notificações de assinatura: `app/Notifications/*`
+- Templates padrão do Laravel (reset/verification): `resources/views/vendor/notifications/*` (após publicar)
+
 ### Sistema de Quizzes Jurídicos (Novo - Dez/2024)
 
 O site agora conta com um sistema completo de quizzes para testar conhecimentos sobre teses do STF e STJ.

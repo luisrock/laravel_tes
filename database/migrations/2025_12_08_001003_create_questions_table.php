@@ -13,7 +13,9 @@ class CreateQuestionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('questions', function (Blueprint $table) {
+        $driver = Schema::getConnection()->getDriverName();
+
+        Schema::create('questions', function (Blueprint $table) use ($driver) {
             $table->id();
             $table->text('text'); // Enunciado da questão
             $table->text('explanation')->nullable(); // Explicação da resposta correta
@@ -36,7 +38,9 @@ class CreateQuestionsTable extends Migration
             // Índices
             $table->index(['category_id']);
             $table->index(['difficulty']);
-            $table->fullText(['text']); // Busca full-text no enunciado
+            if ($driver !== 'sqlite') {
+                $table->fullText(['text']); // Busca full-text no enunciado
+            }
         });
     }
 
