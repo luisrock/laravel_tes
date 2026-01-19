@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
@@ -73,7 +74,7 @@ class RefundRequestResource extends Resource
                 TextColumn::make('user.email')
                     ->label('Usuário')
                     ->searchable(),
-                TextColumn::make('status')
+                BadgeColumn::make('status')
                     ->label('Status')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         RefundRequest::STATUS_PENDING => 'Pendente',
@@ -81,6 +82,13 @@ class RefundRequestResource extends Resource
                         RefundRequest::STATUS_REJECTED => 'Rejeitado',
                         RefundRequest::STATUS_PROCESSED => 'Processado',
                         default => $state,
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        RefundRequest::STATUS_PENDING => 'warning',
+                        RefundRequest::STATUS_APPROVED => 'success',
+                        RefundRequest::STATUS_REJECTED => 'danger',
+                        RefundRequest::STATUS_PROCESSED => 'primary',
+                        default => 'secondary',
                     }),
                 TextColumn::make('stripe_subscription_id')
                     ->label('Stripe Subscription')
@@ -115,6 +123,11 @@ class RefundRequestResource extends Resource
                     ->url(fn (RefundRequest $record): ?string => static::getStripeInvoiceUrl($record))
                     ->openUrlInNewTab()
                     ->visible(fn (RefundRequest $record): bool => !empty($record->stripe_invoice_id)),
+                Action::make('stripe_payment_intent')
+                    ->label('Stripe Payment')
+                    ->url(fn (RefundRequest $record): ?string => static::getStripePaymentIntentUrl($record))
+                    ->openUrlInNewTab()
+                    ->visible(fn (RefundRequest $record): bool => !empty($record->stripe_payment_intent_id)),
             ])
             ->bulkActions([]);
     }
@@ -157,6 +170,17 @@ class RefundRequestResource extends Resource
         $base = static::getStripeDashboardBaseUrl();
 
         return "{$base}/invoices/{$record->stripe_invoice_id}";
+    }
+
+    protected static function getStripePaymentIntentUrl(RefundRequest $record): ?string
+    {
+        if (empty($record->stripe_payment_intent_id)) {
+            return null;
+        }
+
+        $base = static::getStripeDashboardBaseUrl();
+
+        return "{$base}/payments/{$record->stripe_payment_intent_id}";
     }
 
     protected static function getStripeDashboardBaseUrl(): string

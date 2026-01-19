@@ -4,10 +4,12 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Models\User;
+use App\Support\SubscriptionUi;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
@@ -35,26 +37,34 @@ class UserResource extends Resource
                     ->label('Email')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('subscription_status')
+                BadgeColumn::make('subscription_status')
                     ->label('Assinatura')
                     ->getStateUsing(function (User $record): string {
                         $subscriptionName = config('subscription.default_subscription_name', 'default');
-                        $subscription = $record->subscription($subscriptionName);
+                        $subscription = $record->subscriptions->firstWhere('name', $subscriptionName);
 
                         if (!$subscription) {
-                            return 'Sem assinatura';
+                            return SubscriptionUi::LABEL_NONE;
                         }
 
-                        if ($subscription->onGracePeriod()) {
-                            return 'Grace period';
+                        return SubscriptionUi::statusLabel($subscription->stripe_status, $subscription->ends_at);
+                    })
+                    ->color(fn (string $state): string => SubscriptionUi::statusColor($state)),
+                BadgeColumn::make('subscription_plan')
+                    ->label('Plano')
+                    ->getStateUsing(function (User $record): string {
+                        $subscriptionName = config('subscription.default_subscription_name', 'default');
+                        $subscription = $record->subscriptions->firstWhere('name', $subscriptionName);
+
+                        if (!$subscription) {
+                            return SubscriptionUi::LABEL_NONE;
                         }
 
-                        if ($subscription->active()) {
-                            return 'Ativa';
-                        }
+                        $productId = SubscriptionUi::resolveTierProductId($subscription->items ?? []);
 
-                        return $subscription->stripe_status ? ucfirst($subscription->stripe_status) : 'Cancelada';
-                    }),
+                        return SubscriptionUi::tierLabel($productId);
+                    })
+                    ->color(fn (string $state): string => SubscriptionUi::tierColor($state)),
                 TextColumn::make('stripe_id')
                     ->label('Stripe Customer')
                     ->toggleable(isToggledHiddenByDefault: true),

@@ -7,6 +7,7 @@ use App\Filament\Resources\PlanFeatureResource\Pages\EditPlanFeature;
 use App\Filament\Resources\PlanFeatureResource\Pages\ListPlanFeatures;
 use App\Models\PlanFeature;
 use App\Services\StripeService;
+use App\Support\SubscriptionUi;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -14,6 +15,7 @@ use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
+use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -56,9 +58,14 @@ class PlanFeatureResource extends Resource
     {
         return $table
             ->columns([
+                BadgeColumn::make('stripe_product_label')
+                    ->label('Plano')
+                    ->getStateUsing(fn (PlanFeature $record): string => SubscriptionUi::tierLabel($record->stripe_product_id))
+                    ->color(fn (string $state): string => SubscriptionUi::tierColor($state)),
                 TextColumn::make('stripe_product_id')
                     ->label('Produto Stripe')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('feature_key')
                     ->label('Feature')
                     ->formatStateUsing(fn (string $state): string => strtoupper($state)),
