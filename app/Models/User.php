@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Log;
+use Filament\Models\Contracts\FilamentUser;
 use Laravel\Cashier\Billable;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     use HasFactory, Notifiable, HasRoles, Billable;
 
@@ -44,6 +45,20 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Autoriza acesso ao painel Filament.
+     */
+    public function canAccessFilament(): bool
+    {
+        if (app()->environment('local')) {
+            return true;
+        }
+
+        $admins = config('tes_constants.admins', []);
+
+        return $this->email && in_array($this->email, $admins, true);
+    }
 
     /**
      * Retorna a fonte da assinatura (prepara para assinaturas coletivas futuras).

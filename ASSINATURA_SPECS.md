@@ -24,7 +24,8 @@
 | 5 - Views Assinatura | ✅ Concluída | 18/01/2026 | 5 views minimalistas |
 | 5b - UI Global | ✅ Concluída | 18/01/2026 | Header/Footer novos, layout unificado |
 | 6 - Seed Features | ✅ Concluída | 19/01/2026 | Seeder `no_ads` aplicado em PROD (PRO/PREMIUM) |
-| 7-10 | 📋 Pendente | - | Filament, notifications, job de renovação |
+| 7 - Notificações + Job de Renovação | ✅ Concluída | 19/01/2026 | Emails transacionais + job 7 dias antes |
+| 10 - Filament (Admin de Assinaturas) | 🟡 Em andamento | 19/01/2026 | Instalação + resources + widgets |
 
 ### Atualizações Recentes (19/01/2026)
 - ✅ **Guard suave**: middleware `subscription.configured` bloqueia apenas rotas de assinatura quando faltar config (sem derrubar o site).
@@ -36,6 +37,11 @@
 - ✅ **Fluxo testado end‑to‑end** com Stripe CLI + checkout real (modo test).
 - ✅ **Fase 6 concluída**: `PlanFeaturesSeeder` criado e executado em produção (feature `no_ads` para PRO/PREMIUM).
 - ✅ **Histórico sanitizado**: removido `STRIPE_WEBHOOK_SECRET` do histórico do repositório.
+- ✅ **Filament instalado (2.x)**: painel admin em `/painel` com acesso via `FilamentUser`.
+- ✅ **Acesso restringido**: somente emails em `tes_constants.admins` (produção).
+- ✅ **Resources Filament**: Users (read-only), Estornos (edit status/notes), PlanFeatures (CRUD).
+- ✅ **Widgets Filament**: métricas, últimas assinaturas, estornos pendentes, últimos cancelamentos.
+- ✅ **Filtro por plano**: PRO/PREMIUM com base nos `STRIPE_PRODUCT_*`.
 
 ### UI Global Implementada (Fase 5b)
 
@@ -60,16 +66,30 @@ Layouts atualizados:
 ```
 
 ### Próximos Passos
-- **Fase 7 (Notificações)**: implementar notifications + job de renovação.
-- **Fase 10 (Filament)**: painel admin com resources de assinatura.
-- **Definir escopo do admin**: manter CRUD focado em assinaturas ou ampliar para todas as tabelas.
-- **Ao final**: testes completos (PHPUnit + E2E + interface) e pre-commit obrigatório.
+- **Fase 10 (Filament)**: validar uso no `/painel` e ajustar UX conforme necessidade.
+- **Escopo do painel**: manter focado em assinaturas (por enquanto).
+- **Fase 8 (Otimizações)**: revisar cache de planos e métricas adicionais (se necessário).
+- **Fase 9 (Qualidade)**: rodar checklist UI + testes completos no final.
 
 ### Arquivos Criados/Modificados
 
 ```
 CRIADOS:
 ├── config/subscription.php
+├── config/filament.php
+├── app/Filament/Resources/UserResource.php
+├── app/Filament/Resources/UserResource/Pages/ListUsers.php
+├── app/Filament/Resources/RefundRequestResource.php
+├── app/Filament/Resources/RefundRequestResource/Pages/ListRefundRequests.php
+├── app/Filament/Resources/RefundRequestResource/Pages/EditRefundRequest.php
+├── app/Filament/Resources/PlanFeatureResource.php
+├── app/Filament/Resources/PlanFeatureResource/Pages/ListPlanFeatures.php
+├── app/Filament/Resources/PlanFeatureResource/Pages/CreatePlanFeature.php
+├── app/Filament/Resources/PlanFeatureResource/Pages/EditPlanFeature.php
+├── app/Filament/Widgets/SubscriptionStats.php
+├── app/Filament/Widgets/RecentSubscriptions.php
+├── app/Filament/Widgets/PendingRefundRequests.php
+├── app/Filament/Widgets/RecentCancellations.php
 ├── app/Models/PlanFeature.php
 ├── app/Models/RefundRequest.php
 ├── app/Models/StripeWebhookEvent.php
@@ -89,7 +109,8 @@ CRIADOS:
 
 MODIFICADOS:
 ├── .env (adicionadas variáveis Stripe TEST)
-├── composer.json (adicionado laravel/cashier)
+├── composer.json (adicionado laravel/cashier + filament)
+├── composer.lock (deps Filament/Livewire)
 ├── app/Models/User.php (Billable + métodos)
 ├── app/Providers/AppServiceProvider.php (singletons + validação)
 ├── app/Http/Kernel.php (middlewares subscribed, feature)
@@ -3456,46 +3477,64 @@ Ref: ASSINATURA_PLAN.md v1.4 - Fase 9"
 # FASE 10: Admin Filament
 
 ## Objetivo
-Instalar e configurar painel admin com Filament.
+Instalar e configurar painel admin com Filament (focado em assinaturas).
 
-**Nota:** Esta fase é mais complexa e pode ser feita depois do sistema estar funcionando.
+**Nota:** O painel vive em `/painel` para não conflitar com o `/admin` existente.
 
 ---
 
-## Passo 10.1: Instalar Filament
+## Checklist da Fase 10 (atualizado)
+
+- [x] Instalar Filament 2.x (`composer require filament/filament:^2.0`)
+- [x] Publicar config (`php artisan vendor:publish --tag=filament-config`)
+- [x] Configurar rota base em `/painel` (`config/filament.php`)
+- [x] Implementar `FilamentUser` no `User` (acesso restrito a admins)
+- [x] Resources criados: `UserResource` (read-only), `RefundRequestResource` (editar status/notas), `PlanFeatureResource` (CRUD)
+- [x] Widgets criados: métricas, últimas assinaturas, estornos pendentes, últimos cancelamentos
+- [x] Filtro por plano (PRO/PREMIUM) na lista de usuários
+- [ ] Validar uso real do `/painel` e ajustar UX conforme necessidade
+
+---
+
+## Passos Detalhados
+
+### Passo 10.1: Instalar Filament
 
 ```bash
 composer require filament/filament:^2.0
-php artisan filament:install
 ```
 
----
+### Passo 10.1.1: Publicar configuração (opcional, mas feito)
 
-## Passo 10.2: Configurar Rota Base
+```bash
+php artisan vendor:publish --tag=filament-config
+```
 
-### Arquivo: `config/filament.php`
+### Passo 10.2: Configurar Rota Base
 
-Alterar `path`:
+Arquivo: `config/filament.php`
 ```php
 'path' => 'painel',
 ```
 
----
+### Passo 10.3: Acesso ao painel
 
-## Passo 10.3: Criar Usuário Admin Filament
+- Implementar `FilamentUser` no model `User`.
+- Permitir acesso apenas para emails em `config('tes_constants.admins')`.
+- **Não é necessário criar novo usuário** se o admin já existe.
 
-```bash
-php artisan make:filament-user
-```
+### Passo 10.4: Resources (feito)
 
----
+- UserResource (read-only, filtro por status/plano, link Stripe)
+- RefundRequestResource (status e notas internas, links Stripe)
+- PlanFeatureResource (CRUD com produtos do Stripe)
 
-## Passo 10.4: Criar Resources (resumido)
+### Passo 10.5: Widgets (feito)
 
-Os Resources serão criados posteriormente com:
-- UserResource
-- RefundRequestResource
-- PlanFeatureResource
+- Métricas (ativos, grace period, estornos pendentes)
+- Últimas assinaturas
+- Estornos pendentes
+- Últimos cancelamentos
 
 ---
 

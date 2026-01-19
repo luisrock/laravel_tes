@@ -1179,10 +1179,13 @@ composer require filament/filament:^2.0
 - Script de teste automatizado criado: `scripts/test-subscription-flow.sh`.
 - Fluxo validado em modo test via Stripe CLI.
 - Seed de `plan_features` aplicado em produção (feature `no_ads` para PRO/PREMIUM).
+- Filament 2.x instalado com painel em `/painel` (sem conflitar com `/admin`).
+- Acesso ao Filament restrito via `FilamentUser` + lista de admins.
+- Resources e widgets de assinaturas criados (usuarios, estornos, features, métricas).
 
 **Próximos passos imediatos:**
-- Fase 7: notifications + job de renovação.
-- Fase 10: Filament (painel admin focado em assinaturas).
+- Fase 10: validar painel em `/painel` e ajustar conforme uso real.
+- Fase 8/9: otimizações e bateria final de testes ao fim.
 
 **Referência detalhada:** consulte `ASSINATURA_SPECS.md` (seções “STATUS DA IMPLEMENTAÇÃO” e “Testes Realizados”).
 

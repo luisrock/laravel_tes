@@ -14,3 +14,4 @@ sitemap.xml
 public/ads.txt
 ads.txtSearch-Console-*/
 .DS_Store
+.psysh/
