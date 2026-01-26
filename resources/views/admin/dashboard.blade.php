@@ -244,6 +244,31 @@
                         </div>
                     </a>
 
+                    <!-- Acórdãos -->
+                    <a href="{{ route('admin.acordaos.index') }}" class="dashboard-card">
+                        <div class="dashboard-card-icon teal">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="dashboard-card-title">Análise do Precedente</div>
+                        <div class="dashboard-card-description">
+                            Faça upload de acórdãos (PDFs) das teses STF/STJ para análise com IA.
+                        </div>
+                        <div class="dashboard-card-stats">
+                            <div class="dashboard-card-stat">
+                                <div class="dashboard-card-stat-value">{{ $acordaosStats['total'] }}</div>
+                                <div class="dashboard-card-stat-label">Total</div>
+                            </div>
+                            <div class="dashboard-card-stat">
+                                <div class="dashboard-card-stat-value">{{ $acordaosStats['stf'] }}</div>
+                                <div class="dashboard-card-stat-label">STF</div>
+                            </div>
+                            <div class="dashboard-card-stat">
+                                <div class="dashboard-card-stat-value">{{ $acordaosStats['stj'] }}</div>
+                                <div class="dashboard-card-stat-label">STJ</div>
+                            </div>
+                        </div>
+                    </a>
+
                 </div>
             </div>
 

@@ -178,6 +178,13 @@ Route::middleware(['admin_access:manage_all'])->group(function () {
         Route::post('/tags', [App\Http\Controllers\Admin\QuestionAdminController::class, 'storeTag'])->name('tags.store');
         Route::delete('/tags/{tag}', [App\Http\Controllers\Admin\QuestionAdminController::class, 'destroyTag'])->name('tags.destroy');
     });
+    
+    // Acórdãos Admin Routes (Análise do Precedente)
+    Route::prefix('admin/acordaos')->name('admin.acordaos.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\AcordaoAdminController::class, 'index'])->name('index');
+        Route::post('/', [App\Http\Controllers\Admin\AcordaoAdminController::class, 'store'])->name('store');
+        Route::delete('/{acordao}', [App\Http\Controllers\Admin\AcordaoAdminController::class, 'destroy'])->name('destroy');
+    });
 });
 
 /*

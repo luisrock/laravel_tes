@@ -9,6 +9,7 @@ use App\Models\Quiz;
 use App\Models\Question;
 use App\Models\QuizCategory;
 use App\Models\QuizAttempt;
+use App\Models\TeseAcordao;
 
 class HomeController extends Controller
 {
@@ -47,7 +48,14 @@ class HomeController extends Controller
             'completed' => QuizAttempt::where('status', 'completed')->count(),
         ];
 
-        return view('admin.dashboard', compact('stats', 'quizStats'));
+        // Estatísticas de Acórdãos
+        $acordaosStats = [
+            'total' => TeseAcordao::count(),
+            'stf' => TeseAcordao::where('tribunal', 'STF')->count(),
+            'stj' => TeseAcordao::where('tribunal', 'STJ')->count(),
+        ];
+
+        return view('admin.dashboard', compact('stats', 'quizStats', 'acordaosStats'));
     }
 
     /**
