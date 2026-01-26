@@ -879,7 +879,7 @@ class ProcessAcordaoAnalysis implements ShouldQueue
 
 ### Validação Final
 - [x] Upload funciona em ambiente local ✅ (Testado com sucesso - Tema 1428, ARE 1553607)
-- [x] Upload funciona em produção ✅ (Mesmo bucket S3, funcionará em prod)
+- [x] Upload funciona em produção ✅ (Testado com arquivo de 3.3MB - 168 páginas. Configurações ajustadas: Nginx 10MB, PHP 10MB)
 - [x] Soft delete funciona corretamente ✅
 - [x] Presigned URLs expiram corretamente ✅ (Testado - expiração de 1 hora)
 - [x] Logs de auditoria funcionando ✅
@@ -932,10 +932,12 @@ class ProcessAcordaoAnalysis implements ShouldQueue
 ### 📝 Observações Importantes
 
 #### Ambiente Dev vs Produção
-⚠️ **IMPORTANTE**: Ambos os ambientes (dev e prod) usam o **mesmo bucket S3** (`tesesesumulas`) e provavelmente o **mesmo banco de dados**. Portanto:
-- ✅ Uploads feitos em `teses.test` **aparecerão em produção** também
-- ✅ Isso é **desejável** para este caso de uso (não há necessidade de separar)
-- ✅ Se necessário separar no futuro, criar buckets diferentes ou usar prefixos por ambiente
+⚠️ **IMPORTANTE**: 
+- ✅ Ambos os ambientes (dev e prod) usam o **mesmo bucket S3** (`tesesesumulas`)
+- ⚠️ **NÃO** usam o mesmo banco de dados - cada ambiente tem seu próprio banco
+- ✅ **O trabalho de upload deve ser feito em PRODUÇÃO** - os acórdãos inseridos em dev não aparecem em prod
+- ✅ Dev (`teses.test`) deve ser usado **apenas para testes** da interface e funcionalidades
+- ⚠️ Se acórdãos forem inseridos em dev por engano, será necessário removê-los e reinseri-los em prod
 
 #### Arquivos Criados/Modificados
 - `database/migrations/2026_01_26_135224_create_tese_acordaos_table.php` (NEW)
@@ -962,7 +964,7 @@ class ProcessAcordaoAnalysis implements ShouldQueue
 
 ## 10. Próximos Passos Após Fase 1
 
-1. **Validar uso real**: Monitorar uploads e ajustar conforme necessário
+1. ✅ **Validado: Uso real testado e funcionando** - Uploads testados em produção com arquivos de até 3.3MB (168 páginas). Configurações ajustadas: Nginx (10MB), PHP upload_max_filesize (10MB), PHP post_max_size (12MB).
 2. **Fase 2 (IA)**: Implementar pipeline de processamento
 3. **Fase 3 (Paywall)**: Integrar com sistema de assinaturas
 4. **Fase 4 (STJ)**: Expandir para STJ (já preparado na estrutura)
