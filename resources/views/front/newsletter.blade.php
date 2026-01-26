@@ -68,7 +68,7 @@
                 <h3 class="text-primary mb-4" style="font-weight: 700;">{{ $newsletter->subject }}</h3>
                 <!-- Conteúdo da Newsletter -->
                 <div class="newsletter-content mb-5">
-                    {!! $newsletter->web_content !!}
+                    {!! $newsletterContent !!}
                 </div>
                 
                 <hr>
@@ -97,6 +97,11 @@
     .newsletter-content img {
         max-width: 100%;
         height: auto;
+    }
+    .newsletter-content::after {
+        content: "";
+        display: block;
+        clear: both;
     }
     
     /* Fix breadcrumb separator */

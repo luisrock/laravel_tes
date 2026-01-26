@@ -6,6 +6,27 @@
    HEADER STYLES
    ========================================================================== */
 
+/* Layout para manter footer no bottom */
+html, body {
+    height: 100%;
+}
+#page-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+#main-container {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+.page-content {
+    flex: 1 0 auto;
+}
+.site-footer {
+    margin-top: auto;
+}
+
 /* Esconde o footer antigo do base.blade.php */
 #page-footer {
     display: none !important;

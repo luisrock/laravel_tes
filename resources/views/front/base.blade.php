@@ -146,7 +146,9 @@
             {{-- Header Global --}}
             @include('partials.header')
 
-            @yield('content')
+            <div class="page-content">
+                @yield('content')
+            </div>
 
             {{-- Footer Global --}}
             @include('partials.footer')

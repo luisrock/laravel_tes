@@ -198,39 +198,6 @@
 
             <!-- END Results -->
             
-            <!-- Quizzes Relacionados -->
-            @if(isset($related_quizzes) && $related_quizzes->count() > 0)
-            <div class="block-content mt-4 mb-4">
-                <h4 class="h5 mb-3">
-                    <i class="fa fa-graduation-cap text-primary"></i> Teste seus Conhecimentos
-                </h4>
-                <div class="row">
-                    @foreach($related_quizzes as $quiz)
-                    <div class="col-md-4 col-sm-6 mb-3">
-                        <a href="{{ route('quiz.show', $quiz->slug) }}" class="block block-rounded block-link-shadow h-100" style="text-decoration: none; border-left: 4px solid #5c80d1;">
-                            <div class="block-content block-content-full">
-                                <div class="font-w600 text-primary mb-1">
-                                    {{ $quiz->title }}
-                                </div>
-                                <div class="font-size-sm text-muted">
-                                    <i class="fa fa-question-circle"></i> {{ $quiz->questions_count }} questões
-                                    @if($quiz->tribunal)
-                                    · <i class="fa fa-building"></i> {{ $quiz->tribunal }}
-                                    @endif
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    @endforeach
-                </div>
-                <div class="text-center mt-2">
-                    <a href="{{ route('quizzes.index') }}" class="btn btn-sm btn-outline-primary">
-                        Ver todos os Quizzes <i class="fa fa-arrow-right ml-1"></i>
-                    </a>
-                </div>
-            </div>
-            @endif
-            
             <!-- Temas Relacionados -->
             @if(isset($related_themes) && $related_themes->count() > 0)
             <div class="block-content mt-4 mb-4">
@@ -264,7 +231,8 @@
 
             </div>
 
-
+        </div>
+    </div>
         @endsection
         
         @section('scripts')
