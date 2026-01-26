@@ -298,7 +298,7 @@
                                                    name="file" 
                                                    accept=".pdf"
                                                    required>
-                                            <small class="form-text text-muted">Tamanho máximo: 50MB. Apenas arquivos PDF.</small>
+                                            <small class="form-text text-muted">Tamanho máximo: 10MB. Apenas arquivos PDF.</small>
                                         </div>
                                     </div>
                                     <div class="modal-footer">

@@ -110,7 +110,7 @@ class AcordaoAdminController extends Controller
             'numero_acordao' => 'required|string|max:100',
             'tipo' => 'required|in:Principal,Embargos de Declaração,Modulação de Efeitos,Recurso Extraordinário,Recurso Especial,Outros',
             'label' => 'nullable|string|max:255',
-            'file' => 'required|file|mimes:pdf|max:51200', // 50MB
+            'file' => 'required|file|mimes:pdf|max:10240', // 10MB
         ]);
 
         if ($validator->fails()) {

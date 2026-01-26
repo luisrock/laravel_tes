@@ -11,7 +11,7 @@ use Exception;
 
 class AcordaoUploadService
 {
-    private const MAX_FILE_SIZE = 52428800; // 50MB em bytes
+    private const MAX_FILE_SIZE = 10485760; // 10MB em bytes
     private const MAX_FILES_PER_TESE = 10;
     private const ALLOWED_MIME_TYPES = ['application/pdf'];
 
@@ -28,7 +28,7 @@ class AcordaoUploadService
     {
         // 1. Validação de tamanho
         if ($file->getSize() > self::MAX_FILE_SIZE) {
-            throw new Exception('Arquivo excede o limite de 50MB');
+            throw new Exception('Arquivo excede o limite de 10MB');
         }
 
         // 2. Validação de MIME type real (não apenas extensão)
