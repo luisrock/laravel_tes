@@ -21,8 +21,11 @@
 
         <div class="block-content tab-content overflow-hidden">
 
-<!-- PDF Button -->
-        @if (   (
+<!-- PDF Button (apenas para admins - desabilitado temporariamente por bug no layout) -->
+        @php
+            $isAdmin = auth()->check() && in_array(auth()->user()->email, config('tes_constants.admins', []));
+        @endphp
+        @if ($isAdmin && (
                     !empty($output['sumula']['total']) 
                     || 
                     !empty($output['tese']['total'])
