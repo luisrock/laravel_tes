@@ -229,8 +229,8 @@
                                         <i class="fas fa-info-circle"></i> Nenhum acórdão vinculado
                                     </div>
                                 @endif
-                                @if($tribunal === 'STF' && !empty($tese->link))
-                                    <a href="{{ $tese->link }}" target="_blank" class="text-primary" title="Ver no site oficial do STF" style="text-decoration: none;">
+                                @if(!empty($tese->link))
+                                    <a href="{{ $tese->link }}" target="_blank" class="text-primary" title="Ver no site oficial do {{ $tribunal }}" style="text-decoration: none;">
                                         <i class="fa fa-external-link"></i> Ver Original
                                     </a>
                                 @endif

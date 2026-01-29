@@ -42,24 +42,51 @@ class AcordaoAdminController extends Controller
         $table = $tribunal === 'STF' ? 'stf_teses' : 'stj_teses';
         
         // Nomes das colunas variam por tribunal
+        // STF: tema_texto, acordao, link
+        // STJ: tema (sem acordao nem link)
         $temaColumn = $tribunal === 'STF' ? 'tema_texto' : 'tema';
+        
+        // Colunas base comuns
+        $selectColumns = [
+            "{$table}.id as tese_id",
+            "{$table}.numero",
+            "{$table}.{$temaColumn} as tema",
+            "{$table}.tese_texto",
+        ];
+        
+        // Colunas específicas por tribunal
+        if ($tribunal === 'STF') {
+            $selectColumns[] = "{$table}.acordao";
+            $selectColumns[] = "{$table}.link";
+        } else {
+            // STJ não tem essas colunas, usar NULL
+            $selectColumns[] = DB::raw('NULL as acordao');
+            $selectColumns[] = DB::raw('NULL as link');
+        }
+        
+        $selectColumns[] = DB::raw('COUNT(tese_acordaos.id) as acordaos_count');
+        
+        // Colunas para GROUP BY (sem acordao/link para STJ)
+        $groupByColumns = [
+            "{$table}.id",
+            "{$table}.numero",
+            "{$table}.{$temaColumn}",
+            "{$table}.tese_texto",
+        ];
+        
+        if ($tribunal === 'STF') {
+            $groupByColumns[] = "{$table}.acordao";
+            $groupByColumns[] = "{$table}.link";
+        }
 
         $query = DB::table($table)
-            ->select([
-                "{$table}.id as tese_id",
-                "{$table}.numero",
-                "{$table}.{$temaColumn} as tema",
-                "{$table}.tese_texto",
-                "{$table}.acordao",
-                "{$table}.link",
-                DB::raw('COUNT(tese_acordaos.id) as acordaos_count')
-            ])
+            ->select($selectColumns)
             ->leftJoin('tese_acordaos', function ($join) use ($table, $tribunal) {
                 $join->on('tese_acordaos.tese_id', '=', "{$table}.id")
                      ->on('tese_acordaos.tribunal', '=', DB::raw("'{$tribunal}'"))
                      ->whereNull('tese_acordaos.deleted_at');
             })
-            ->groupBy("{$table}.id", "{$table}.numero", "{$table}.{$temaColumn}", "{$table}.tese_texto", "{$table}.acordao", "{$table}.link");
+            ->groupBy($groupByColumns);
 
         // Filtro: apenas temas com tese divulgada (pré-marcado por padrão)
         if ($onlyWithTese) {
@@ -88,11 +115,14 @@ class AcordaoAdminController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get();
             
-            // Gerar link "Ver Original" para STF (mesma lógica do TesePageController)
+            // Gerar link "Ver Original" (mesma lógica do TesePageController)
             if ($tribunal === 'STF') {
                 if ((empty($tese->link) || $tese->link == '-') && !empty($tese->acordao)) {
                     $tese->link = "https://jurisprudencia.stf.jus.br/pages/search?base=acordaos&sinonimo=true&plural=true&page=1&&pageSize=10&sort=_score&sortBy=desc&isAdvance=true&classeNumeroIncidente=" . urlencode($tese->acordao);
                 }
+            } else if ($tribunal === 'STJ') {
+                // STJ: link para o portal de temas repetitivos
+                $tese->link = "https://processo.stj.jus.br/repetitivos/temas_repetitivos/pesquisa.jsp?novaConsulta=true&tipo_pesquisa=T&cod_tema_inicial={$tese->numero}&cod_tema_final={$tese->numero}";
             }
         }
 
