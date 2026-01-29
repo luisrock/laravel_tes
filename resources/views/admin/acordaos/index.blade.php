@@ -88,14 +88,22 @@
             <!-- Filtros -->
             <div class="filter-form">
                 <form method="GET" action="{{ route('admin.acordaos.index') }}" class="row g-3" id="filterForm">
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label for="tribunal" class="form-label">Tribunal</label>
                         <select name="tribunal" id="tribunal" class="form-control">
                             <option value="STF" {{ $tribunal === 'STF' ? 'selected' : '' }}>STF</option>
                             <option value="STJ" {{ $tribunal === 'STJ' ? 'selected' : '' }}>STJ</option>
                         </select>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-2">
+                        <label for="per_page" class="form-label">Por página</label>
+                        <select name="per_page" id="per_page" class="form-control" onchange="this.form.submit()">
+                            @foreach([10, 20, 50, 100, 200, 500, 1000] as $option)
+                                <option value="{{ $option }}" {{ $perPage == $option ? 'selected' : '' }}>{{ $option }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-5">
                         <label for="search" class="form-label">Buscar tema</label>
                         <input type="text" name="search" id="search" class="form-control" 
                                value="{{ request('search') }}" placeholder="Digite o número ou tema...">
@@ -313,7 +321,7 @@
 
                 <!-- Paginação -->
                 <div class="mt-4">
-                    {{ $teses->links() }}
+                    {{ $teses->withQueryString()->links() }}
                 </div>
             @else
                 <div class="alert alert-info">

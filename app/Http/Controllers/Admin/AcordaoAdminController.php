@@ -29,6 +29,13 @@ class AcordaoAdminController extends Controller
         $tribunal = $request->get('tribunal', 'STF');
         $search = $request->get('search');
         $onlyWithout = $request->boolean('only_without');
+        
+        // Itens por página (validar contra valores permitidos)
+        $allowedPerPage = [10, 20, 50, 100, 200, 500, 1000];
+        $perPage = (int) $request->get('per_page', 50);
+        if (!in_array($perPage, $allowedPerPage)) {
+            $perPage = 50;
+        }
         // Filtro pré-marcado: apenas temas com tese divulgada (tese_texto não nulo)
         // Se não vier na requisição (primeira vez), assume true (pré-marcado)
         // Se vier como '0' ou não vier após primeira vez, mostra todos (com e sem tese)
@@ -106,7 +113,7 @@ class AcordaoAdminController extends Controller
         }
 
         $teses = $query->orderBy("{$table}.numero", 'desc')
-                      ->paginate(50);
+                      ->paginate($perPage);
 
         // Buscar acórdãos de cada tese e gerar link "Ver Original" para STF
         foreach ($teses as $tese) {
@@ -126,7 +133,7 @@ class AcordaoAdminController extends Controller
             }
         }
 
-        return view('admin.acordaos.index', compact('teses', 'tribunal', 'onlyWithTese'));
+        return view('admin.acordaos.index', compact('teses', 'tribunal', 'onlyWithTese', 'perPage'));
     }
 
     /**
