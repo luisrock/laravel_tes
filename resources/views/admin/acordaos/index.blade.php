@@ -103,12 +103,19 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-5">
+                    <div class="col-md-2">
+                        <label for="order" class="form-label">Ordenar</label>
+                        <select name="order" id="order" class="form-control" onchange="this.form.submit()">
+                            <option value="desc" {{ $order === 'desc' ? 'selected' : '' }}>DESC</option>
+                            <option value="asc" {{ $order === 'asc' ? 'selected' : '' }}>ASC</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
                         <label for="search" class="form-label">Buscar tema</label>
                         <input type="text" name="search" id="search" class="form-control" 
                                value="{{ request('search') }}" placeholder="Digite o número ou tema...">
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label">&nbsp;</label>
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary w-100">
