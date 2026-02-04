@@ -11,7 +11,7 @@ use Exception;
 
 class AcordaoUploadService
 {
-    private const MAX_FILE_SIZE = 10485760; // 10MB em bytes
+    private const MAX_FILE_SIZE = 15728640; // 15MB em bytes (temporário - reduzir para 5MB após upload do tema 1031)
     private const MAX_FILES_PER_TESE = 10;
     private const ALLOWED_MIME_TYPES = ['application/pdf'];
 
