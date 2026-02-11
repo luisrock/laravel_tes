@@ -169,7 +169,7 @@ function trib_request_body($data, $tribunal, $url = NULL, $verify = false)
     $url = config('tes_constants.options.' . strtolower($tribunal) . '_search_url');
   }
 
-  $headers = array(
+  $headers = [
     "Pragma" => "no-cache",
     "Cache-Control" => "no-cache",
     "User-Agent" => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
@@ -177,10 +177,10 @@ function trib_request_body($data, $tribunal, $url = NULL, $verify = false)
     "Accept" => "*/*",
     "Accept-Encoding" => "gzip, deflate, br",
     "Accept-Language" => "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
-  );
-  $options = array(
+  ];
+  $options = [
     'verify' => $verify
-  );
+  ];
 
   $request = Http::withHeaders($headers)
     ->timeout(15)
@@ -479,13 +479,13 @@ function tcu_request($keyword)
     $type = ($s === 'sumula') ? $s : "resposta-consulta";
     $search_tcu_url = "$search_tcu_url_base/$type/documentosResumidos?";
 
-    $params = array(
+    $params = [
       'termo' => $keyword,
       'ordenacao' => 'DTRELEVANCIA desc, NUMEROINT desc',
       'quantidade' => '200',
       'inicio' => '0',
       'sinonimos' => 'true'
-    );
+    ];
 
     if ($s === 'tese') {
       $params['ordenacao'] = 'score desc, COLEGIADO asc, ANOACORDAO desc, NUMACORDAO desc';
@@ -495,14 +495,14 @@ function tcu_request($keyword)
 
     $final_url = $search_tcu_url . http_build_query($params);
 
-    $headers = array(
+    $headers = [
       "Pragma" => "no-cache",
       "Cache-Control" => "no-cache",
       "User-Agent" => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
       "Accept" => "application/json, text/plain, */*",
       "Accept-Encoding" => "gzip, deflate, br",
       "Accept-Language" => "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
-    );
+    ];
 
     $request = Http::withHeaders($headers)
       ->timeout(15)
