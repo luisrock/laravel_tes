@@ -20,3 +20,4 @@ ads.txtSearch-Console-*/
 *.md
 !README.md
 !LARAVEL_9_UPGRADE.md
+!TESTING_LARAVEL_9_UPGRADE.md
