@@ -16,6 +16,7 @@ ads.txtSearch-Console-*/
 .DS_Store
 .psysh/
 
-# Ignore all .md files except README.md
+# Ignore all .md files except README.md and upgrade docs
 *.md
 !README.md
+!LARAVEL_9_UPGRADE.md
