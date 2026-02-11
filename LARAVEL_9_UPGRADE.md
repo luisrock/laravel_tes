@@ -9,15 +9,15 @@ All changes have been implemented following the [Laravel 9 Upgrade Guide](https:
 ### 1. Composer Dependencies Updated
 
 #### composer.json - require section:
-- **PHP Version**: Changed from `^7.3|^8.0` to `^8.0` (Laravel 9 requires PHP 8.0+)
+- **PHP Version**: Changed from `^7.3|^8.0` to `^8.0` (Laravel 9 requires PHP 8.0.2+)
 - **Laravel Framework**: Updated from `^8.0` to `^9.0`
 - **Laravel UI**: Updated from `^3.0` to `^4.0`
 - **Flysystem S3 Driver**: Updated from `^1.0` to `^3.0` (Major version update required)
-- **fideloper/proxy**: **REMOVED** (Now built into Laravel 9)
 
 #### composer.json - require-dev section:
 - **nunomaduro/collision**: Updated from `^5.0` to `^6.1`
 - **fzaninotto/faker**: Replaced with `fakerphp/faker` (original package is abandoned)
+- **facade/ignition**: Replaced with `spatie/laravel-ignition` `^1.0` (facade/ignition is no longer maintained for Laravel 9)
 
 ### 2. Middleware Changes
 
@@ -42,6 +42,10 @@ All changes have been implemented following the [Laravel 9 Upgrade Guide](https:
 #### config/filament.php
 - **Line 297**: Changed `env('FILAMENT_FILESYSTEM_DRIVER', 'public')` to `env('FILAMENT_FILESYSTEM_DISK', 'public')`
 - **Reason**: Match Laravel 9's naming convention
+
+#### config/database.php
+- **Line 77**: Changed `'schema' => 'public'` to `'search_path' => 'public'` in Postgres configuration
+- **Reason**: Laravel 9 renames the `schema` configuration option to `search_path` for Postgres connections
 
 ## Next Steps
 
