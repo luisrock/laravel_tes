@@ -10,6 +10,35 @@
  */
 
 // ==========================================
+// Presets nativos do Pest v3
+// ==========================================
+
+// Nota: arch()->preset()->laravel() é muito restritivo para este codebase
+// que usa padrão clássico (Kernel.php, controllers com métodos não-resource,
+// AdminPanelProvider sem sufixo ServiceProvider). Em vez do preset completo,
+// adicionamos verificações específicas mais adequadas abaixo.
+
+arch('controllers usam suffix Controller')
+    ->expect('App\Http\Controllers')
+    ->toHaveSuffix('Controller')
+    ->ignoring('App\Http\Controllers\Controller');
+
+arch('models não usam suffix Model')
+    ->expect('App\Models')
+    ->not->toHaveSuffix('Model')
+    ->ignoring('App\Models\AiModel'); // exceção legítima — é o nome do conceito
+
+arch('providers estão no namespace correto')
+    ->expect('App\Providers')
+    ->toBeClasses();
+
+arch()->preset()->security()
+    ->ignoring([
+        'App\Console\Commands',                      // comandos artisan de diagnóstico
+        'App\Http\Controllers\ApiController',        // usa shuffle() para aleatoriedade de temas
+    ]);
+
+// ==========================================
 // Padrões Gerais
 // ==========================================
 

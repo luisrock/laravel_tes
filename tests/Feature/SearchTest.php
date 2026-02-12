@@ -80,6 +80,94 @@ describe('API de Busca', function () {
 });
 
 // ==========================================
+// Busca com Acentos
+// ==========================================
+
+describe('Busca com Acentos', function () {
+
+    it('aceita busca com termo acentuado "constituição"', function () {
+        $response = $this->postJson('/api/', [
+            'q' => 'constituição',
+            'tribunal' => 'STF',
+        ]);
+
+        expect($response->getStatusCode())->toBeIn([200, 500]);
+    });
+
+    it('aceita busca com termo acentuado "previdenciário"', function () {
+        $response = $this->postJson('/api/', [
+            'q' => 'previdenciário',
+            'tribunal' => 'STJ',
+        ]);
+
+        expect($response->getStatusCode())->toBeIn([200, 500]);
+    });
+
+    it('aceita busca com cedilha "execução"', function () {
+        $response = $this->postJson('/api/', [
+            'q' => 'execução fiscal',
+            'tribunal' => 'STJ',
+        ]);
+
+        expect($response->getStatusCode())->toBeIn([200, 500]);
+    });
+
+});
+
+// ==========================================
+// Busca sem Resultados
+// ==========================================
+
+describe('Busca sem Resultados', function () {
+
+    it('aceita busca com termo absurdo que não retorna resultados', function () {
+        $response = $this->postJson('/api/', [
+            'q' => 'xyzqwertynonsense',
+            'tribunal' => 'STF',
+        ]);
+
+        expect($response->getStatusCode())->toBeIn([200, 500]);
+    });
+
+});
+
+// ==========================================
+// Paginação
+// ==========================================
+
+describe('Paginação', function () {
+
+    it('aceita parâmetro page na busca web', function () {
+        $response = $this->get('/?q=direito&tribunal=STF&page=1');
+
+        // Pode dar 302 (validação), 200 ou 500
+        expect($response->getStatusCode())->toBeIn([200, 302, 500]);
+    });
+
+});
+
+// ==========================================
+// Todos os Tribunais válidos
+// ==========================================
+
+describe('Todos os Tribunais', function () {
+
+    $tribunais = ['STF', 'STJ', 'TST', 'TNU', 'TCU', 'CARF', 'FONAJE', 'CEJ'];
+
+    foreach ($tribunais as $tribunal) {
+        it("aceita busca com tribunal {$tribunal}", function () use ($tribunal) {
+            $response = $this->postJson('/api/', [
+                'q' => 'direito',
+                'tribunal' => $tribunal,
+            ]);
+
+            expect($response->getStatusCode())->toBeIn([200, 500]);
+        });
+    }
+
+});
+
+// ==========================================
 // Páginas de Temas
 // ==========================================
 

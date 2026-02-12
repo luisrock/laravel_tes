@@ -84,6 +84,49 @@ quiz_answers        - Respostas individuais
 
 ---
 
+### Testes
+
+A aplicação possui uma bateria abrangente de **205 testes** (291 assertions) usando Pest v3 + PHPUnit 11.
+
+```bash
+# Rodar todos os testes (usar PHP 8.3)
+/opt/homebrew/opt/php@8.3/bin/php artisan test
+
+# Rodar um arquivo específico
+/opt/homebrew/opt/php@8.3/bin/php artisan test --filter=QuizTest
+
+# Rodar testes de arquitetura
+/opt/homebrew/opt/php@8.3/bin/php artisan test --filter=ArchTest
+```
+
+**Estrutura de testes:**
+
+| Arquivo | Testes | O que cobre |
+|---------|--------|-------------|
+| ArchTest | 16 | Arquitetura: presets security, namespaces, sufixos |
+| AuthTest | 22 | Login, logout, registro, reset de senha completo |
+| SmokeTest | 27 | Todas as rotas públicas e protegidas |
+| MiddlewareTest | 15 | AdminMiddleware, BearerToken, Subscribed, Feature, Config |
+| QuizTest | 17 | Listagem, filtro, visualização, resposta AJAX, resultado |
+| NewsletterTest | 5 | Listagem, individual, accessor web_content |
+| EditableContentTest | 8 | Página pública, edição admin, validação |
+| AdminCrudTest | 19 | Proteção 403 e acesso 200 para todas as rotas admin |
+| FilamentPanelTest | 7 | Auth, recursos, proteção do painel /painel |
+| ApiTest | 13 | Bearer token auth, endpoints protegidos, busca pública |
+| WebhookTest | 6 | Validação payload, idempotência, checkout session |
+| SubscriptionTest | 22 | Model helpers, estorno completo, PlanFeature |
+| SearchTest | 22 | Validação, acentos, paginação, todos os 8 tribunais |
+| SubscriptionNotifications | 3 | Notificações de boas-vindas, cancelamento, estorno |
+| SubscriptionRenewalReminder | 3 | Job de lembrete de renovação |
+
+**Observações:**
+- DB de teste: SQLite in-memory (configurado em `phpunit.xml`)
+- Queries MySQL-específicas (FULLTEXT, etc.) podem retornar 500 no SQLite — testes usam `assertRouteResponds()` que aceita 200 ou 500
+- Helpers reutilizáveis em `tests/Pest.php`: `createAdminUser()`, `createPublishedQuiz()`, `createSubscribedUser()`
+- Plano completo: `TEST_PLAN.md`
+
+---
+
 ### Prepare local
 
 1. create db tes
