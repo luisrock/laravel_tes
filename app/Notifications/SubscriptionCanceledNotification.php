@@ -12,32 +12,32 @@ class SubscriptionCanceledNotification extends Notification implements ShouldQue
 {
     use Queueable;
 
-    protected ?Carbon $endsAt;
+    public function __construct(
+        protected ?Carbon $endsAt = null,
+    ) {}
 
-    public function __construct(?Carbon $endsAt = null)
-    {
-        $this->endsAt = $endsAt;
-    }
-
-    public function via($notifiable)
+    /**
+     * @return array<int, string>
+     */
+    public function via(mixed $notifiable): array
     {
         return ['mail'];
     }
 
-    public function toMail($notifiable)
+    public function toMail(mixed $notifiable): MailMessage
     {
         $message = (new MailMessage)
             ->subject('Sua assinatura foi cancelada')
-            ->greeting('Olá, '.$notifiable->name)
+            ->greeting('Ola, '.$notifiable->name)
             ->line('Confirmamos o cancelamento da sua assinatura.');
 
         if ($this->endsAt) {
-            $message->line('Você ainda terá acesso até: '.$this->endsAt->format('d/m/Y'));
+            $message->line('Voce ainda tera acesso ate: '.$this->endsAt->format('d/m/Y'));
         }
 
         return $message
             ->line('Sentiremos sua falta! Se mudar de ideia, pode reativar a qualquer momento.')
             ->action('Reativar Assinatura', route('subscription.plans'))
-            ->line('Obrigado por ter sido assinante do Teses e Súmulas.');
+            ->line('Obrigado por ter sido assinante do Teses e Sumulas.');
     }
 }

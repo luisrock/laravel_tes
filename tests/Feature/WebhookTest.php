@@ -5,18 +5,18 @@ use App\Models\User;
 use Laravel\Cashier\Http\Middleware\VerifyWebhookSignature;
 
 /**
- * Testes do fluxo de Webhook Stripe — idempotência, validação de payload,
+ * Testes do fluxo de Webhook Stripe — idempotencia, validacao de payload,
  * e processamento de eventos.
  *
- * O VerifyWebhookSignature é desativado nos testes para permitir
+ * O VerifyWebhookSignature e desativado nos testes para permitir
  * testar o fluxo sem assinatura real do Stripe.
  */
 
 // ==========================================
-// Validação de Payload
+// Validacao de Payload
 // ==========================================
 
-describe('Webhook - Validação de Payload', function () {
+describe('Webhook - Validacao de Payload', function () {
 
     it('retorna 400 para payload sem id', function () {
         $this->withoutMiddleware(VerifyWebhookSignature::class)
@@ -47,19 +47,18 @@ describe('Webhook - Validação de Payload', function () {
 });
 
 // ==========================================
-// Idempotência
+// Idempotencia
 // ==========================================
 
-describe('Webhook - Idempotência', function () {
+describe('Webhook - Idempotencia', function () {
 
-    it('retorna already_processed para evento já processado', function () {
-        // Pré-criar um evento já processado
+    it('retorna already_processed para evento ja processado', function () {
         StripeWebhookEvent::create([
             'stripe_event_id' => 'evt_already_processed',
             'event_type' => 'checkout.session.completed',
             'stripe_object_id' => 'cs_test_123',
             'received_at' => now(),
-            'processed_at' => now(), // Já processado
+            'processed_at' => now(),
         ]);
 
         $this->withoutMiddleware(VerifyWebhookSignature::class)
@@ -73,13 +72,11 @@ describe('Webhook - Idempotência', function () {
                     ],
                 ],
             ])
-            ->assertOk()
+            ->assertSuccessful()
             ->assertJson(['status' => 'already_processed']);
     });
 
     it('registra StripeWebhookEvent ao receber evento novo', function () {
-        // Este teste valida que o evento é registrado no banco
-        // Pode falhar no processamento real (Stripe API), mas o registro deve existir
         $this->withoutMiddleware(VerifyWebhookSignature::class)
             ->postJson('/stripe/webhook', [
                 'id' => 'evt_new_event_123',
@@ -92,7 +89,6 @@ describe('Webhook - Idempotência', function () {
                 ],
             ]);
 
-        // Independente do resultado, o evento deve ter sido registrado
         $this->assertDatabaseHas('stripe_webhook_events', [
             'stripe_event_id' => 'evt_new_event_123',
             'event_type' => 'checkout.session.completed',
@@ -110,7 +106,6 @@ describe('Webhook - Checkout Session Completed', function () {
     it('cria StripeWebhookEvent com client_reference_id', function () {
         $user = User::factory()->create();
 
-        // Testar via controller diretamente (como SubscriptionNotificationsTest)
         $controller = new TestableWebhookControllerForWebhookTest;
         $controller->callHandleCheckoutSessionCompleted([
             'data' => [
@@ -121,16 +116,15 @@ describe('Webhook - Checkout Session Completed', function () {
             ],
         ]);
 
-        // Verificar que funciona sem erros (a notificação é enviada internamente)
         expect(true)->toBeTrue();
     });
 
 });
 
-// Helper class para expor métodos protegidos do WebhookController
+// Helper class para expor metodos protegidos do WebhookController
 class TestableWebhookControllerForWebhookTest extends \App\Http\Controllers\WebhookController
 {
-    public function callHandleCheckoutSessionCompleted(array $payload)
+    public function callHandleCheckoutSessionCompleted(array $payload): mixed
     {
         return $this->handleCheckoutSessionCompleted($payload);
     }

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\RefundRequestStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,18 +25,17 @@ class RefundRequest extends Model
     ];
 
     /**
-     * Status possíveis para solicitações de estorno.
+     * @return array<string, string>
      */
-    public const STATUS_PENDING = 'pending';
-
-    public const STATUS_APPROVED = 'approved';
-
-    public const STATUS_REJECTED = 'rejected';
-
-    public const STATUS_PROCESSED = 'processed';
+    protected function casts(): array
+    {
+        return [
+            'status' => RefundRequestStatus::class,
+        ];
+    }
 
     /**
-     * Relacionamento com usuário.
+     * Relacionamento com usuario.
      */
     public function user(): BelongsTo
     {
@@ -50,10 +51,10 @@ class RefundRequest extends Model
     }
 
     /**
-     * Scope para solicitações pendentes.
+     * Scope para solicitacoes pendentes.
      */
-    public function scopePending($query)
+    public function scopePending(Builder $query): Builder
     {
-        return $query->where('status', self::STATUS_PENDING);
+        return $query->where('status', RefundRequestStatus::Pending);
     }
 }

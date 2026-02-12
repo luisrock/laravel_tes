@@ -4,28 +4,25 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class EnsureUserIsSubscribed
 {
     /**
      * Handle an incoming request.
-     *
-     * @return mixed
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
 
-        // Se não está logado, redirecionar para login
         if (! $user) {
             return redirect()->route('login')
-                ->with('error', 'Você precisa estar logado para acessar esta página.');
+                ->with('error', 'Voce precisa estar logado para acessar esta pagina.');
         }
 
-        // Se não é assinante, redirecionar para página de planos
         if (! $user->isSubscriber()) {
             return redirect()->route('subscription.plans')
-                ->with('info', 'Esta página é exclusiva para assinantes.');
+                ->with('info', 'Esta pagina e exclusiva para assinantes.');
         }
 
         return $next($request);

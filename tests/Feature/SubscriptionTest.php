@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\RefundRequestStatus;
 use App\Models\PlanFeature;
 use App\Models\RefundRequest;
 use App\Models\User;
@@ -11,8 +12,8 @@ use Laravel\Cashier\Subscription;
 /**
  * Testes do fluxo de assinatura.
  *
- * NOTA: Não testamos a integração real com Stripe — apenas os fluxos
- * que não dependem de chamadas externas (validação, redirecionamentos, etc.).
+ * NOTA: Nao testamos a integracao real com Stripe — apenas os fluxos
+ * que nao dependem de chamadas externas (validacao, redirecionamentos, etc.).
  */
 
 // ==========================================
@@ -21,7 +22,7 @@ use Laravel\Cashier\Subscription;
 
 describe('Planos de Assinatura', function () {
 
-    it('exibe a página de planos quando Stripe está configurado', function () {
+    it('exibe a pagina de planos quando Stripe esta configurado', function () {
         Config::set('cashier.key', 'pk_test_fake');
         Config::set('cashier.secret', 'sk_test_fake');
         Config::set('subscription.tier_product_ids', ['prod_test']);
@@ -40,7 +41,7 @@ describe('Planos de Assinatura', function () {
 
 describe('Checkout', function () {
 
-    it('requer autenticação para checkout', function () {
+    it('requer autenticacao para checkout', function () {
         Config::set('cashier.key', 'pk_test_fake');
         Config::set('cashier.secret', 'sk_test_fake');
 
@@ -51,12 +52,12 @@ describe('Checkout', function () {
 });
 
 // ==========================================
-// Área do Assinante
+// Area do Assinante
 // ==========================================
 
-describe('Área do Assinante', function () {
+describe('Area do Assinante', function () {
 
-    it('exibe página de assinatura para usuário autenticado', function () {
+    it('exibe pagina de assinatura para usuario autenticado', function () {
         Config::set('cashier.key', 'pk_test_fake');
         Config::set('cashier.secret', 'sk_test_fake');
         Config::set('subscription.tier_product_ids', ['prod_test']);
@@ -65,10 +66,10 @@ describe('Área do Assinante', function () {
 
         $this->actingAs($user)
             ->get('/minha-conta/assinatura')
-            ->assertStatus(200);
+            ->assertSuccessful();
     });
 
-    it('responde na página de estorno para usuário autenticado', function () {
+    it('responde na pagina de estorno para usuario autenticado', function () {
         Config::set('cashier.key', 'pk_test_fake');
         Config::set('cashier.secret', 'sk_test_fake');
         Config::set('subscription.tier_product_ids', ['prod_test']);
@@ -78,7 +79,7 @@ describe('Área do Assinante', function () {
         $response = $this->actingAs($user)
             ->get('/minha-conta/estorno');
 
-        // Pode redirecionar se não houver assinatura ativa, ou exibir 200
+        // Pode redirecionar se nao houver assinatura ativa, ou exibir 200
         expect($response->getStatusCode())->toBeIn([200, 302]);
     });
 
@@ -90,19 +91,19 @@ describe('Área do Assinante', function () {
 
 describe('Modelo User - Subscription helpers sem assinatura', function () {
 
-    it('retorna false para isSubscriber quando não tem assinatura', function () {
+    it('retorna false para isSubscriber quando nao tem assinatura', function () {
         $user = User::factory()->create();
 
         expect($user->isSubscriber())->toBeFalse();
     });
 
-    it('retorna null para getSubscriptionPlan quando não tem assinatura', function () {
+    it('retorna null para getSubscriptionPlan quando nao tem assinatura', function () {
         $user = User::factory()->create();
 
         expect($user->getSubscriptionPlan())->toBeNull();
     });
 
-    it('retorna false para hasFeature quando não tem assinatura', function () {
+    it('retorna false para hasFeature quando nao tem assinatura', function () {
         Config::set('subscription.tier_product_ids', ['prod_test']);
 
         $user = User::factory()->create();
@@ -110,7 +111,7 @@ describe('Modelo User - Subscription helpers sem assinatura', function () {
         expect($user->hasFeature('no_ads'))->toBeFalse();
     });
 
-    it('retorna true para shouldSeeAds quando não é assinante', function () {
+    it('retorna true para shouldSeeAds quando nao e assinante', function () {
         Config::set('subscription.tier_product_ids', ['prod_test']);
 
         $user = User::factory()->create();
@@ -118,13 +119,13 @@ describe('Modelo User - Subscription helpers sem assinatura', function () {
         expect($user->shouldSeeAds())->toBeTrue();
     });
 
-    it('retorna false para isOnGracePeriod quando não tem assinatura', function () {
+    it('retorna false para isOnGracePeriod quando nao tem assinatura', function () {
         $user = User::factory()->create();
 
         expect($user->isOnGracePeriod())->toBeFalse();
     });
 
-    it('retorna null para getAccessEndsAt quando não tem assinatura', function () {
+    it('retorna null para getAccessEndsAt quando nao tem assinatura', function () {
         $user = User::factory()->create();
 
         expect($user->getAccessEndsAt())->toBeNull();
@@ -168,7 +169,7 @@ describe('Modelo User - Subscription helpers com assinatura ativa', function () 
         expect($user->hasFeature('no_ads'))->toBeTrue();
     });
 
-    it('retorna false para hasFeature quando PlanFeature não existe', function () {
+    it('retorna false para hasFeature quando PlanFeature nao existe', function () {
         Config::set('subscription.tier_product_ids', ['prod_test']);
 
         $user = createSubscribedUser('prod_test');
@@ -176,7 +177,7 @@ describe('Modelo User - Subscription helpers com assinatura ativa', function () 
         expect($user->hasFeature('exclusive_content'))->toBeFalse();
     });
 
-    it('retorna false para shouldSeeAds quando é assinante com feature no_ads', function () {
+    it('retorna false para shouldSeeAds quando e assinante com feature no_ads', function () {
         Config::set('subscription.tier_product_ids', ['prod_test']);
 
         $user = createSubscribedUser('prod_test');
@@ -232,10 +233,10 @@ describe('Modelo User - Subscription helpers com assinatura ativa', function () 
 });
 
 // ==========================================
-// Formulário de Estorno
+// Formulario de Estorno
 // ==========================================
 
-describe('Formulário de Estorno', function () {
+describe('Formulario de Estorno', function () {
 
     beforeEach(function () {
         Config::set('cashier.key', 'pk_test_fake');
@@ -251,15 +252,15 @@ describe('Formulário de Estorno', function () {
             ->assertRedirect(route('subscription.plans'));
     });
 
-    it('exibe formulário de estorno com assinatura ativa', function () {
+    it('exibe formulario de estorno com assinatura ativa', function () {
         $user = createSubscribedUser('prod_test');
 
         $this->actingAs($user)
             ->get('/minha-conta/estorno')
-            ->assertStatus(200);
+            ->assertSuccessful();
     });
 
-    it('rejeita razão curta (< 20 chars) no estorno', function () {
+    it('rejeita razao curta (< 20 chars) no estorno', function () {
         $user = createSubscribedUser('prod_test');
 
         $this->actingAs($user)
@@ -269,36 +270,35 @@ describe('Formulário de Estorno', function () {
             ->assertSessionHasErrors(['reason']);
     });
 
-    it('cria RefundRequest com razão válida', function () {
+    it('cria RefundRequest com razao valida', function () {
         Notification::fake();
 
         $user = createSubscribedUser('prod_test');
 
         $this->actingAs($user)
             ->post('/minha-conta/estorno', [
-                'reason' => 'Motivo válido e detalhado para solicitar o estorno da minha assinatura.',
+                'reason' => 'Motivo valido e detalhado para solicitar o estorno da minha assinatura.',
             ])
             ->assertRedirect(route('subscription.show'));
 
         $this->assertDatabaseHas('refund_requests', [
             'user_id' => $user->id,
-            'status' => RefundRequest::STATUS_PENDING,
+            'status' => RefundRequestStatus::Pending->value,
         ]);
     });
 
-    it('redireciona com info se já existe solicitação pendente', function () {
+    it('redireciona com info se ja existe solicitacao pendente', function () {
         Notification::fake();
 
         $user = createSubscribedUser('prod_test');
         $subscription = $user->subscription('default');
 
-        // Criar solicitação pendente
         RefundRequest::create([
             'user_id' => $user->id,
             'cashier_subscription_id' => $subscription->id,
             'stripe_subscription_id' => $subscription->stripe_id,
-            'reason' => 'Solicitação anterior pendente',
-            'status' => RefundRequest::STATUS_PENDING,
+            'reason' => 'Solicitacao anterior pendente',
+            'status' => RefundRequestStatus::Pending,
         ]);
 
         $this->actingAs($user)

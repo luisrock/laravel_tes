@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\RefundRequestStatus;
 use App\Models\RefundRequest;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -17,12 +18,12 @@ class PendingRefundRequests extends BaseWidget
             ->query(
                 RefundRequest::query()
                     ->with('user')
-                    ->where('status', RefundRequest::STATUS_PENDING)
+                    ->where('status', RefundRequestStatus::Pending)
                     ->latest()
             )
             ->columns([
                 TextColumn::make('user.email')
-                    ->label('Usuário')
+                    ->label('Usuario')
                     ->searchable(),
                 TextColumn::make('reason')
                     ->label('Motivo')

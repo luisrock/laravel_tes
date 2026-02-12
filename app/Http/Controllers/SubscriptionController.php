@@ -5,22 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\StripeWebhookEvent;
 use App\Services\StripeService;
 use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 
 class SubscriptionController extends Controller
 {
-    protected StripeService $stripeService;
-
-    public function __construct(StripeService $stripeService)
-    {
-        $this->stripeService = $stripeService;
-    }
+    public function __construct(
+        protected StripeService $stripeService,
+    ) {}
 
     /**
-     * Página de planos/preços.
+     * Pagina de planos/precos.
      */
-    public function index()
+    public function index(): View
     {
         $plans = $this->stripeService->getFormattedPlans();
 
@@ -32,7 +32,7 @@ class SubscriptionController extends Controller
     /**
      * Inicia checkout via Stripe Checkout.
      */
-    public function checkout(Request $request)
+    public function checkout(Request $request): mixed
     {
         $request->validate([
             'priceId' => 'required|string',
@@ -41,38 +41,31 @@ class SubscriptionController extends Controller
         $priceId = $request->input('priceId');
         $user = $request->user();
 
-        // Validar price ID contra allowlist
         if (! $this->stripeService->isValidPriceId($priceId)) {
-            Log::warning('Tentativa de checkout com priceId inválido', [
+            Log::warning('Tentativa de checkout com priceId invalido', [
                 'user_id' => $user->id,
                 'price_id' => $priceId,
             ]);
 
-            return back()->with('error', 'Plano inválido selecionado.');
+            return back()->with('error', 'Plano invalido selecionado.');
         }
 
-        // Verificar se usuário já tem assinatura ativa
-        $source = $user->getSubscriptionSource();
         $subscriptionName = config('subscription.default_subscription_name', 'default');
 
-        if ($source && $source->subscribed($subscriptionName)) {
-            // Redirecionar para Billing Portal para upgrade/gerenciamento
+        if ($user->subscribed($subscriptionName)) {
             return $this->billingPortal($request);
         }
 
-        // Criar sessão de checkout
         try {
-            $checkoutSession = $user->newSubscription($subscriptionName, $priceId)
+            return $user->newSubscription($subscriptionName, $priceId)
+                ->allowPromotionCodes()
                 ->checkout([
                     'success_url' => route('subscription.success').'?session_id={CHECKOUT_SESSION_ID}',
                     'cancel_url' => route('subscription.cancel'),
                     'client_reference_id' => (string) $user->id,
-                    'allow_promotion_codes' => true,
                 ]);
-
-            return redirect($checkoutSession->url);
         } catch (Exception $e) {
-            Log::error('Erro ao criar sessão de checkout', [
+            Log::error('Erro ao criar sessao de checkout', [
                 'user_id' => $user->id,
                 'price_id' => $priceId,
                 'error' => $e->getMessage(),
@@ -83,18 +76,17 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Página de sucesso após checkout.
+     * Pagina de sucesso apos checkout.
      */
-    public function success(Request $request)
+    public function success(Request $request): View|RedirectResponse
     {
         $sessionId = $request->query('session_id');
 
         if (! $sessionId) {
             return redirect()->route('subscription.plans')
-                ->with('error', 'Sessão inválida.');
+                ->with('error', 'Sessao invalida.');
         }
 
-        // Verificar se o webhook já processou esta sessão
         $isProcessed = StripeWebhookEvent::checkoutSessionProcessed($sessionId);
 
         return view('subscription.success', [
@@ -104,17 +96,17 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Página quando usuário cancela/desiste do checkout.
+     * Pagina quando usuario cancela/desiste do checkout.
      */
-    public function cancel()
+    public function cancel(): View
     {
         return view('subscription.cancel');
     }
 
     /**
-     * Página de status da assinatura do usuário.
+     * Pagina de status da assinatura do usuario.
      */
-    public function show(Request $request)
+    public function show(Request $request): View
     {
         $user = $request->user();
         $subscriptionName = config('subscription.default_subscription_name', 'default');
@@ -133,7 +125,7 @@ class SubscriptionController extends Controller
     /**
      * Redireciona para Stripe Billing Portal.
      */
-    public function billingPortal(Request $request)
+    public function billingPortal(Request $request): RedirectResponse
     {
         $user = $request->user();
 
@@ -152,7 +144,7 @@ class SubscriptionController extends Controller
     /**
      * Endpoint AJAX para verificar status de processamento do checkout.
      */
-    public function checkProcessingStatus(Request $request)
+    public function checkProcessingStatus(Request $request): JsonResponse
     {
         $sessionId = $request->query('session_id');
 

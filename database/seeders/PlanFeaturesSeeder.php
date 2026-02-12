@@ -10,10 +10,8 @@ class PlanFeaturesSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         $featureKey = config('subscription.features.no_ads', 'no_ads');
         $productIds = array_values(array_filter(config('subscription.tier_product_ids', [])));

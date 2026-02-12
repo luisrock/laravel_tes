@@ -7,15 +7,14 @@ use App\Models\User;
 
 class SubscriptionService
 {
-    protected StripeService $stripeService;
-
-    public function __construct(StripeService $stripeService)
-    {
-        $this->stripeService = $stripeService;
-    }
+    public function __construct(
+        protected StripeService $stripeService,
+    ) {}
 
     /**
-     * Retorna todas as features do usuário baseado em sua assinatura.
+     * Retorna todas as features do usuario baseado em sua assinatura.
+     *
+     * @return array<int, string>
      */
     public function getUserFeatures(User $user): array
     {
@@ -32,7 +31,8 @@ class SubscriptionService
 
     /**
      * Valida integridade entre produtos do Stripe e features configuradas.
-     * Retorna produtos órfãos (sem features) ou features órfãs (produto inexistente).
+     *
+     * @return array{products_without_features: array<int, string>, features_with_invalid_product: array<int, string>}
      */
     public function validatePlanFeaturesIntegrity(): array
     {
@@ -42,7 +42,6 @@ class SubscriptionService
             'features_with_invalid_product' => [],
         ];
 
-        // Verificar produtos sem features
         foreach ($tierProductIds as $productId) {
             if (empty($productId)) {
                 continue;
@@ -54,7 +53,6 @@ class SubscriptionService
             }
         }
 
-        // Verificar features com produtos inválidos
         $featuresProductIds = PlanFeature::pluck('stripe_product_id')->unique();
         foreach ($featuresProductIds as $productId) {
             if (! in_array($productId, $tierProductIds)) {
@@ -66,7 +64,9 @@ class SubscriptionService
     }
 
     /**
-     * Seed de features para um produto (útil para setup inicial).
+     * Seed de features para um produto (util para setup inicial).
+     *
+     * @param  array<int, string>  $featureKeys
      */
     public function seedFeaturesForProduct(string $productId, array $featureKeys): void
     {

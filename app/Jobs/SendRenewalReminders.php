@@ -17,7 +17,7 @@ class SendRenewalReminders implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function handle()
+    public function handle(): void
     {
         $daysAhead = 7;
         $targetDate = Carbon::now()->addDays($daysAhead)->startOfDay();

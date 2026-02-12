@@ -2,37 +2,38 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\RefundRequestStatus;
 use App\Models\RefundRequest;
 use App\Notifications\RefundRequestReceivedNotification;
 use Exception;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 
 class RefundRequestController extends Controller
 {
     /**
-     * Formulário de solicitação de estorno.
+     * Formulario de solicitacao de estorno.
      */
-    public function create(Request $request)
+    public function create(Request $request): View|RedirectResponse
     {
         $user = $request->user();
         $subscriptionName = config('subscription.default_subscription_name', 'default');
         $subscription = $user->subscription($subscriptionName);
 
-        // Verificar se usuário tem assinatura
         if (! $subscription) {
             return redirect()->route('subscription.plans')
-                ->with('error', 'Você não possui uma assinatura ativa.');
+                ->with('error', 'Voce nao possui uma assinatura ativa.');
         }
 
-        // Verificar se já existe solicitação pendente
         $pendingRequest = RefundRequest::where('user_id', $user->id)
             ->pending()
             ->first();
 
         if ($pendingRequest) {
             return redirect()->route('subscription.show')
-                ->with('info', 'Você já possui uma solicitação de estorno em análise.');
+                ->with('info', 'Voce ja possui uma solicitacao de estorno em analise.');
         }
 
         return view('subscription.refund', [
@@ -42,16 +43,16 @@ class RefundRequestController extends Controller
     }
 
     /**
-     * Salva solicitação de estorno.
+     * Salva solicitacao de estorno.
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'reason' => 'required|string|min:20|max:1000',
         ], [
-            'reason.required' => 'Por favor, descreva o motivo da solicitação.',
-            'reason.min' => 'A descrição deve ter pelo menos 20 caracteres.',
-            'reason.max' => 'A descrição não pode exceder 1000 caracteres.',
+            'reason.required' => 'Por favor, descreva o motivo da solicitacao.',
+            'reason.min' => 'A descricao deve ter pelo menos 20 caracteres.',
+            'reason.max' => 'A descricao nao pode exceder 1000 caracteres.',
         ]);
 
         $user = $request->user();
@@ -59,20 +60,18 @@ class RefundRequestController extends Controller
         $subscription = $user->subscription($subscriptionName);
 
         if (! $subscription) {
-            return back()->with('error', 'Você não possui uma assinatura ativa.');
+            return back()->with('error', 'Voce nao possui uma assinatura ativa.');
         }
 
-        // Verificar se já existe solicitação pendente
         $pendingRequest = RefundRequest::where('user_id', $user->id)
             ->pending()
             ->first();
 
         if ($pendingRequest) {
             return redirect()->route('subscription.show')
-                ->with('info', 'Você já possui uma solicitação de estorno em análise.');
+                ->with('info', 'Voce ja possui uma solicitacao de estorno em analise.');
         }
 
-        // Buscar última invoice paga
         $invoiceId = null;
         $paymentIntentId = null;
 
@@ -87,13 +86,12 @@ class RefundRequestController extends Controller
                 $paymentIntentId = $lastPaidInvoice->payment_intent;
             }
         } catch (Exception $e) {
-            Log::warning('Não foi possível buscar invoices para refund request', [
+            Log::warning('Nao foi possivel buscar invoices para refund request', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
             ]);
         }
 
-        // Criar solicitação
         $refundRequest = RefundRequest::create([
             'user_id' => $user->id,
             'cashier_subscription_id' => $subscription->id,
@@ -101,10 +99,10 @@ class RefundRequestController extends Controller
             'stripe_invoice_id' => $invoiceId,
             'stripe_payment_intent_id' => $paymentIntentId,
             'reason' => $request->input('reason'),
-            'status' => RefundRequest::STATUS_PENDING,
+            'status' => RefundRequestStatus::Pending,
         ]);
 
-        Log::info('Nova solicitação de estorno criada', [
+        Log::info('Nova solicitacao de estorno criada', [
             'refund_request_id' => $refundRequest->id,
             'user_id' => $user->id,
             'subscription_id' => $subscription->id,
@@ -113,7 +111,7 @@ class RefundRequestController extends Controller
         try {
             $user->notify(new RefundRequestReceivedNotification($refundRequest));
         } catch (Exception $e) {
-            Log::warning('Não foi possível enviar notificação de estorno', [
+            Log::warning('Nao foi possivel enviar notificacao de estorno', [
                 'refund_request_id' => $refundRequest->id,
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
@@ -121,6 +119,6 @@ class RefundRequestController extends Controller
         }
 
         return redirect()->route('subscription.show')
-            ->with('success', 'Sua solicitação de estorno foi enviada. Analisaremos em até 48 horas úteis.');
+            ->with('success', 'Sua solicitacao de estorno foi enviada. Analisaremos em ate 48 horas uteis.');
     }
 }

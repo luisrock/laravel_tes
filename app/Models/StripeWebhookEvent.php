@@ -22,14 +22,20 @@ class StripeWebhookEvent extends Model
         'last_error',
     ];
 
-    protected $casts = [
-        'received_at' => 'datetime',
-        'processed_at' => 'datetime',
-        'failed_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'received_at' => 'datetime',
+            'processed_at' => 'datetime',
+            'failed_at' => 'datetime',
+        ];
+    }
 
     /**
-     * Relacionamento com usuário.
+     * Relacionamento com usuario.
      */
     public function user(): BelongsTo
     {
@@ -37,7 +43,7 @@ class StripeWebhookEvent extends Model
     }
 
     /**
-     * Verifica se o evento já foi processado com sucesso.
+     * Verifica se o evento ja foi processado com sucesso.
      */
     public function isProcessed(): bool
     {

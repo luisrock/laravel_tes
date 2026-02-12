@@ -20,7 +20,7 @@ class User extends Authenticatable implements FilamentUser
     /**
      * The attributes that are mass assignable.
      *
-     * @var array
+     * @var array<int, string>
      */
     protected $fillable = [
         'name',
@@ -31,7 +31,7 @@ class User extends Authenticatable implements FilamentUser
     /**
      * The attributes that should be hidden for arrays.
      *
-     * @var array
+     * @var array<int, string>
      */
     protected $hidden = [
         'password',
@@ -39,13 +39,14 @@ class User extends Authenticatable implements FilamentUser
     ];
 
     /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
+     * @return array<string, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+        ];
+    }
 
     /**
      * Autoriza acesso ao painel Filament.
@@ -65,20 +66,15 @@ class User extends Authenticatable implements FilamentUser
      * Retorna a fonte da assinatura (prepara para assinaturas coletivas futuras).
      *
      * Hoje: retorna $this (assinatura individual)
-     * Futuro: pode retornar Team se usuário faz parte de um
+     * Futuro: pode retornar Team se usuario faz parte de um
      */
     public function getSubscriptionSource(): ?Model
     {
-        // Futuro: verificar se usuário pertence a um Team com assinatura
-        // if ($team = $this->currentTeam) {
-        //     return $team;
-        // }
-
         return $this;
     }
 
     /**
-     * Verifica se usuário é assinante ativo (inclui grace period).
+     * Verifica se usuario e assinante ativo (inclui grace period).
      */
     public function isSubscriber(): bool
     {
@@ -89,7 +85,7 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
-     * Verifica se usuário tem acesso a uma feature específica.
+     * Verifica se usuario tem acesso a uma feature especifica.
      */
     public function hasFeature(string $featureKey): bool
     {
@@ -105,11 +101,10 @@ class User extends Authenticatable implements FilamentUser
             return false;
         }
 
-        // Busca o item do tier (produto que está na nossa lista de tiers)
         $tierProductIds = config('subscription.tier_product_ids', []);
 
         if (empty($tierProductIds)) {
-            Log::error('hasFeature: tier_product_ids não configurado', [
+            Log::error('hasFeature: tier_product_ids nao configurado', [
                 'user_id' => $this->id,
                 'feature_key' => $featureKey,
             ]);
@@ -122,7 +117,7 @@ class User extends Authenticatable implements FilamentUser
             ->first();
 
         if (! $item) {
-            Log::warning('hasFeature: subscription sem item de tier válido', [
+            Log::warning('hasFeature: subscription sem item de tier valido', [
                 'user_id' => $this->id,
                 'subscription_id' => $subscription->id,
                 'tier_product_ids' => $tierProductIds,
@@ -135,7 +130,7 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
-     * Retorna o nome do plano atual do usuário.
+     * Retorna o nome do plano atual do usuario.
      */
     public function getSubscriptionPlan(): ?string
     {
@@ -160,7 +155,7 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
-     * Verifica se usuário pode acessar conteúdo exclusivo.
+     * Verifica se usuario pode acessar conteudo exclusivo.
      */
     public function canAccessExclusiveContent(): bool
     {
@@ -168,7 +163,7 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
-     * Verifica se usuário deve ver anúncios.
+     * Verifica se usuario deve ver anuncios.
      */
     public function shouldSeeAds(): bool
     {
@@ -176,7 +171,7 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
-     * Verifica se usuário está em grace period (cancelou mas ainda tem acesso).
+     * Verifica se usuario esta em grace period (cancelou mas ainda tem acesso).
      */
     public function isOnGracePeriod(): bool
     {
@@ -189,7 +184,7 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
-     * Retorna a data de término do acesso (se em grace period).
+     * Retorna a data de termino do acesso (se em grace period).
      */
     public function getAccessEndsAt(): ?Carbon
     {

@@ -6,8 +6,7 @@ use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use Stripe\Price;
-use Stripe\Product;
+use Laravel\Cashier\Cashier;
 use Stripe\StripeClient;
 
 class StripeService
@@ -16,7 +15,7 @@ class StripeService
 
     public function __construct()
     {
-        $this->stripe = new StripeClient(config('cashier.secret'));
+        $this->stripe = Cashier::stripe();
     }
 
     /**
@@ -24,7 +23,7 @@ class StripeService
      */
     public function getActiveProducts(): Collection
     {
-        return Cache::remember('stripe_products', 3600, function () {
+        return Cache::remember('stripe_products', 3600, function (): Collection {
             $products = $this->stripe->products->all([
                 'active' => true,
                 'limit' => 100,
@@ -35,11 +34,11 @@ class StripeService
     }
 
     /**
-     * Retorna os preços ativos de um produto.
+     * Retorna os precos ativos de um produto.
      */
     public function getPricesForProduct(string $productId): Collection
     {
-        return Cache::remember("stripe_prices_{$productId}", 3600, function () use ($productId) {
+        return Cache::remember("stripe_prices_{$productId}", 3600, function () use ($productId): Collection {
             $prices = $this->stripe->prices->all([
                 'product' => $productId,
                 'active' => true,
@@ -51,18 +50,13 @@ class StripeService
     }
 
     /**
-     * Retorna planos formatados para exibição na página de planos.
-     * Estrutura: [
-     *   'pro' => [
-     *     'product' => Product,
-     *     'prices' => ['monthly' => Price, 'yearly' => Price]
-     *   ],
-     *   ...
-     * ]
+     * Retorna planos formatados para exibicao na pagina de planos.
+     *
+     * @return array<string, array{product_id: string, name: string, description: ?string, prices: array}>
      */
     public function getFormattedPlans(): array
     {
-        return Cache::remember('stripe_formatted_plans', 3600, function () {
+        return Cache::remember('stripe_formatted_plans', 3600, function (): array {
             $tierProductIds = config('subscription.tier_product_ids', []);
             $plans = [];
 
@@ -91,7 +85,6 @@ class StripeService
                         ];
                     }
 
-                    // Usa metadata 'tier' ou infere do nome
                     $tier = $product->metadata['tier'] ?? strtolower($product->name);
 
                     $plans[$tier] = [
@@ -112,11 +105,13 @@ class StripeService
     }
 
     /**
-     * Retorna lista de price IDs válidos para checkout.
+     * Retorna lista de price IDs validos para checkout.
+     *
+     * @return array<int, string>
      */
     public function getAllowedPriceIds(): array
     {
-        return Cache::remember('stripe_allowed_price_ids', 3600, function () {
+        return Cache::remember('stripe_allowed_price_ids', 3600, function (): array {
             $tierProductIds = config('subscription.tier_product_ids', []);
             $allowedIds = [];
 
@@ -136,7 +131,7 @@ class StripeService
     }
 
     /**
-     * Valida se um price ID é válido para checkout.
+     * Valida se um price ID e valido para checkout.
      */
     public function isValidPriceId(string $priceId): bool
     {
@@ -144,7 +139,7 @@ class StripeService
     }
 
     /**
-     * Limpa cache de planos (útil após alterações no Stripe).
+     * Limpa cache de planos (util apos alteracoes no Stripe).
      */
     public function clearCache(): void
     {

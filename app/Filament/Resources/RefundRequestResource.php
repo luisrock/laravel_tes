@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\RefundRequestStatus;
 use App\Filament\Resources\RefundRequestResource\Pages\EditRefundRequest;
 use App\Filament\Resources\RefundRequestResource\Pages\ListRefundRequests;
 use App\Models\RefundRequest;
@@ -27,9 +28,9 @@ class RefundRequestResource extends Resource
 
     protected static ?string $navigationLabel = 'Estornos';
 
-    protected static ?string $modelLabel = 'Solicitação de Estorno';
+    protected static ?string $modelLabel = 'Solicitacao de Estorno';
 
-    protected static ?string $pluralModelLabel = 'Solicitações de Estorno';
+    protected static ?string $pluralModelLabel = 'Solicitacoes de Estorno';
 
     protected static ?int $navigationSort = 20;
 
@@ -38,7 +39,7 @@ class RefundRequestResource extends Resource
         return $schema
             ->components([
                 Placeholder::make('user')
-                    ->label('Usuário')
+                    ->label('Usuario')
                     ->content(fn (RefundRequest $record): string => $record->user?->email ?? '-'),
                 Placeholder::make('stripe_subscription_id')
                     ->label('Stripe Subscription')
@@ -55,12 +56,7 @@ class RefundRequestResource extends Resource
                 Select::make('status')
                     ->label('Status')
                     ->required()
-                    ->options([
-                        RefundRequest::STATUS_PENDING => 'Pendente',
-                        RefundRequest::STATUS_APPROVED => 'Aprovado',
-                        RefundRequest::STATUS_REJECTED => 'Rejeitado',
-                        RefundRequest::STATUS_PROCESSED => 'Processado',
-                    ]),
+                    ->options(RefundRequestStatus::class),
                 Textarea::make('admin_notes')
                     ->label('Notas internas')
                     ->rows(4),
@@ -75,25 +71,13 @@ class RefundRequestResource extends Resource
                     ->label('#')
                     ->sortable(),
                 TextColumn::make('user.email')
-                    ->label('Usuário')
+                    ->label('Usuario')
                     ->searchable(),
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        RefundRequest::STATUS_PENDING => 'Pendente',
-                        RefundRequest::STATUS_APPROVED => 'Aprovado',
-                        RefundRequest::STATUS_REJECTED => 'Rejeitado',
-                        RefundRequest::STATUS_PROCESSED => 'Processado',
-                        default => $state,
-                    })
-                    ->color(fn (string $state): string => match ($state) {
-                        RefundRequest::STATUS_PENDING => 'warning',
-                        RefundRequest::STATUS_APPROVED => 'success',
-                        RefundRequest::STATUS_REJECTED => 'danger',
-                        RefundRequest::STATUS_PROCESSED => 'primary',
-                        default => 'gray',
-                    }),
+                    ->formatStateUsing(fn (RefundRequestStatus $state): string => $state->label())
+                    ->color(fn (RefundRequestStatus $state): string => $state->color()),
                 TextColumn::make('stripe_subscription_id')
                     ->label('Stripe Subscription')
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -108,12 +92,7 @@ class RefundRequestResource extends Resource
             ->filters([
                 SelectFilter::make('status')
                     ->label('Status')
-                    ->options([
-                        RefundRequest::STATUS_PENDING => 'Pendente',
-                        RefundRequest::STATUS_APPROVED => 'Aprovado',
-                        RefundRequest::STATUS_REJECTED => 'Rejeitado',
-                        RefundRequest::STATUS_PROCESSED => 'Processado',
-                    ]),
+                    ->options(RefundRequestStatus::class),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -146,6 +125,9 @@ class RefundRequestResource extends Resource
         return false;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function getPages(): array
     {
         return [

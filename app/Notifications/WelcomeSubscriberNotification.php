@@ -11,21 +11,24 @@ class WelcomeSubscriberNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function via($notifiable)
+    /**
+     * @return array<int, string>
+     */
+    public function via(mixed $notifiable): array
     {
         return ['mail'];
     }
 
-    public function toMail($notifiable)
+    public function toMail(mixed $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Bem-vindo ao Teses e Súmulas!')
-            ->greeting('Olá, '.$notifiable->name.'!')
+            ->subject('Bem-vindo ao Teses e Sumulas!')
+            ->greeting('Ola, '.$notifiable->name.'!')
             ->line('Sua assinatura foi ativada com sucesso.')
-            ->line('Agora você tem acesso a:')
-            ->line('✓ Navegação sem anúncios')
-            ->line('✓ Conteúdo exclusivo')
-            ->action('Explorar Conteúdo', url('/'))
-            ->line('Obrigado por assinar o Teses e Súmulas!');
+            ->line('Agora voce tem acesso a:')
+            ->line('✓ Navegacao sem anuncios')
+            ->line('✓ Conteudo exclusivo')
+            ->action('Explorar Conteudo', url('/'))
+            ->line('Obrigado por assinar o Teses e Sumulas!');
     }
 }

@@ -12,27 +12,27 @@ class RefundRequestReceivedNotification extends Notification implements ShouldQu
 {
     use Queueable;
 
-    protected RefundRequest $refundRequest;
+    public function __construct(
+        protected RefundRequest $refundRequest,
+    ) {}
 
-    public function __construct(RefundRequest $refundRequest)
-    {
-        $this->refundRequest = $refundRequest;
-    }
-
-    public function via($notifiable)
+    /**
+     * @return array<int, string>
+     */
+    public function via(mixed $notifiable): array
     {
         return ['mail'];
     }
 
-    public function toMail($notifiable)
+    public function toMail(mixed $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Recebemos sua solicitação de estorno')
-            ->greeting('Olá, '.$notifiable->name)
-            ->line('Recebemos sua solicitação de estorno e ela será analisada pela nossa equipe.')
-            ->line('Prazo de resposta: até 5 dias úteis.')
-            ->line('Você receberá um email com nossa decisão.')
+            ->subject('Recebemos sua solicitacao de estorno')
+            ->greeting('Ola, '.$notifiable->name)
+            ->line('Recebemos sua solicitacao de estorno e ela sera analisada pela nossa equipe.')
+            ->line('Prazo de resposta: ate 5 dias uteis.')
+            ->line('Voce recebera um email com nossa decisao.')
             ->action('Ver Status da Assinatura', route('subscription.show'))
-            ->line('Obrigado pela paciência.');
+            ->line('Obrigado pela paciencia.');
     }
 }

@@ -12,25 +12,25 @@ class SubscriptionRenewingSoonNotification extends Notification implements Shoul
 {
     use Queueable;
 
-    protected Carbon $renewsAt;
+    public function __construct(
+        protected Carbon $renewsAt,
+    ) {}
 
-    public function __construct(Carbon $renewsAt)
-    {
-        $this->renewsAt = $renewsAt;
-    }
-
-    public function via($notifiable)
+    /**
+     * @return array<int, string>
+     */
+    public function via(mixed $notifiable): array
     {
         return ['mail'];
     }
 
-    public function toMail($notifiable)
+    public function toMail(mixed $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Sua assinatura será renovada em breve')
-            ->greeting('Olá, '.$notifiable->name)
-            ->line('Sua assinatura do Teses e Súmulas será renovada automaticamente em '.$this->renewsAt->format('d/m/Y').'.')
-            ->line('Se você deseja cancelar ou alterar seu plano, pode fazer isso a qualquer momento.')
+            ->subject('Sua assinatura sera renovada em breve')
+            ->greeting('Ola, '.$notifiable->name)
+            ->line('Sua assinatura do Teses e Sumulas sera renovada automaticamente em '.$this->renewsAt->format('d/m/Y').'.')
+            ->line('Se voce deseja cancelar ou alterar seu plano, pode fazer isso a qualquer momento.')
             ->action('Gerenciar Assinatura', route('subscription.portal'))
             ->line('Obrigado por continuar conosco!');
     }

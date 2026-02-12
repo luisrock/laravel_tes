@@ -1,7 +1,7 @@
 <?php
 
+use App\Enums\RefundRequestStatus;
 use App\Http\Controllers\WebhookController;
-use App\Models\RefundRequest;
 use App\Models\User;
 use App\Notifications\RefundRequestReceivedNotification;
 use App\Notifications\SubscriptionCanceledNotification;
@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Cashier\Subscription;
 
-it('envia notificação de boas-vindas ao completar checkout', function () {
+it('envia notificacao de boas-vindas ao completar checkout', function () {
     Notification::fake();
 
     $user = User::factory()->create();
@@ -28,7 +28,7 @@ it('envia notificação de boas-vindas ao completar checkout', function () {
     Notification::assertSentTo($user, WelcomeSubscriberNotification::class);
 });
 
-it('envia notificação de cancelamento quando cancel_at_period_end é ativado', function () {
+it('envia notificacao de cancelamento quando cancel_at_period_end e ativado', function () {
     Notification::fake();
 
     $user = User::factory()->create();
@@ -71,7 +71,7 @@ it('envia notificação de cancelamento quando cancel_at_period_end é ativado',
     Notification::assertSentTo($user, SubscriptionCanceledNotification::class);
 });
 
-it('envia notificação de estorno ao criar solicitação', function () {
+it('envia notificacao de estorno ao criar solicitacao', function () {
     Notification::fake();
 
     $user = User::factory()->create();
@@ -91,7 +91,7 @@ it('envia notificação de estorno ao criar solicitação', function () {
 
     $this->actingAs($user)
         ->post(route('refund.store'), [
-            'reason' => str_repeat('Motivo válido. ', 2),
+            'reason' => str_repeat('Motivo valido. ', 2),
         ])
         ->assertRedirect(route('subscription.show'));
 
@@ -100,19 +100,19 @@ it('envia notificação de estorno ao criar solicitação', function () {
     $this->assertDatabaseHas('refund_requests', [
         'user_id' => $user->id,
         'cashier_subscription_id' => $subscription->id,
-        'status' => RefundRequest::STATUS_PENDING,
+        'status' => RefundRequestStatus::Pending->value,
     ]);
 });
 
-// Helper class para expor métodos protegidos do WebhookController
+// Helper class para expor metodos protegidos do WebhookController
 class TestableWebhookController extends WebhookController
 {
-    public function callHandleCheckoutSessionCompleted(array $payload)
+    public function callHandleCheckoutSessionCompleted(array $payload): mixed
     {
         return $this->handleCheckoutSessionCompleted($payload);
     }
 
-    public function callHandleCustomerSubscriptionUpdated(array $payload)
+    public function callHandleCustomerSubscriptionUpdated(array $payload): mixed
     {
         return $this->handleCustomerSubscriptionUpdated($payload);
     }

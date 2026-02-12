@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,15 +17,15 @@ class PlanFeature extends Model
     ];
 
     /**
-     * Scope para buscar features de um produto específico.
+     * Scope para buscar features de um produto especifico.
      */
-    public function scopeForProduct($query, string $productId)
+    public function scopeForProduct(Builder $query, string $productId): Builder
     {
         return $query->where('stripe_product_id', $productId);
     }
 
     /**
-     * Verifica se um produto tem uma feature específica.
+     * Verifica se um produto tem uma feature especifica.
      */
     public static function productHasFeature(string $productId, string $featureKey): bool
     {

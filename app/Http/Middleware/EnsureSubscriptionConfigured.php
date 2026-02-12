@@ -4,15 +4,14 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class EnsureSubscriptionConfigured
 {
     /**
      * Handle an incoming request.
-     *
-     * @return mixed
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
         $tierProductIds = config('subscription.tier_product_ids', []);
         $stripeKey = config('cashier.key');
@@ -24,7 +23,7 @@ class EnsureSubscriptionConfigured
             return $next($request);
         }
 
-        $message = 'Assinaturas indisponíveis temporariamente. Tente novamente mais tarde.';
+        $message = 'Assinaturas indisponiveis temporariamente. Tente novamente mais tarde.';
 
         if ($request->expectsJson()) {
             return response()->json(['message' => $message], 503);

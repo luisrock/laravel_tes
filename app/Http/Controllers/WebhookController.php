@@ -10,16 +10,17 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Laravel\Cashier\Cashier;
 use Laravel\Cashier\Http\Controllers\WebhookController as CashierWebhookController;
 use Laravel\Cashier\Subscription;
-use Stripe\StripeClient;
+use Symfony\Component\HttpFoundation\Response;
 
 class WebhookController extends CashierWebhookController
 {
     /**
      * Handle incoming webhook.
      */
-    public function handleWebhook(Request $request)
+    public function handleWebhook(Request $request): Response
     {
         $payload = json_decode($request->getContent(), true);
         $eventId = $payload['id'] ?? null;
@@ -30,11 +31,9 @@ class WebhookController extends CashierWebhookController
             return response()->json(['error' => 'Invalid payload'], 400);
         }
 
-        // Extrair IDs relevantes do payload
-        $stripeObjectId = $this->extractObjectId($eventType, $data);
+        $stripeObjectId = $data['id'] ?? null;
         $userId = $this->extractUserId($eventType, $data);
 
-        // Padrão atômico: firstOrCreate evita race condition
         $webhookEvent = StripeWebhookEvent::firstOrCreate(
             ['stripe_event_id' => $eventId],
             [
@@ -45,21 +44,17 @@ class WebhookController extends CashierWebhookController
             ]
         );
 
-        // Se já foi processado com sucesso, retorna early
         if ($webhookEvent->isProcessed()) {
             return response()->json(['status' => 'already_processed']);
         }
 
-        // Se não foi recém-criado, é reprocessamento
         if (! $webhookEvent->wasRecentlyCreated) {
             $webhookEvent->increment('attempts');
         }
 
         try {
-            // Delegar para o Cashier processar o webhook
             $response = parent::handleWebhook($request);
 
-            // Marcar como processado após sucesso
             $webhookEvent->update([
                 'processed_at' => now(),
                 'failed_at' => null,
@@ -86,13 +81,12 @@ class WebhookController extends CashierWebhookController
     /**
      * Handle checkout.session.completed event.
      */
-    protected function handleCheckoutSessionCompleted(array $payload)
+    protected function handleCheckoutSessionCompleted(array $payload): Response
     {
         $session = $payload['data']['object'];
         $clientReferenceId = $session['client_reference_id'] ?? null;
 
         if ($clientReferenceId) {
-            // Atualizar o webhook event com o user_id
             StripeWebhookEvent::where('stripe_object_id', $session['id'])
                 ->whereNull('user_id')
                 ->update(['user_id' => $clientReferenceId]);
@@ -110,14 +104,13 @@ class WebhookController extends CashierWebhookController
             }
         }
 
-        // O Cashier já gerencia a criação da subscription
         return $this->successMethod();
     }
 
     /**
      * Handle customer.subscription.created event.
      */
-    protected function handleCustomerSubscriptionCreated(array $payload)
+    protected function handleCustomerSubscriptionCreated(array $payload): Response
     {
         $subscription = $payload['data']['object'];
         $this->updateCurrentPeriodEnd($subscription);
@@ -128,7 +121,7 @@ class WebhookController extends CashierWebhookController
     /**
      * Handle customer.subscription.updated event.
      */
-    protected function handleCustomerSubscriptionUpdated(array $payload)
+    protected function handleCustomerSubscriptionUpdated(array $payload): Response
     {
         $subscription = $payload['data']['object'];
         $this->updateCurrentPeriodEnd($subscription);
@@ -160,16 +153,14 @@ class WebhookController extends CashierWebhookController
     /**
      * Handle invoice.payment_succeeded event.
      */
-    protected function handleInvoicePaymentSucceeded(array $payload)
+    protected function handleInvoicePaymentSucceeded(array $payload): Response
     {
         $invoice = $payload['data']['object'];
         $stripeSubscriptionId = $invoice['subscription'] ?? null;
 
         if ($stripeSubscriptionId) {
-            // Buscar subscription no Stripe para obter current_period_end atualizado
             try {
-                $stripe = new StripeClient(config('cashier.secret'));
-                $stripeSubscription = $stripe->subscriptions->retrieve($stripeSubscriptionId);
+                $stripeSubscription = Cashier::stripe()->subscriptions->retrieve($stripeSubscriptionId);
                 $this->updateCurrentPeriodEnd((array) $stripeSubscription);
             } catch (Exception $e) {
                 Log::warning('Erro ao buscar subscription para atualizar current_period_end', [
@@ -200,34 +191,16 @@ class WebhookController extends CashierWebhookController
     }
 
     /**
-     * Extrai o ID do objeto principal do evento.
-     */
-    protected function extractObjectId(string $eventType, array $data): ?string
-    {
-        return match ($eventType) {
-            'checkout.session.completed' => $data['id'] ?? null,
-            'customer.subscription.created',
-            'customer.subscription.updated',
-            'customer.subscription.deleted' => $data['id'] ?? null,
-            'invoice.payment_succeeded',
-            'invoice.payment_failed' => $data['id'] ?? null,
-            default => $data['id'] ?? null,
-        };
-    }
-
-    /**
      * Tenta extrair o user_id do evento.
      */
     protected function extractUserId(string $eventType, array $data): ?int
     {
-        // Para checkout.session.completed, usamos client_reference_id
         if ($eventType === 'checkout.session.completed') {
             $refId = $data['client_reference_id'] ?? null;
 
             return $refId ? (int) $refId : null;
         }
 
-        // Para outros eventos, tentamos encontrar pelo stripe_id do customer
         $customerId = $data['customer'] ?? null;
         if ($customerId) {
             $user = User::where('stripe_id', $customerId)->first();
