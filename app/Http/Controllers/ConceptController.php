@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -17,7 +18,7 @@ class ConceptController extends Controller
                 ->update(['concept_validated_at' => now()]);
 
             return response()->json(['success' => true]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
@@ -33,7 +34,7 @@ class ConceptController extends Controller
                 ->update(['concept' => $newText]);
 
             return response()->json(['success' => true]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
@@ -49,7 +50,7 @@ class ConceptController extends Controller
                 ->update(['concept' => null, 'concept_validated_at' => null]);
 
             return response()->json(['success' => true]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
@@ -66,7 +67,7 @@ class ConceptController extends Controller
                 ->update(['concept' => $concept]);
 
             return response()->json(['success' => true]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
@@ -104,10 +105,10 @@ class ConceptController extends Controller
                 $concept = $responseData['choices'][0]['message']['content'];
             } else {
                 $responseData = json_encode($responseData);
-                throw new \Exception('Erro ao gerar conceito. Por favor, tente novamente.\n\n' + $responseData);
+                throw new Exception('Erro ao gerar conceito. Por favor, tente novamente.\n\n' + $responseData);
             }
             return response()->json(['success' => true, 'concept' => trim($concept)]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Str;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -160,6 +161,6 @@ class Question extends Model
      */
     public function getPreviewAttribute()
     {
-        return \Str::limit($this->text, 100);
+        return Str::limit($this->text, 100);
     }
 }

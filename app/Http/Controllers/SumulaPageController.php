@@ -117,7 +117,7 @@ class SumulaPageController extends Controller
         $display_pdf = false;
         $label = "{$sumula->titulo} do $tribunal_nome_completo - $tribunal";
         $description = "{$sumula->titulo} do $tribunal_nome_completo - $tribunal";
-        
+
         // Breadcrumb
         $breadcrumb = [
             ['name' => 'Início', 'url' => url('/')],

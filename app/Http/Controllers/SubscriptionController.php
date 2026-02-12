@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Models\StripeWebhookEvent;
 use App\Services\StripeService;
 use Illuminate\Http\Request;
@@ -69,7 +70,7 @@ class SubscriptionController extends Controller
                 ]);
 
             return redirect($checkoutSession->url);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Erro ao criar sessão de checkout', [
                 'user_id' => $user->id,
                 'price_id' => $priceId,
@@ -137,7 +138,7 @@ class SubscriptionController extends Controller
 
         try {
             return $user->redirectToBillingPortal(route('subscription.show'));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Erro ao redirecionar para Billing Portal', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use App\Models\Newsletter;
 use Illuminate\Support\Str;
@@ -101,7 +102,7 @@ class ImportLegacyNewsletters extends Command
                     $this->info(" - Imported successfully.");
                 }
                 $count++;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->error(" - Error: " . $e->getMessage());
             }
         }

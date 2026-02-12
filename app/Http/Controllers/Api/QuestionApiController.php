@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use Str;
+use App\Models\Quiz;
 use App\Http\Controllers\Controller;
 use App\Models\Question;
 use App\Models\QuestionOption;
@@ -273,7 +275,7 @@ class QuestionApiController extends Controller
 
         $tag = QuestionTag::create([
             'name' => $validated['name'],
-            'slug' => \Str::slug($validated['name']),
+            'slug' => Str::slug($validated['name']),
         ]);
 
         return response()->json([
@@ -366,7 +368,7 @@ class QuestionApiController extends Controller
 
         // Optionally add to quiz
         if (!empty($validated['quiz_id']) && !empty($createdQuestions)) {
-            $quiz = \App\Models\Quiz::find($validated['quiz_id']);
+            $quiz = Quiz::find($validated['quiz_id']);
             $maxOrder = $quiz->questions()->max('quiz_question.order') ?? 0;
             
             foreach ($createdQuestions as $index => $question) {

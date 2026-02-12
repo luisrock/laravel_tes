@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Models\RefundRequest;
 use App\Notifications\RefundRequestReceivedNotification;
 use Illuminate\Http\Request;
@@ -85,7 +86,7 @@ class RefundRequestController extends Controller
                 $invoiceId = $lastPaidInvoice->id;
                 $paymentIntentId = $lastPaidInvoice->payment_intent;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::warning('Não foi possível buscar invoices para refund request', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
@@ -111,7 +112,7 @@ class RefundRequestController extends Controller
 
         try {
             $user->notify(new RefundRequestReceivedNotification($refundRequest));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::warning('Não foi possível enviar notificação de estorno', [
                 'refund_request_id' => $refundRequest->id,
                 'user_id' => $user->id,

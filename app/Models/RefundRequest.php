@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Laravel\Cashier\Subscription;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -42,7 +43,7 @@ class RefundRequest extends Model
      */
     public function subscription(): BelongsTo
     {
-        return $this->belongsTo(\Laravel\Cashier\Subscription::class, 'cashier_subscription_id');
+        return $this->belongsTo(Subscription::class, 'cashier_subscription_id');
     }
 
     /**

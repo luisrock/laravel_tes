@@ -46,6 +46,6 @@ class AllTemasPageController extends Controller
             $perc_total_concepts = "$total_concepts de $total_temas com resumo ($percentage_concepts%)"; 
         }
         return view('front.temas', compact('temas','display_pdf','description', 'perc_total_concepts'));
-        
+
     } //end public function
 }

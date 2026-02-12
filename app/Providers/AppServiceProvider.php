@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use Reliese\Coders\CodersServiceProvider;
+use App\Services\StripeService;
+use App\Services\SubscriptionService;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Log;
 
@@ -15,12 +19,12 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         if ($this->app->environment() == 'local') {
-            $this->app->register(\Reliese\Coders\CodersServiceProvider::class);
+            $this->app->register(CodersServiceProvider::class);
         }
 
         // Registrar services como singletons
-        $this->app->singleton(\App\Services\StripeService::class);
-        $this->app->singleton(\App\Services\SubscriptionService::class);
+        $this->app->singleton(StripeService::class);
+        $this->app->singleton(SubscriptionService::class);
     }
 
     /**
@@ -30,7 +34,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        \Illuminate\Pagination\Paginator::useBootstrap();
+        Paginator::useBootstrap();
 
         // Validar configuração crítica de assinaturas em produção
         if ($this->app->environment('production')) {

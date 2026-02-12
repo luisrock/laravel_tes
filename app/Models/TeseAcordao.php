@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Exception;
+use Log;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -88,8 +90,8 @@ class TeseAcordao extends Model
                     $this->s3_key,
                     now()->addHour()
                 );
-            } catch (\Exception $e) {
-                \Log::error('Erro ao gerar presigned URL', [
+            } catch (Exception $e) {
+                Log::error('Erro ao gerar presigned URL', [
                     'acordao_id' => $this->id,
                     's3_key' => $this->s3_key,
                     'error' => $e->getMessage(),

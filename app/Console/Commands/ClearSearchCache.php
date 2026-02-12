@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 
@@ -68,7 +69,7 @@ class ClearSearchCache extends Command
             
             return 0;
             
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('❌ Erro ao limpar cache: ' . $e->getMessage());
             return 1;
         }

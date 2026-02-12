@@ -48,17 +48,17 @@ class AllStfSumulasPageController extends Controller
         $tribunal = 'STF';
         $label = 'Súmulas do Supremo Tribunal Federal - STF';
         $sumula_route = 'stfsumulapage';
-        
+
         // Meta description dinâmica para melhor CTR
         $description = "Consulte {$count} Súmulas do STF, incluindo as vinculantes, com texto completo.";
-        
+
         // Breadcrumb
         $breadcrumb = [
             ['name' => 'Início', 'url' => url('/')],
             ['name' => 'Índice', 'url' => url('/index')],
             ['name' => 'Súmulas STF', 'url' => null]
         ];
-        
+
         $admin = false;
         if (auth()->check()) {
             //check the email

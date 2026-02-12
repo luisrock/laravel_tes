@@ -27,18 +27,18 @@ class AllStfTesesPageController extends Controller
 
         $label = 'Teses Vinculantes do Supremo Tribunal Federal - STF';
         $tese_route = 'stftesepage';
-        
+
         // Meta description dinâmica para melhor CTR
         $dataAtual = now()->format('m/Y');
         $description = "Consulte {$count} teses de repercussão geral do STF. Pesquisa por número de tema ou assunto. Atualizado em {$dataAtual}.";
-        
+
         // Breadcrumb
         $breadcrumb = [
             ['name' => 'Início', 'url' => url('/')],
             ['name' => 'Índice', 'url' => url('/index')],
             ['name' => 'Teses STF', 'url' => null]
         ];
-        
+
         $admin = false;
         if (auth()->check()) {
             //check the email

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
+use Stripe\StripeClient;
 use App\Models\StripeWebhookEvent;
 use App\Models\User;
 use App\Notifications\SubscriptionCanceledNotification;
@@ -65,7 +67,7 @@ class WebhookController extends CashierWebhookController
             ]);
 
             return $response;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $webhookEvent->update([
                 'failed_at' => now(),
                 'last_error' => $e->getMessage(),
@@ -99,7 +101,7 @@ class WebhookController extends CashierWebhookController
             if ($user) {
                 try {
                     $user->notify(new WelcomeSubscriberNotification());
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     Log::error('Erro ao enviar email de boas-vindas', [
                         'user_id' => $user->id,
                         'error' => $e->getMessage(),
@@ -143,7 +145,7 @@ class WebhookController extends CashierWebhookController
             if ($user) {
                 try {
                     $user->notify(new SubscriptionCanceledNotification($endsAt));
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     Log::error('Erro ao enviar email de cancelamento', [
                         'user_id' => $user->id,
                         'error' => $e->getMessage(),
@@ -166,10 +168,10 @@ class WebhookController extends CashierWebhookController
         if ($stripeSubscriptionId) {
             // Buscar subscription no Stripe para obter current_period_end atualizado
             try {
-                $stripe = new \Stripe\StripeClient(config('cashier.secret'));
+                $stripe = new StripeClient(config('cashier.secret'));
                 $stripeSubscription = $stripe->subscriptions->retrieve($stripeSubscriptionId);
                 $this->updateCurrentPeriodEnd((array) $stripeSubscription);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::warning('Erro ao buscar subscription para atualizar current_period_end', [
                     'subscription_id' => $stripeSubscriptionId,
                     'error' => $e->getMessage(),
@@ -193,7 +195,7 @@ class WebhookController extends CashierWebhookController
         }
 
         Subscription::where('stripe_id', $stripeId)->update([
-            'current_period_end' => \Carbon\Carbon::createFromTimestamp($currentPeriodEnd),
+            'current_period_end' => Carbon::createFromTimestamp($currentPeriodEnd),
         ]);
     }
 

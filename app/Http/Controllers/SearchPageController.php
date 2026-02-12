@@ -4,6 +4,7 @@
 
 namespace App\Http\Controllers;
 
+use Mpdf\Mpdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Config;
@@ -33,17 +34,17 @@ class SearchPageController extends Controller
                 ->orderBy('views_count', 'desc')
                 ->limit(12)
                 ->get();
-            
+
             // Buscar conteúdo editável da home (precedentes)
             $precedentes_home = EditableContent::where('slug', 'precedentes-home')
                 ->where('published', true)
                 ->first();
-            
+
             // Verificar se a seção de quizzes deve aparecer na home
             $quizzesHomeVisible = EditableContent::where('slug', 'quizzes-home-visibility')
                 ->where('published', true)
                 ->exists();
-            
+
             // Buscar quizzes em destaque apenas se estiver habilitado
             $featured_quizzes = collect();
             if ($quizzesHomeVisible) {
@@ -54,7 +55,7 @@ class SearchPageController extends Controller
                     ->limit(3)
                     ->get();
             }
-            
+
             // Verificar se usuário é admin
             $admin = false;
             if (auth()->check()) {
@@ -62,7 +63,7 @@ class SearchPageController extends Controller
                     $admin = true;
                 }
             }
-            
+
             return view('front.search', compact('lista_tribunais', 'display_pdf', 'popular_themes', 'precedentes_home', 'admin', 'featured_quizzes'));
         }
 
@@ -125,7 +126,7 @@ class SearchPageController extends Controller
         // render PDF
 
         $url_request = url()->full();
-        $mpdf = new \Mpdf\Mpdf([
+        $mpdf = new Mpdf([
             'mode' => 'utf-8',
             'CSSselectMedia' => 'screen',
             'showWatermarkText' => true,

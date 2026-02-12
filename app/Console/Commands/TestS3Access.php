@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use Aws\S3\S3Client;
@@ -92,7 +93,7 @@ class TestS3Access extends Command
             $this->error('   ❌ Erro ao conectar com S3: ' . $e->getMessage());
             $this->error('   Código: ' . $e->getAwsErrorCode());
             return 1;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('   ❌ Erro inesperado: ' . $e->getMessage());
             return 1;
         }
@@ -130,7 +131,7 @@ class TestS3Access extends Command
             Storage::disk('s3')->put($testKey, $testContent);
             $this->info("   ✓ Upload realizado com sucesso: {$testKey}");
             $this->info('   ✓ Permissão s3:PutObject: OK');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('   ❌ Erro no upload: ' . $e->getMessage());
             $this->warn('   Verifique permissão s3:PutObject');
             return 1;
@@ -147,7 +148,7 @@ class TestS3Access extends Command
             } else {
                 $this->warn('   ⚠ Conteúdo lido não corresponde ao esperado');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('   ❌ Erro na leitura: ' . $e->getMessage());
             $this->warn('   Verifique permissão s3:GetObject');
         }
@@ -160,7 +161,7 @@ class TestS3Access extends Command
             $this->info('   ✓ Presigned URL gerada com sucesso');
             $this->info('   ✓ Permissão s3:GetObject (para presigned): OK');
             $this->line("   URL: {$url}");
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('   ❌ Erro ao gerar presigned URL: ' . $e->getMessage());
         }
         $this->newLine();
@@ -171,7 +172,7 @@ class TestS3Access extends Command
             Storage::disk('s3')->delete($testKey);
             $this->info('   ✓ Arquivo de teste removido');
             $this->info('   ✓ Permissão s3:DeleteObject: OK');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->warn('   ⚠ Erro ao remover arquivo de teste: ' . $e->getMessage());
             $this->warn("   Arquivo pode precisar ser removido manualmente: {$testKey}");
         }

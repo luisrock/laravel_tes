@@ -2,6 +2,9 @@
 
 namespace App\Console\Commands;
 
+use PDO;
+use PDOException;
+use Exception;
 use Illuminate\Console\Command;
 use App\Models\Newsletter;
 use Illuminate\Support\Str;
@@ -26,9 +29,9 @@ class ImportNewsletters extends Command
         ];
 
         try {
-            $pdo = new \PDO("mysql:host={$sourceDb['host']};dbname={$sourceDb['name']};charset=utf8mb4", $sourceDb['user'], $sourceDb['pass']);
-            $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        } catch (\PDOException $e) {
+            $pdo = new PDO("mysql:host={$sourceDb['host']};dbname={$sourceDb['name']};charset=utf8mb4", $sourceDb['user'], $sourceDb['pass']);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (PDOException $e) {
             $this->error("Failed to connect to Sendy DB: " . $e->getMessage());
             return 1;
         }
@@ -47,7 +50,7 @@ class ImportNewsletters extends Command
         $count = 0;
         $skipped = 0;
 
-        while ($campaign = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+        while ($campaign = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $sendyId = $campaign['id'];
             $title = $campaign['title'];
 
@@ -109,7 +112,7 @@ class ImportNewsletters extends Command
                 ]);
                 $this->info(" - Imported successfully.");
                 $count++;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->error(" - Database Error for '$title': " . $e->getMessage());
             }
         }

@@ -12,8 +12,8 @@ class EnsureUserHasFeature
      *
      * Uso: Route::get('/rota', [Controller::class, 'method'])->middleware('feature:no_ads');
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
+     * @param Request $request
+     * @param Closure $next
      * @param  string  $featureKey
      * @return mixed
      */

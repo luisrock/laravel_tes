@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -189,7 +190,7 @@ class User extends Authenticatable implements FilamentUser
     /**
      * Retorna a data de término do acesso (se em grace period).
      */
-    public function getAccessEndsAt(): ?\Carbon\Carbon
+    public function getAccessEndsAt(): ?Carbon
     {
         $source = $this->getSubscriptionSource();
         $subscriptionName = config('subscription.default_subscription_name', 'default');

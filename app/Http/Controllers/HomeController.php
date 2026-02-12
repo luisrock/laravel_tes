@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
@@ -26,7 +28,7 @@ class HomeController extends Controller
     /**
      * Show the admin dashboard.
      *
-     * @return \Illuminate\Contracts\Support\Renderable
+     * @return Renderable
      */
     public function index()
     {
@@ -61,7 +63,7 @@ class HomeController extends Controller
     /**
      * Show the temas management page.
      *
-     * @return \Illuminate\Contracts\Support\Renderable
+     * @return Renderable
      */
     public function temas()
     {
@@ -82,7 +84,7 @@ class HomeController extends Controller
      * Get temas via AJAX with pagination and filters
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function getTemas(Request $request)
     {

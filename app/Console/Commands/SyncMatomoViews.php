@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
@@ -150,7 +151,7 @@ class SyncMatomoViews extends Command
 
             return 0;
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('❌ Erro: ' . $e->getMessage());
             return 1;
         }

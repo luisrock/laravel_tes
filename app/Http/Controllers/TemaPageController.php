@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
+use Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Config;
@@ -28,7 +30,7 @@ class TemaPageController extends Controller
         $id = $get_keyword[0]->id;
 
         $keyword = $get_keyword[0]->keyword;
-        
+
         if(!empty($get_keyword[0]->label)) {
             $label = $get_keyword[0]->label;
         } else {
@@ -55,7 +57,7 @@ class TemaPageController extends Controller
         $display_pdf = '';
 
         //dd($tribunais);
-        
+
         $output = [];
 
         //Getting the results by querying tes db for all tribunais (except the ones with API, excluding STF)
@@ -64,7 +66,7 @@ class TemaPageController extends Controller
             if($lista_tribunais[$tribunal]['db'] === false && $tribunal !== 'STF' ) { 
                 continue;
             }
-            
+
             $output_tribunal = [];
 
             $tribunal_lower = strtolower($tribunal);
@@ -78,12 +80,12 @@ class TemaPageController extends Controller
 
         // Gerar meta description dinâmica otimizada para SEO
         $description = $this->generateMetaDescription($label, $output);
-        
+
         $html = view('front.tema', compact('id', 'keyword', 'label', 'output', 'display_pdf', 'description', 'concept', 'concept_validated_at', 'related_themes'));
         return $html;
-        
 
-        
+
+
     } //end public function
 
     /**
@@ -98,22 +100,22 @@ class TemaPageController extends Controller
             $main_words = array_filter($words, function($w) {
                 return strlen(trim($w)) > 3;
             });
-            
+
             // Se não houver palavras significativas, retornar vazio
             if(empty($main_words)) {
                 return collect([]);
             }
-            
+
             // Pegar as 3 primeiras palavras mais significativas
             $main_words = array_slice($main_words, 0, 3);
-            
+
             // Construir query
             $query = DB::table('pesquisas')
                 ->select('id', 'keyword', 'label', 'slug')
                 ->where('id', '!=', $current_id)
                 ->whereNotNull('slug')
                 ->where('slug', '!=', '');
-            
+
             // Adicionar condições OR para cada palavra
             $query->where(function($q) use ($main_words) {
                 foreach($main_words as $word) {
@@ -124,12 +126,12 @@ class TemaPageController extends Controller
                     }
                 }
             });
-            
+
             return $query->limit($limit)->get();
-            
-        } catch (\Exception $e) {
+
+        } catch (Exception $e) {
             // Em caso de erro, retornar coleção vazia para não quebrar a página
-            \Log::error('Erro ao buscar temas relacionados: ' . $e->getMessage());
+            Log::error('Erro ao buscar temas relacionados: ' . $e->getMessage());
             return collect([]);
         }
     }
@@ -145,21 +147,21 @@ class TemaPageController extends Controller
             $total_sumulas = 0;
             $total_teses = 0;
             $tribunais_com_resultado = [];
-            
+
             foreach($output as $tribunal => $data) {
                 // Ignorar 'total_count' e outras keys que não são tribunais
                 if(!is_array($data) || $tribunal === 'total_count') {
                     continue;
                 }
-                
+
                 $tribunal_upper = strtoupper($tribunal);
-                
+
                 // Contar súmulas - estrutura correta: $data['sumula']['total']
                 if(isset($data['sumula']['total']) && $data['sumula']['total'] > 0) {
                     $total_sumulas += $data['sumula']['total'];
                     $tribunais_com_resultado[] = $tribunal_upper;
                 }
-                
+
                 // Contar teses/repercussão/repetitivos - estrutura correta: $data['tese']['total']
                 if(isset($data['tese']['total']) && $data['tese']['total'] > 0) {
                     $total_teses += $data['tese']['total'];
@@ -167,7 +169,7 @@ class TemaPageController extends Controller
                         $tribunais_com_resultado[] = $tribunal_upper;
                     }
                 }
-                
+
                 // Para STF: $data['repercussao']['total']
                 if(isset($data['repercussao']['total']) && $data['repercussao']['total'] > 0) {
                     $total_teses += $data['repercussao']['total'];
@@ -175,7 +177,7 @@ class TemaPageController extends Controller
                         $tribunais_com_resultado[] = $tribunal_upper;
                     }
                 }
-                
+
                 // Para STJ: $data['repetitivos']['total']
                 if(isset($data['repetitivos']['total']) && $data['repetitivos']['total'] > 0) {
                     $total_teses += $data['repetitivos']['total'];
@@ -184,14 +186,14 @@ class TemaPageController extends Controller
                     }
                 }
             }
-            
+
             $total_resultados = $total_sumulas + $total_teses;
             $tribunais_com_resultado = array_unique($tribunais_com_resultado);
-            
+
             // Construir description otimizada
             if($total_resultados > 0) {
                 $description = $label . ': ';
-                
+
                 // Adicionar contagem de resultados com singular/plural correto
                 if($total_teses > 0 && $total_sumulas > 0) {
                     $teses_texto = $total_teses === 1 ? 'tese' : 'teses';
@@ -204,30 +206,30 @@ class TemaPageController extends Controller
                     $sumulas_texto = $total_sumulas === 1 ? 'súmula' : 'súmulas';
                     $description .= "Encontre {$total_sumulas} {$sumulas_texto}";
                 }
-                
+
                 // Adicionar tribunais
                 if(count($tribunais_com_resultado) > 0) {
                     $description .= ' de ' . implode(', ', $tribunais_com_resultado);
                 }
-                
+
                 // Adicionar data de atualização
                 $description .= '. Atualizado em ' . date('d/m/Y') . '.';
-                
+
             } else {
                 // Fallback para quando não há resultados
                 $description = $label . ' - Pesquise súmulas e teses jurisprudenciais nos tribunais superiores (STF, STJ, TST, TNU). Jurisprudência atualizada.';
             }
-            
+
             // Garantir que não ultrapasse 160 caracteres (limite ideal para Google)
             if(strlen($description) > 160) {
                 $description = substr($description, 0, 157) . '...';
             }
-            
+
             return $description;
-            
-        } catch (\Exception $e) {
+
+        } catch (Exception $e) {
             // Fallback em caso de erro
-            \Log::error('Erro ao gerar meta description: ' . $e->getMessage());
+            Log::error('Erro ao gerar meta description: ' . $e->getMessage());
             return $label . ' - Teses e Súmulas dos tribunais superiores. Atualizado em ' . date('d/m/Y') . '.';
         }
     }

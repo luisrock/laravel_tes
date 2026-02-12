@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Exception;
 use App\Notifications\SubscriptionRenewingSoonNotification;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -45,7 +46,7 @@ class SendRenewalReminders implements ShouldQueue
                     'user_id' => $subscription->user->id,
                     'renews_at' => $renewsAt,
                 ]);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error('Failed to send renewal reminder', [
                     'user_id' => $subscription->user->id,
                     'error' => $e->getMessage(),

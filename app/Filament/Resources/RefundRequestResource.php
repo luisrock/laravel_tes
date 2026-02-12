@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Actions\EditAction;
+use Filament\Actions\Action;
 use App\Filament\Resources\RefundRequestResource\Pages\EditRefundRequest;
 use App\Filament\Resources\RefundRequestResource\Pages\ListRefundRequests;
 use App\Models\RefundRequest;
@@ -9,10 +12,8 @@ use Filament\Forms;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -22,17 +23,17 @@ class RefundRequestResource extends Resource
 {
     protected static ?string $model = RefundRequest::class;
 
-    protected static ?string $navigationGroup = 'Assinaturas';
-    protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
+    protected static string | \UnitEnum | null $navigationGroup = 'Assinaturas';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-receipt-percent';
     protected static ?string $navigationLabel = 'Estornos';
     protected static ?string $modelLabel = 'Solicitação de Estorno';
     protected static ?string $pluralModelLabel = 'Solicitações de Estorno';
     protected static ?int $navigationSort = 20;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Placeholder::make('user')
                     ->label('Usuário')
                     ->content(fn (RefundRequest $record): string => $record->user?->email ?? '-'),
@@ -111,8 +112,8 @@ class RefundRequestResource extends Resource
                         RefundRequest::STATUS_PROCESSED => 'Processado',
                     ]),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
                 Action::make('stripe_subscription')
                     ->label('Stripe Sub')
                     ->url(fn (RefundRequest $record): ?string => static::getStripeSubscriptionUrl($record))
@@ -129,7 +130,7 @@ class RefundRequestResource extends Resource
                     ->openUrlInNewTab()
                     ->visible(fn (RefundRequest $record): bool => !empty($record->stripe_payment_intent_id)),
             ])
-            ->bulkActions([]);
+            ->toolbarActions([]);
     }
 
     public static function getEloquentQuery(): Builder

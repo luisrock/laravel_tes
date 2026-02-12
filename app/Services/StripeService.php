@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -99,7 +100,7 @@ class StripeService
                         'description' => $product->description,
                         'prices' => $formattedPrices,
                     ];
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     Log::error("Erro ao buscar produto Stripe: {$productId}", [
                         'error' => $e->getMessage(),
                     ]);

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
+use Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Config;
@@ -223,9 +225,9 @@ class TesePageController extends Controller
             
             return $description;
             
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Fallback em caso de erro
-            \Log::error('Erro ao gerar meta description de tese: ' . $e->getMessage());
+            Log::error('Erro ao gerar meta description de tese: ' . $e->getMessage());
             return "Tema {$numero} {$tribunal} - Jurisprudência atualizada dos tribunais superiores.";
         }
     }
@@ -266,8 +268,8 @@ class TesePageController extends Controller
             
             return $related;
             
-        } catch (\Exception $e) {
-            \Log::error('Erro ao buscar temas relacionados: ' . $e->getMessage());
+        } catch (Exception $e) {
+            Log::error('Erro ao buscar temas relacionados: ' . $e->getMessage());
             return collect([]);
         }
     }
@@ -307,8 +309,8 @@ class TesePageController extends Controller
             
             return $quizzes;
             
-        } catch (\Exception $e) {
-            \Log::error('Erro ao buscar quizzes relacionados: ' . $e->getMessage());
+        } catch (Exception $e) {
+            Log::error('Erro ao buscar quizzes relacionados: ' . $e->getMessage());
             return collect([]);
         }
     }

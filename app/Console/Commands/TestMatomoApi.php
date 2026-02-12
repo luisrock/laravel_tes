@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 
@@ -133,7 +134,7 @@ class TestMatomoApi extends Command
                 return 1;
             }
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('❌ Erro ao conectar com Matomo: ' . $e->getMessage());
             return 1;
         }

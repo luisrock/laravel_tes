@@ -47,17 +47,17 @@ class AllStjSumulasPageController extends Controller
         $tribunal = 'STJ';
         $label = 'Súmulas do Superior Tribunal de Justiça - STJ';
         $sumula_route = 'stjsumulapage';
-        
+
         // Meta description dinâmica para melhor CTR
         $description = "Consulte {$count} Súmulas do STJ com texto completo e referência do órgão julgador.";
-        
+
         // Breadcrumb
         $breadcrumb = [
             ['name' => 'Início', 'url' => url('/')],
             ['name' => 'Índice', 'url' => url('/index')],
             ['name' => 'Súmulas STJ', 'url' => null]
         ];
-        
+
         $admin = false;
         if (auth()->check()) {
             //check the email

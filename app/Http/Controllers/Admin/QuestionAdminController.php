@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Str;
 use App\Http\Controllers\Controller;
 use App\Models\Question;
 use App\Models\QuestionOption;
@@ -293,7 +294,7 @@ class QuestionAdminController extends Controller
 
         $tag = QuestionTag::create([
             'name' => $validated['name'],
-            'slug' => \Str::slug($validated['name']),
+            'slug' => Str::slug($validated['name']),
         ]);
 
         if ($request->ajax()) {
