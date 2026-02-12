@@ -28,8 +28,10 @@
         "amirami/localizator": "^0.12@alpha",
         "fakerphp/faker": "^1.24",
         "mockery/mockery": "^1.3.1",
-        "nunomaduro/collision": "^6.4",
-        "phpunit/phpunit": "^9.3",
+        "nunomaduro/collision": "^7.0",
+        "pestphp/pest": "^2.0",
+        "pestphp/pest-plugin-laravel": "^2.0",
+        "phpunit/phpunit": "^10.0",
         "reliese/laravel": "^0.0.19",
         "spatie/laravel-ignition": "^2.0"
     },
@@ -39,6 +41,9 @@
         "sort-packages": true,
         "platform": {
             "php": "8.3.30"
+        },
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
         }
     },
     "extra": {
