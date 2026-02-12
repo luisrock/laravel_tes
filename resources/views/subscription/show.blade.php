@@ -1,198 +1,114 @@
-@extends('front.base', ['display_pdf' => false])
+@extends('layouts.user-panel')
 
-@section('page-title', 'Minha Assinatura')
+@section('panel-title', 'Minha Assinatura')
 
-@section('styles')
+@section('panel-styles')
 <style>
-    .subscription-container {
-        max-width: 800px;
-        margin: 40px auto;
-        padding: 20px;
-    }
-    
-    .subscription-header {
-        margin-bottom: 30px;
-    }
+    .subscription-container { margin: 0; }
+    .subscription-header { margin-bottom: 24px; }
     .subscription-header h1 {
-        font-size: 2rem;
-        color: #333;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #212529;
     }
-    
     .subscription-card {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        padding: 30px;
+        background: #fff;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+        padding: 24px;
         margin-bottom: 20px;
     }
-    
+    .subscription-card h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #212529;
+        margin: 0 0 16px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
     .status-badge {
         display: inline-block;
-        padding: 5px 15px;
-        border-radius: 20px;
-        font-size: 0.9rem;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-size: 0.875rem;
         font-weight: 600;
     }
-    .status-active {
-        background: #d4edda;
-        color: #155724;
-    }
-    .status-grace {
-        background: #fff3cd;
-        color: #856404;
-    }
-    .status-inactive {
-        background: #f8d7da;
-        color: #721c24;
-    }
-    
+    .status-active { background: #d1e7dd; color: #0f5132; }
+    .status-grace { background: #fff3cd; color: #664d03; }
+    .status-inactive { background: #f8d7da; color: #842029; }
     .plan-info {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 20px 0;
-        border-bottom: 1px solid #eee;
+        padding: 14px 0;
+        border-bottom: 1px solid #e9ecef;
+        font-size: 0.9375rem;
     }
-    .plan-info:last-child {
-        border-bottom: none;
-    }
-    .plan-label {
-        color: #666;
-        font-size: 0.95rem;
-    }
-    .plan-value {
-        font-weight: 600;
-        color: #333;
-    }
-    
+    .plan-info:last-child { border-bottom: none; }
+    .plan-label { color: #6c757d; font-weight: 500; }
+    .plan-value { font-weight: 600; color: #212529; }
     .grace-warning {
         background: #fff3cd;
         border: 1px solid #ffc107;
-        border-radius: 8px;
-        padding: 15px 20px;
+        border-radius: 6px;
+        padding: 16px 20px;
         margin-bottom: 20px;
-        color: #856404;
+        color: #664d03;
+        font-size: 0.9375rem;
     }
-    
-    .btn-group {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        margin-top: 20px;
-    }
-    
+    .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
     .btn-primary {
-        padding: 12px 25px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        padding: 12px 20px;
+        background: #0d6efd;
+        color: #fff !important;
         text-decoration: none;
-        border-radius: 8px;
+        border-radius: 6px;
         font-weight: 600;
+        font-size: 0.9375rem;
         border: none;
         cursor: pointer;
-        transition: opacity 0.2s ease;
+        transition: background 0.15s ease;
     }
     .btn-primary:hover {
-        opacity: 0.9;
-        color: white;
+        background: #0b5ed7;
+        color: #fff !important;
         text-decoration: none;
     }
-    
-    .btn-outline {
-        padding: 12px 25px;
-        background: transparent;
-        color: #667eea;
-        text-decoration: none;
-        border-radius: 8px;
-        font-weight: 600;
-        border: 2px solid #667eea;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    .btn-outline:hover {
-        background: #667eea;
-        color: white;
-        text-decoration: none;
-    }
-    
-    .btn-danger-outline {
-        padding: 12px 25px;
-        background: transparent;
-        color: #dc3545;
-        text-decoration: none;
-        border-radius: 8px;
-        font-weight: 600;
-        border: 2px solid #dc3545;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    .btn-danger-outline:hover {
-        background: #dc3545;
-        color: white;
-        text-decoration: none;
-    }
-
     .link-small {
-        color: #dc3545;
-        font-size: 0.85rem;
+        color: #0d6efd;
+        font-size: 0.875rem;
         text-decoration: none;
+        font-weight: 500;
     }
-    .link-small:hover {
-        text-decoration: underline;
-        color: #c82333;
-    }
-    
-    .alert {
-        padding: 15px 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-    }
-    .alert-success {
-        background: #d4edda;
-        color: #155724;
-    }
-    .alert-info {
-        background: #e7f3ff;
-        color: #0066cc;
-    }
-    
-    .no-subscription {
-        text-align: center;
-        padding: 60px 20px;
-    }
+    .link-small:hover { text-decoration: underline; color: #0a58ca; }
+    .subscription-card .alert { padding: 15px 20px; border-radius: 6px; margin-bottom: 20px; }
+    .alert-success { background: #d1e7dd; color: #0f5132; }
+    .alert-info { background: #cff4fc; color: #055160; }
+    .no-subscription { text-align: center; padding: 48px 20px; }
     .no-subscription h2 {
-        color: #333;
-        margin-bottom: 15px;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 12px;
     }
     .no-subscription p {
-        color: #666;
-        margin-bottom: 25px;
+        color: #6c757d;
+        margin-bottom: 24px;
+        font-size: 0.9375rem;
     }
+    .benefits-list {
+        margin: 16px 0 0;
+        padding-left: 1.25rem;
+        color: #212529;
+        font-size: 0.9375rem;
+        line-height: 1.7;
+    }
+    .benefits-list li { margin-bottom: 6px; }
 </style>
 @endsection
 
-@section('content')
-<!-- Hero -->
-<div class="bg-body-light">
-    <div class="content content-full">
-        <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
-            <h1 class="flex-sm-fill h3 my-2">
-                <a href="{{ url('/') }}">
-                Teses & Súmulas
-                </a>
-            </h1>
-            <span>
-                <a href="{{ route('searchpage') }}" class="badge badge-primary">Voltar para Pesquisa</a>
-            </span>
-        </div>
-    </div>
-</div>
-<!-- END Hero -->
-
+@section('panel-content')
 <div class="subscription-container">
-    <div class="subscription-header">
-        <h1>Minha Assinatura</h1>
-    </div>
     
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -244,27 +160,25 @@
                 </a>
             </div>
             
-            <p class="text-muted mt-3" style="font-size: 0.85rem;">
+            <p class="text-muted mt-3" style="font-size: 0.875rem; color: #6c757d;">
                 No portal, você pode atualizar seu cartão, trocar de plano ou cancelar.
             </p>
             <div class="mt-2">
-                <a href="{{ route('refund.create') }}" class="link-small">
-                    Solicitar estorno
-                </a>
+                <a href="{{ route('refund.create') }}" class="link-small">Solicitar estorno</a>
             </div>
         </div>
         
         <div class="subscription-card">
             <h3>Seus Benefícios</h3>
-            <ul style="margin-top: 15px;">
+            <ul class="benefits-list">
                 @if($user->hasFeature('no_ads'))
-                <li>✓ Navegação sem anúncios</li>
+                <li>Navegação sem anúncios</li>
                 @endif
                 @if($user->hasFeature('exclusive_content'))
-                <li>✓ Acesso a conteúdo exclusivo</li>
+                <li>Acesso a conteúdo exclusivo</li>
                 @endif
                 @if($user->hasFeature('ai_tools'))
-                <li>✓ Ferramentas de IA</li>
+                <li>Ferramentas de IA</li>
                 @endif
             </ul>
         </div>
@@ -277,9 +191,5 @@
             </a>
         </div>
     @endif
-    
-    <div class="text-center mt-4">
-        <a href="{{ route('searchpage') }}" style="color: #667eea;">← Voltar ao site</a>
-    </div>
 </div>
 @endsection

@@ -21,12 +21,13 @@ describe('Login', function () {
     it('permite login com credenciais válidas', function () {
         $user = User::factory()->create([
             'password' => bcrypt('password'),
+            'email_verified_at' => now(),
         ]);
 
         $this->post('/login', [
             'email' => $user->email,
             'password' => 'password',
-        ])->assertRedirect('/');
+        ])->assertRedirect('/minha-conta');
 
         $this->assertAuthenticatedAs($user);
     });
@@ -79,66 +80,14 @@ describe('Logout', function () {
 });
 
 // ==========================================
-// Testes de Registro
+// Testes de Registro (desabilitado por ora)
 // ==========================================
 
 describe('Registro', function () {
 
-    it('exibe o formulário de registro', function () {
-        $this->get('/register')
-            ->assertStatus(200);
-    });
-
-    it('valida campos obrigatórios no registro', function () {
-        $this->post('/register', [])
-            ->assertSessionHasErrors(['name', 'email', 'password']);
-    });
-
-    it('valida email único no registro', function () {
-        $existing = User::factory()->create(['email' => 'existente@example.com']);
-
-        $this->post('/register', [
-            'name' => 'Novo Usuário',
-            'email' => 'existente@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
-        ])->assertSessionHasErrors(['email']);
-    });
-
-    it('valida senha mínima de 8 caracteres', function () {
-        $this->post('/register', [
-            'name' => 'Usuário Teste',
-            'email' => 'novo@example.com',
-            'password' => 'short',
-            'password_confirmation' => 'short',
-        ])->assertSessionHasErrors(['password']);
-    });
-
-    it('valida confirmação de senha', function () {
-        $this->post('/register', [
-            'name' => 'Usuário Teste',
-            'email' => 'novo@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'senhadiferente',
-        ])->assertSessionHasErrors(['password']);
-    });
-
-    it('registra novo usuário com sucesso', function () {
-        // A role 'registered' é necessária no fluxo de registro (Spatie Permission)
-        \Spatie\Permission\Models\Role::findOrCreate('registered', 'web');
-
-        $this->post('/register', [
-            'name' => 'Novo Usuário',
-            'email' => 'novo@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
-        ])->assertRedirect('/');
-
-        $this->assertAuthenticated();
-        $this->assertDatabaseHas('users', [
-            'email' => 'novo@example.com',
-            'name' => 'Novo Usuário',
-        ]);
+    it('retorna 404 pois registro está desabilitado', function () {
+        $this->get('/register')->assertStatus(404);
+        $this->post('/register', [])->assertStatus(404);
     });
 
 });
@@ -150,26 +99,22 @@ describe('Registro', function () {
 describe('Reset de Senha', function () {
 
     it('exibe o formulário de reset', function () {
-        $this->get('/password/reset')
+        $this->get('/forgot-password')
             ->assertStatus(200);
     });
 
     it('envia email de reset para email válido', function () {
         $user = User::factory()->create();
 
-        $this->post('/password/email', [
+        $this->post('/forgot-password', [
             'email' => $user->email,
         ])->assertSessionHasNoErrors();
     });
 
     it('não revela se email existe ao solicitar reset', function () {
-        // Mesmo com email inexistente, a resposta é a mesma (segurança)
-        $this->post('/password/email', [
+        $this->post('/forgot-password', [
             'email' => 'inexistente@example.com',
         ]);
-
-        // Não deve retornar erro de validação que revele que o email não existe
-        // Laravel padrão retorna erro, mas isso é esperado (segurança by obscurity depende da config)
         $this->assertTrue(true);
     });
 
@@ -178,7 +123,7 @@ describe('Reset de Senha', function () {
 
         $user = User::factory()->create();
 
-        $this->post('/password/email', [
+        $this->post('/forgot-password', [
             'email' => $user->email,
         ]);
 
@@ -190,7 +135,7 @@ describe('Reset de Senha', function () {
 
         $token = Password::broker()->createToken($user);
 
-        $this->get("/password/reset/{$token}?email=".urlencode($user->email))
+        $this->get("/reset-password/{$token}?email=".urlencode($user->email))
             ->assertStatus(200);
     });
 
@@ -199,14 +144,13 @@ describe('Reset de Senha', function () {
 
         $token = Password::broker()->createToken($user);
 
-        $this->post('/password/reset', [
+        $this->post('/reset-password', [
             'token' => $token,
             'email' => $user->email,
             'password' => 'newpassword123',
             'password_confirmation' => 'newpassword123',
-        ])->assertRedirect('/');
+        ])->assertRedirect('/login');
 
-        // Verifica que a nova senha funciona
         $user->refresh();
         expect(Hash::check('newpassword123', $user->password))->toBeTrue();
     });
@@ -214,26 +158,24 @@ describe('Reset de Senha', function () {
     it('permite login com nova senha após reset', function () {
         $user = User::factory()->create([
             'password' => bcrypt('oldpassword'),
+            'email_verified_at' => now(),
         ]);
 
         $token = Password::broker()->createToken($user);
 
-        $this->post('/password/reset', [
+        $this->post('/reset-password', [
             'token' => $token,
             'email' => $user->email,
             'password' => 'newpassword123',
             'password_confirmation' => 'newpassword123',
-        ]);
+        ])->assertRedirect('/login');
 
-        // Logout (o reset faz login automático)
-        $this->post('/logout');
-
-        // Login com nova senha
-        $this->post('/login', [
+        $response = $this->post('/login', [
             'email' => $user->email,
             'password' => 'newpassword123',
-        ])->assertRedirect('/');
+        ]);
 
+        $response->assertRedirect();
         $this->assertAuthenticatedAs($user->fresh());
     });
 

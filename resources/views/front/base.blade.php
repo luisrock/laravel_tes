@@ -136,7 +136,7 @@
 
 </head>
 
-<body>
+<body class="@if(request()->routeIs('user-panel.*', 'subscription.show', 'refund.*')) page-user-panel @endif">
     <!-- Page Container -->
     <div id="page-container" class="main-content-boxed">
 

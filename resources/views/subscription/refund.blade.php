@@ -1,153 +1,101 @@
-@extends('front.base', ['display_pdf' => false])
+@extends('layouts.user-panel')
 
-@section('page-title', 'Solicitar Estorno')
+@section('panel-title', 'Solicitar Estorno')
 
-@section('styles')
+@section('panel-styles')
 <style>
-    .refund-container {
-        max-width: 600px;
-        margin: 40px auto;
-        padding: 20px;
-    }
-    
-    .refund-header {
-        margin-bottom: 30px;
-    }
-    .refund-header h1 {
-        font-size: 2rem;
-        color: #333;
-    }
-    
+    .refund-container { margin: 0 auto; max-width: 100%; }
     .refund-card {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        padding: 30px;
+        background: #fff;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+        padding: 24px;
     }
-    
     .refund-info {
         background: #f8f9fa;
-        border-radius: 8px;
+        border-radius: 6px;
         padding: 20px;
-        margin-bottom: 25px;
+        margin-bottom: 24px;
     }
     .refund-info h4 {
+        font-size: 0.9375rem;
+        font-weight: 600;
         margin-bottom: 10px;
-        color: #333;
+        color: #212529;
     }
     .refund-info p {
-        color: #666;
+        color: #495057;
         margin: 0;
-        font-size: 0.95rem;
+        font-size: 0.9375rem;
+        line-height: 1.5;
     }
-    
-    .form-group {
-        margin-bottom: 20px;
-    }
-    .form-group label {
+    .refund-card .form-group { margin-bottom: 20px; }
+    .refund-card .form-group label {
         display: block;
         font-weight: 600;
         margin-bottom: 8px;
-        color: #333;
+        color: #212529;
+        font-size: 0.9375rem;
     }
-    .form-group textarea {
+    .refund-card .form-group textarea {
         width: 100%;
-        min-height: 150px;
-        padding: 15px;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
+        min-height: 140px;
+        padding: 12px 14px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
         font-size: 1rem;
         resize: vertical;
-        transition: border-color 0.2s ease;
+        transition: border-color 0.15s ease;
     }
-    .form-group textarea:focus {
+    .refund-card .form-group textarea:focus {
         outline: none;
-        border-color: #667eea;
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
     }
-    .form-group small {
-        color: #999;
+    .refund-card .form-group small {
+        color: #6c757d;
         display: block;
-        margin-top: 5px;
+        margin-top: 6px;
+        font-size: 0.8125rem;
     }
-    
-    .error-message {
-        color: #dc3545;
-        font-size: 0.9rem;
-        margin-top: 5px;
-    }
-    
-    .btn-group {
-        display: flex;
-        gap: 10px;
-        margin-top: 25px;
-    }
-    
-    .btn-primary {
-        padding: 15px 30px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        text-decoration: none;
-        border-radius: 8px;
+    .error-message { color: #dc3545; font-size: 0.875rem; margin-top: 6px; }
+    .refund-card .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+    .refund-card .btn-primary {
+        padding: 12px 24px;
+        background: #0d6efd;
+        color: #fff;
+        border-radius: 6px;
         font-weight: 600;
+        font-size: 0.9375rem;
         border: none;
         cursor: pointer;
-        transition: opacity 0.2s ease;
+        transition: background 0.15s ease;
     }
-    .btn-primary:hover {
-        opacity: 0.9;
-    }
-    
-    .btn-secondary {
-        padding: 15px 30px;
-        background: #f0f0f0;
-        color: #333;
-        text-decoration: none;
-        border-radius: 8px;
+    .refund-card .btn-primary:hover { background: #0b5ed7; }
+    .refund-card .btn-secondary {
+        padding: 12px 24px;
+        background: #fff;
+        color: #212529;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
         font-weight: 600;
-        border: none;
+        font-size: 0.9375rem;
+        text-decoration: none;
         cursor: pointer;
-        transition: background 0.2s ease;
+        transition: background 0.15s ease;
     }
-    .btn-secondary:hover {
-        background: #e0e0e0;
-        color: #333;
+    .refund-card .btn-secondary:hover {
+        background: #f8f9fa;
+        color: #212529;
         text-decoration: none;
     }
-    
-    .alert {
-        padding: 15px 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-    }
-    .alert-warning {
-        background: #fff3cd;
-        color: #856404;
-    }
+    .refund-card .alert { padding: 15px 20px; border-radius: 6px; margin-bottom: 20px; }
+    .alert-warning { background: #fff3cd; color: #664d03; }
 </style>
 @endsection
 
-@section('content')
-<!-- Hero -->
-<div class="bg-body-light">
-    <div class="content content-full">
-        <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
-            <h1 class="flex-sm-fill h3 my-2">
-                <a href="{{ url('/') }}">
-                Teses & Súmulas
-                </a>
-            </h1>
-            <span>
-                <a href="{{ route('subscription.show') }}" class="badge badge-secondary">Voltar para Assinatura</a>
-            </span>
-        </div>
-    </div>
-</div>
-<!-- END Hero -->
-
+@section('panel-content')
 <div class="refund-container">
-    <div class="refund-header">
-        <h1>Solicitar Estorno</h1>
-    </div>
     
     <div class="alert alert-warning">
         <strong>Importante:</strong> Antes de solicitar estorno, considere cancelar sua assinatura. Você manterá acesso até o fim do período pago. O estorno é irreversível e encerrará seu acesso imediatamente.
@@ -191,7 +139,7 @@
             </div>
         </form>
         
-        <p class="text-muted mt-4" style="font-size: 0.85rem;">
+        <p class="text-muted mt-4" style="font-size: 0.875rem; color: #6c757d;">
             Sua solicitação será analisada pela nossa equipe em até 48 horas úteis. Você receberá uma resposta por e-mail.
         </p>
     </div>

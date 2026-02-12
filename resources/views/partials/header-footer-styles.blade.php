@@ -23,6 +23,7 @@ html, body {
 .page-content {
     flex: 1 0 auto;
 }
+
 .site-footer {
     margin-top: auto;
 }
@@ -274,4 +275,5 @@ html, body {
         text-align: center;
     }
 }
+
 </style>

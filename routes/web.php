@@ -6,9 +6,9 @@ use App\Http\Controllers\RefundRequestController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserPanelController;
 use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
-use Spatie\Honeypot\ProtectAgainstSpam;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,23 +19,9 @@ use Spatie\Honeypot\ProtectAgainstSpam;
 | routes are loaded by the RouteServiceProvider within a group which
 | contains the "web" middleware group. Now create something great!
 |
+| Autenticação: Laravel Fortify (login, registro, reset senha, 2FA, etc.)
+|
 */
-
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-
-// Auth::routes(); //with registering
-
-// No registering, by now.
-Auth::routes([
-    'register' => false,
-]);
-
-// enable honeypot
-Route::middleware(ProtectAgainstSpam::class)->group(function () {
-    Auth::routes();
-});
 
 /**
  * TES web routes
@@ -212,15 +198,12 @@ Route::post('/stripe/webhook', [WebhookController::class, 'handleWebhook'])
     ->middleware('stripe.webhook')
     ->name('cashier.webhook');
 
-// Rotas autenticadas de assinatura
-Route::middleware(['auth', 'subscription.configured'])->prefix('minha-conta')->group(function () {
-    Route::get('/assinatura', [SubscriptionController::class, 'show'])
-        ->name('subscription.show');
-    Route::get('/assinatura/portal', [SubscriptionController::class, 'billingPortal'])
-        ->name('subscription.portal');
-
-    Route::get('/estorno', [RefundRequestController::class, 'create'])
-        ->name('refund.create');
-    Route::post('/estorno', [RefundRequestController::class, 'store'])
-        ->name('refund.store');
+// Rotas autenticadas do painel do usuário (minha-conta)
+Route::middleware(['auth', 'verified', 'subscription.configured'])->prefix('minha-conta')->group(function () {
+    Route::get('/', [UserPanelController::class, 'dashboard'])->name('user-panel.dashboard');
+    Route::get('/perfil', [UserPanelController::class, 'profile'])->name('user-panel.profile');
+    Route::get('/assinatura', [SubscriptionController::class, 'show'])->name('subscription.show');
+    Route::get('/assinatura/portal', [SubscriptionController::class, 'billingPortal'])->name('subscription.portal');
+    Route::get('/estorno', [RefundRequestController::class, 'create'])->name('refund.create');
+    Route::post('/estorno', [RefundRequestController::class, 'store'])->name('refund.store');
 });

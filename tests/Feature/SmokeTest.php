@@ -39,12 +39,12 @@ it('carrega a página de login', function () {
     $this->get('/login')->assertStatus(200);
 });
 
-it('carrega a página de registro', function () {
-    $this->get('/register')->assertStatus(200);
+it('registro retorna 404 (rota desabilitada)', function () {
+    $this->get('/register')->assertStatus(404);
 });
 
 it('carrega a página de reset de senha', function () {
-    $this->get('/password/reset')->assertStatus(200);
+    $this->get('/forgot-password')->assertStatus(200);
 });
 
 it('carrega a página de obrigado newsletter', function () {

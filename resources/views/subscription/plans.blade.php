@@ -11,7 +11,7 @@
     }
     
     .plans-container {
-        max-width: 900px;
+        max-width: 1000px;
         margin: 0 auto;
         padding: 0 20px;
     }
@@ -52,9 +52,14 @@
     
     .plans-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        grid-template-columns: 1fr;
         gap: 20px;
         margin-bottom: 40px;
+    }
+    @media (min-width: 768px) {
+        .plans-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
     }
     
     .plan-card {
@@ -267,7 +272,7 @@
         
         @guest
             <div class="alert-notice">
-                Para assinar, você precisa ter uma conta. <a href="{{ route('login') }}">Faça login</a> ou <a href="{{ route('register') }}">crie sua conta</a>.
+                Para assinar, você precisa ter uma conta. <a href="{{ route('login') }}">Faça login</a>.
             </div>
         @endguest
         

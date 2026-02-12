@@ -86,7 +86,7 @@ quiz_answers        - Respostas individuais
 
 ### Testes
 
-A aplicação possui uma bateria abrangente de **205 testes** (291 assertions) usando Pest v3 + PHPUnit 11.
+A aplicação possui uma bateria abrangente de testes usando Pest v3 + PHPUnit 11.
 
 ```bash
 # Rodar todos os testes (usar PHP 8.3)
@@ -104,7 +104,7 @@ A aplicação possui uma bateria abrangente de **205 testes** (291 assertions) u
 | Arquivo | Testes | O que cobre |
 |---------|--------|-------------|
 | ArchTest | 16 | Arquitetura: presets security, namespaces, sufixos |
-| AuthTest | 22 | Login, logout, registro, reset de senha completo |
+| AuthTest | 17 | Login, logout, reset de senha (registro desabilitado) |
 | SmokeTest | 27 | Todas as rotas públicas e protegidas |
 | MiddlewareTest | 15 | AdminMiddleware, BearerToken, Subscribed, Feature, Config |
 | QuizTest | 17 | Listagem, filtro, visualização, resposta AJAX, resultado |
