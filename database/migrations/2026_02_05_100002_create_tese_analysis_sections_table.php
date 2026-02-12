@@ -63,19 +63,21 @@ class CreateTeseAnalysisSectionsTable extends Migration
             $table->index(['tese_id', 'tribunal', 'section_type', 'generated_at'], 'idx_section_history');
         });
 
-        // Adicionar coluna gerada via SQL raw (Laravel 8 não suporta nativamente)
-        DB::statement("
-            ALTER TABLE tese_analysis_sections
-            ADD COLUMN active_key VARCHAR(500) GENERATED ALWAYS AS (
-                IF(is_active, CONCAT(tese_id, ':', tribunal, ':', section_type), NULL)
-            ) STORED AFTER is_active
-        ");
+        // Adicionar coluna gerada via SQL raw (apenas MySQL — SQLite não suporta)
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            DB::statement("
+                ALTER TABLE tese_analysis_sections
+                ADD COLUMN active_key VARCHAR(500) GENERATED ALWAYS AS (
+                    IF(is_active, CONCAT(tese_id, ':', tribunal, ':', section_type), NULL)
+                ) STORED AFTER is_active
+            ");
 
-        // Índice único na coluna gerada
-        DB::statement("
-            ALTER TABLE tese_analysis_sections
-            ADD UNIQUE KEY uniq_active_key (active_key)
-        ");
+            // Índice único na coluna gerada
+            DB::statement("
+                ALTER TABLE tese_analysis_sections
+                ADD UNIQUE KEY uniq_active_key (active_key)
+            ");
+        }
     }
 
     public function down()
