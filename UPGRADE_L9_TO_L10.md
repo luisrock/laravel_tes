@@ -1,5 +1,6 @@
-# Upgrade Laravel 9 → 10
+# Upgrade Laravel 9 → 10 ✅ CONCLUÍDO
 
+> Concluído em 2026-02-12. Laravel Framework 10.50.0 instalado com sucesso.
 > Baseado na [documentação oficial](https://laravel.com/docs/10.x/upgrade#main-content)
 > Tempo estimado: ~15min (impacto baixo neste projeto)
 
@@ -9,15 +10,15 @@
 
 ### 1. Dependências (composer.json) — Alto Impacto
 - [ ] Alterar `"php"` de `"^8.0.2"` para `"^8.1"` (na prática mantemos `"^8.1"`, prod usa 8.3)
-- [ ] Alterar `"laravel/framework"` de `"^9.0"` para `"^10.0"`
-- [ ] Alterar `"spatie/laravel-ignition"` de `"^1.0"` para `"^2.0"`
-- [ ] Alterar `"nunomaduro/collision"` de `"^6.1"` para `"^7.0"`
-- [ ] Verificar/atualizar versões de:
-  - [ ] `"laravel/cashier"` — `^14.0` (já compatível com L10 ✅)
-  - [ ] `"filament/filament"` — `^2.0` funciona com L10, mas upgrade para v3 é recomendado (opcional — pode ser feito depois)
-  - [ ] `"spatie/laravel-permission"` — `^5.10` funciona com L10, pode subir para `^6.0`
-  - [ ] `"spatie/laravel-honeypot"` — verificar compatibilidade
-  - [ ] `"spatie/laravel-sitemap"` — `^6.0` já compatível ✅
+- [x] Alterar `"laravel/framework"` de `"^9.0"` para `"^10.0"`
+- [x] Alterar `"spatie/laravel-ignition"` de `"^1.0"` para `"^2.0"`
+- [x] Alterar `"nunomaduro/collision"` de `"^6.1"` para `"^6.4"` (v7 exige PHPUnit 10)
+- [x] Verificar/atualizar versões de:
+  - [x] `"laravel/cashier"` — `^14.0` (já compatível com L10 ✅)
+  - [x] `"filament/filament"` — `^2.0` funciona com L10 (upgrade v3 adiado)
+  - [x] `"spatie/laravel-permission"` — `^5.10` funciona com L10
+  - [x] `"spatie/laravel-sitemap"` — atualizado para `^7.0` (requer PHP 8.2+ e browsershot seguro)
+  - [x] `"amirami/localizator"` — atualizado para `^0.12@alpha`
 
 ---
 
