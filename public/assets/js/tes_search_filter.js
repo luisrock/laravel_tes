@@ -26,17 +26,31 @@
     });
 
     // Toggle da visibilidade da busca
+    function showSearchContainer() {
+        searchContainer.classList.remove('d-none');
+        searchContainer.classList.remove('tw-hidden');
+    }
+
+    function hideSearchContainer() {
+        searchContainer.classList.add('d-none');
+        searchContainer.classList.add('tw-hidden');
+    }
+
+    function isSearchContainerVisible() {
+        return !searchContainer.classList.contains('d-none') && !searchContainer.classList.contains('tw-hidden');
+    }
+
     if (toggleBtn) {
         toggleBtn.addEventListener('click', function (e) {
             e.preventDefault();
-            if (searchContainer.classList.contains('d-none')) {
+            if (!isSearchContainerVisible()) {
                 // Mostrar: Reaplicar filtro existente
-                searchContainer.classList.remove('d-none');
+                showSearchContainer();
                 filterTable(searchInput.value.toLowerCase());
                 searchInput.focus();
             } else {
                 // Ocultar: Limpar visualização (mas manter valor no input)
-                searchContainer.classList.add('d-none');
+                hideSearchContainer();
                 filterTable('');
             }
         });

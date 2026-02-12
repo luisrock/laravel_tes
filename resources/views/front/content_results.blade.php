@@ -4,22 +4,18 @@
 
 <!-- content -->
 <!-- Page Content -->
-<div class="content" id="content-results">
+<div class="home-pilot-shell tw-pt-0" id="content-results">
     <!-- Results -->
-    <div class="block">
-        <ul class="nav nav-tabs nav-tabs-block nav-tabs-items" data-toggle="tabs" role="tablist" style="{{ $display_pdf }}">
-            <li class="nav-item" id="nav-sumulas">
-                <a class="nav-link active" href="#busca-sumulas-trib">Súmulas</a>
-            </li>
+    <div class="home-pilot-card tw-overflow-hidden">
+        <div class="home-results-tabs" role="tablist" style="{{ $display_pdf }}">
+            <button type="button" class="home-results-tab is-active" data-tab-target="#busca-sumulas-trib" id="nav-sumulas" aria-selected="true">Súmulas</button>
             @hasSection('teses_total_text')
-            <li class="nav-item" id="nav-teses">
-                <a class="nav-link" href="#busca-teses-trib">Teses</a>
-            </li>
+            <button type="button" class="home-results-tab" data-tab-target="#busca-teses-trib" id="nav-teses" aria-selected="false">Teses</button>
             @endif
-        </ul>
+        </div>
 
 
-        <div class="block-content tab-content overflow-hidden">
+        <div class="home-results-content">
 
 <!-- PDF Button (apenas para admins - desabilitado temporariamente por bug no layout) -->
         @php
@@ -38,11 +34,12 @@
                 )   )
 
             <div id="pdf-button" style="{{ $display_pdf }}">
-                <a href="{{ url()->full() }}&print=pdf" 
+                <a href="{{ url()->full() }}&print=pdf"
+                    class="home-pilot-btn tw-py-2 tw-px-3 tw-text-sm"
                     target="_blank" 
                     rel="nofollow">
-                <img src="assets/img/pdf.png" 
-                        alt="image_pdf" title="Gerar PDF">
+                    <img src="assets/img/pdf.png" 
+                        alt="image_pdf" title="Gerar PDF" class="tw-w-4 tw-h-4 tw-mr-1 tw-inline-block"> Gerar PDF
                 </a>
             </div>
         
@@ -50,14 +47,13 @@
 <!-- PDF Button END-->
 
             <!-- Súmulas -->
-            <div class="tab-pane fade fade-up show active" id="busca-sumulas-trib" role="tabpanel">
-                <div
-                    class="font-size-h4 font-w600 p-2 mb-4 border-left border-4x border-primary bg-body-light trib-texto-quantidade">
+            <section class="home-results-pane is-active" id="busca-sumulas-trib" role="tabpanel">
+                <div class="home-results-count trib-texto-quantidade">
 
                     @yield('sumulas_total_text')
 
                 </div>
-                <table class="table table-striped table-vcenter table-results">
+                <table class="home-results-table table-results">
                     <tbody>
 
                         @yield('sumulas_inner_table')
@@ -90,18 +86,17 @@
                                     </li>
                                 </ul>
                             </nav> -->
-            </div>
+            </section>
             <!-- END Súmulas -->
             <!--mpdf  <pagebreak>  mpdf-->
             <!-- Teses -->
-            <div class="tab-pane fade fade-up" id="busca-teses-trib" role="tabpanel">
-                <div
-                    class="font-size-h4 font-w600 p-2 mb-4 border-left border-4x border-primary bg-body-light trib-texto-quantidade">
+            <section class="home-results-pane" id="busca-teses-trib" role="tabpanel" hidden>
+                <div class="home-results-count trib-texto-quantidade">
 
                     @yield('teses_total_text')
 
                 </div>
-                <table class="table table-striped table-vcenter table-results">
+                <table class="home-results-table table-results">
                     <tbody>
 
                         @yield('teses_inner_table')
@@ -134,7 +129,7 @@
                                     </li>
                                 </ul>
                             </nav> -->
-            </div>
+            </section>
             <!-- END Súmulas -->
 
         </div>
@@ -142,5 +137,36 @@
     <!-- END Results -->
 
 </div>
+
+<script>
+(function () {
+    const tabs = document.querySelectorAll('.home-results-tab');
+    const panes = document.querySelectorAll('.home-results-pane');
+
+    if (!tabs.length || !panes.length) {
+        return;
+    }
+
+    function activateTab(targetSelector) {
+        tabs.forEach(function (tab) {
+            const isActive = tab.dataset.tabTarget === targetSelector;
+            tab.classList.toggle('is-active', isActive);
+            tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+
+        panes.forEach(function (pane) {
+            const isActive = `#${pane.id}` === targetSelector;
+            pane.classList.toggle('is-active', isActive);
+            pane.hidden = !isActive;
+        });
+    }
+
+    tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            activateTab(tab.dataset.tabTarget);
+        });
+    });
+})();
+</script>
 
 @endsection

@@ -4,11 +4,19 @@ const ldText = document.getElementById('loading-text');
 const btnForm = document.getElementById('btn-send-trib-form');
 
 function waitingResults() {
-    spinner.style.display = "block";
-    ldText.style.display = "inline";
-    resultsBlock.innerHTML = '';
-    btnForm.disabled = true;
-    btnForm.style.display = 'none';
+    if (spinner) {
+        spinner.style.display = "block";
+    }
+    if (ldText) {
+        ldText.style.display = "inline";
+    }
+    if (resultsBlock) {
+        resultsBlock.innerHTML = '';
+    }
+    if (btnForm) {
+        btnForm.disabled = true;
+        btnForm.style.display = 'none';
+    }
 }
 
 const tribForm = document.getElementById('trib-form');
@@ -65,8 +73,17 @@ navItems.forEach(function(el) {
         return; 
     }
     let navLink = el.querySelector('.nav-link');
+    if (!navLink) {
+        return;
+    }
     let href = navLink.getAttribute('href');
+    if (!href || !href.startsWith('#')) {
+        return;
+    }
     let tabPane = document.querySelector(href);
+    if (!tabPane) {
+        return;
+    }
     let trs = tabPane.querySelectorAll('tr');
     if (trs.length === 0) {
         if (navLink.closest('.nav-tabs-tribunais')) {

@@ -68,6 +68,30 @@
     @php
         //mPdf does not access css by url, but by full path
         $basepath = empty($display_pdf) ? url('/') : public_path();
+
+        $modernizedRouteNames = [
+            'searchpage',
+            'alltemaspage',
+            'temapage',
+            'indexsumulaspage',
+            'stfallsumulaspage',
+            'stjallsumulaspage',
+            'tstallsumulaspage',
+            'tnuallsumulaspage',
+            'stfalltesespage',
+            'stjalltesespage',
+            'stfsumulapage',
+            'stjsumulapage',
+            'tstsumulapage',
+            'tnusumulapage',
+            'stftesepage',
+            'stjtesepage',
+            'newsletterspage',
+            'newsletter.show',
+            'newsletterobrigadopage',
+        ];
+
+        $isModernizedRoute = request()->routeIs($modernizedRouteNames);
     @endphp
 
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
@@ -77,6 +101,10 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
         integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
     <link rel="stylesheet" href='{{ $basepath . '/assets/css/tes.css?v=' . time() }}' type="text/css">
+
+    @if (empty($display_pdf))
+        @vite(['resources/js/tailwind-home.js'])
+    @endif
 
 
     @yield('styles')
@@ -156,86 +184,6 @@
         </main>
         <!-- END Main Container -->
 
-        <!-- Footer -->
-        <footer id="page-footer" class="bg-body-light" style="{{ $display_pdf }}">
-            <div class="content py-3">
-                <div class="row font-size-sm">
-                    <div class="col-sm-6 order-sm-2 py-1 text-center text-sm-right">
-                        @if (Route::currentRouteName() == 'searchpage')
-                            <a class="font-w600" href="{{ route('alltemaspage') }}">Pesquisas prontas</a>
-                        @elseif(Route::currentRouteName() == 'alltemaspage')
-                            <a class="font-w600" href="{{ route('searchpage') }}">Pesquisar</a>
-                        @else
-                            <a class="font-w600" href="{{ route('alltemaspage') }}">Pesquisas prontas</a> | <a
-                                class="font-w600" href="{{ route('searchpage') }}">Pesquisar</a>
-                        @endif
-
-                        {{-- substituindo a página de atualizacoes pela de newsletter no front.
-                        as atualizacoes ficam só para mim  --}}
-                        {{-- @if (Route::currentRouteName() != 'atualizacoespage')
-                            | <a class="font-w600" href="{{ route('atualizacoespage') }}">Atualizações</a>
-                        @endif --}}
-                        @if (Route::currentRouteName() != 'newsletterspage')
-                            | <a class="font-w600" href="{{ route('newsletterspage') }}">Atualizações</a>
-                        @endif
-                        @php
-                            $quizzesVisible = \App\Models\EditableContent::where('slug', 'quizzes-home-visibility')
-                                ->where('published', true)->exists();
-                        @endphp
-                        @if ($quizzesVisible && Route::currentRouteName() != 'quizzes.index')
-                            | <a class="font-w600" href="{{ route('quizzes.index') }}">Quizzes</a>
-                        @endif
-                        @auth
-                            @if (in_array(Auth::user()->email, config('tes_constants.admins')))
-                                | <a href="{{ route('admin') }}">Admin</a>
-                            @endif
-                        @endauth
-                    </div>
-                    <div class="col-sm-6 order-sm-1 py-1 text-center text-sm-left">
-                        <a class="font-w600" href="/index">Index de Súmulas (STF, STJ, TST, TNU) e Teses (STF,
-                            STJ)</a>
-
-                        {{-- Fontes:
-
-                        <a class="font-w600" href="https://jurisprudencia.stf.jus.br/pages/search"
-                            target="_blank">STF</a>
-                        -
-                        <a class="font-w600" href="https://jurisprudencia.tst.jus.br/" target="_blank">TST</a>
-                        -
-                        <a class="font-w600" href="https://scon.stj.jus.br/SCON/" target="_blank">STJ</a>
-                        -
-                        <a class="font-w600" href="https://www2.cjf.jus.br/jurisprudencia/tnu/"
-                            target="_blank">TNU</a>
-                        -
-                        <a class="font-w600" href="https://pesquisa.apps.tcu.gov.br/#/pesquisa/jurisprudencia"
-                            target="_blank">TCU</a>
-                        -
-                        <a class="font-w600" href="http://idg.carf.fazenda.gov.br/jurisprudencia/sumulas-carf"
-                            target="_blank">CARF</a>
-                        -
-                        <a class="font-w600"
-                            href="https://www.cnj.jus.br/corregedoria-nacional-de-justica/redescobrindo-os-juizados-especiais/enunciados-fonaje/"
-                            target="_blank">FONAJE</a>
-                        -
-                        <a class="font-w600" href="https://www.cjf.jus.br/enunciados/" target="_blank">CEJ</a> --}}
-                    </div>
-                </div>
-                <hr>
-                <div class="row font-size-sm">
-                    <div class="col-sm-6 order-sm-2 py-1 text-center text-sm-right">
-                        &copy; <span data-toggle="year-copy"></span>. Todos os direitos reservados.
-                    </div>
-                    <div class="col-sm-6 order-sm-1 py-1 text-center text-sm-left">
-                        Criado por <a class="font-w600" href="https://maurolopes.com.br" target="_blank">Mauro
-                            Lopes</a>.
-                    </div>
-                </div>
-
-            </div>
-        </footer>
-        <!-- END Footer -->
-
-
     </div>
     <!-- END Page Container -->
 
@@ -245,8 +193,10 @@
     </button>
     <!-- END Botão Voltar ao Topo -->
 
-    <script src='{{ url('assets/js/tescustom.core.min.js') }}'></script>
-    <script src='{{ url('assets/js/tescustom.app.min.js') }}'></script>
+    @unless($isModernizedRoute)
+        <script src='{{ url('assets/js/tescustom.core.min.js') }}'></script>
+        <script src='{{ url('assets/js/tescustom.app.min.js') }}'></script>
+    @endunless
     <script src='{{ url('assets/js/tes.js') }}'></script>
     <script src='{{ url('assets/js/tes_tema_concept.js') }}'></script>
     @yield('adminjs')

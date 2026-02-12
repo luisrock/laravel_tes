@@ -13,32 +13,15 @@
         @endphp
     @endauth
 
-    <!-- Hero -->
-    <div class="bg-body-light" style="{{ $display_pdf }}">
-        <div class="content content-full">
-            <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
-                <h1 class="flex-sm-fill h3 my-2">
-                    <a href="{{ url('/') }}">
-                        Teses & Súmulas
-                    </a>
-                </h1>
-                <span>
-                    <a href="https://chrome.google.com/webstore/detail/teses-e-s%C3%BAmulas/biigfejcdpcpibfmffgmmndpjhnlcjfb?hl=pt-BR"
-                        class="badge badge-primary">Extensão para o Chrome</a>
-                </span>
-            </div>
-            <p>
-                Pesquisa Pronta de Súmulas, Enunciados e Teses de Repercussão Geral e Repetitivos
-                feita na base de dados de tribunais superiores
-                e outros órgãos relevantes. Escolha o seu tema e comece a estudar!
+    <div class="home-pilot-shell tw-pt-4" style="{{ $display_pdf }}">
+        <section class="home-pilot-card tw-p-5 md:tw-p-6 tw-space-y-2">
+            <h1 class="home-pilot-title tw-m-0">Pesquisas Prontas</h1>
+            <p class="home-pilot-subtitle tw-m-0">
+                Pesquisa pronta de súmulas, enunciados e teses de repercussão geral e repetitivos na base de dados de
+                tribunais superiores e outros órgãos relevantes.
             </p>
-            <h2>
-                Pesquisas Prontas
-            </h2>
-            <p>
-                (todos os tribunais)
-            </p>
-        </div>
+            <p class="tw-text-sm tw-text-slate-500 tw-m-0">(todos os tribunais)</p>
+        </section>
     </div>
     <!-- END Hero -->
 
@@ -47,45 +30,40 @@
 
 
     <!-- Temas -->
-    <div class="content">
-        <div class="block block-rounded">
-            <div class="block-header">
-                <h3 class="block-title">Temas</h3>
+    <div class="home-pilot-shell tw-pt-2">
+        <div class="home-pilot-card tw-overflow-hidden">
+            <div class="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-px-5 tw-py-4 tw-border-b tw-border-slate-200 tw-bg-slate-50">
+                <h3 class="tw-text-base tw-font-semibold tw-text-slate-800 tw-m-0">Temas</h3>
                 @if ($admin)
-                    <h6 class="block-title">{{ $perc_total_concepts }}</h6>
-                    <a href="{{ route('admin') }}">Admin</a>
-                @endif
-                <div class="block-options">
-                    <div class="block-options-item">
-                        <!-- <code>.table</code> -->
+                    <div class="tw-flex tw-items-center tw-gap-3">
+                        <h6 class="tw-text-xs tw-font-semibold tw-text-slate-600 tw-m-0">{{ $perc_total_concepts }}</h6>
+                        <a href="{{ route('admin') }}" class="tw-text-sm tw-text-brand-700 hover:tw-text-brand-800">Admin</a>
                     </div>
-                </div>
+                @endif
             </div>
             
             <!-- Busca Rápida -->
-            <div class="block-content block-content-full bg-body-light">
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">
+            <div class="tw-p-5 tw-border-b tw-border-slate-200 tw-bg-slate-50/70">
+                <div class="tw-flex tw-items-stretch tw-gap-2">
+                    <div class="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-slate-300 tw-bg-white tw-px-3 tw-text-slate-500">
                             <i class="fa fa-search"></i>
-                        </span>
                     </div>
-                    <input type="text" class="form-control form-control-alt" id="quick-search-temas" placeholder="🔍 Filtrar temas nesta página..." autocomplete="off">
-                    <div class="input-group-append">
-                        <button type="button" class="btn btn-secondary" id="clear-search-temas" style="display: none;">
+                    <input type="text" class="home-pilot-input" id="quick-search-temas" placeholder="Filtrar temas nesta página..." autocomplete="off">
+                    <div>
+                        <button type="button" class="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-slate-300 tw-bg-white tw-px-3 tw-text-slate-600 hover:tw-bg-slate-100" id="clear-search-temas" style="display: none;">
                             <i class="fa fa-times"></i>
                         </button>
                     </div>
                 </div>
-                <small class="form-text text-muted">
+                <small class="tw-block tw-text-slate-500 tw-mt-2">
                     <span id="search-results-count"></span>
                 </small>
             </div>
             <!-- END Busca Rápida -->
             
-            <div class="block-content">
+            <div class="tw-p-5">
                 <div class="table-responsive">
-                    <table class="table table-vcenter table-bordered">
+                    <table class="home-results-table temas-grid-table table-results">
                         <!-- <thead>
                                 <tr>
                                     <th style="width: 33%;">Tema</th>
@@ -94,18 +72,18 @@
                                 </tr>
                             </thead> -->
                         <tbody>
-                            <tr class="tema-row">
+                            <tr class="tema-row tw-block md:tw-table-row">
                                 @foreach ($temas as $k => $t)
                                     @php
                                         $style = $admin && $t->concept && $t->concept_validated_at ? 'background-color: #c3d1c3;' : '';
                                     @endphp
-                                    <td class="font-w600 font-size-sm tema-item" style="{{ $style }}" data-tema-text="{{ strtolower($t->label ?? str_replace('"', '', $t->keyword)) }}">
+                                        <td class="tw-font-semibold tw-text-sm tema-item tw-block md:tw-table-cell tw-w-full md:tw-w-1/3" style="{{ $style }}" data-tema-text="{{ strtolower($t->label ?? str_replace('"', '', $t->keyword)) }}">
                                         <a
-                                            href="{{ route('temapage') }}/{{ $t->slug }}">{{ $t->label ?? str_replace('"', '', $t->keyword) }}</a>
+                                            href="{{ route('temapage') }}/{{ $t->slug }}" class="tw-text-brand-700 hover:tw-text-brand-800">{{ $t->label ?? str_replace('"', '', $t->keyword) }}</a>
                                     </td>
                                     @if (is_int(($k + 1) / 3))
                             </tr>
-                            <tr class="tema-row">
+                            <tr class="tema-row tw-block md:tw-table-row">
                                 @endif
                                 @endforeach
                         </tbody>

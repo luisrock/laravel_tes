@@ -32,63 +32,51 @@
 
     <!-- Page Content -->
 
-    <!-- Hero -->
-    <div class="bg-body-light">
-        <div class="content content-full">
-            <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
-                <h1 class="flex-sm-fill h3 my-2">
-                    <a href="{{ url('/') }}">
-                        Teses & Súmulas
-                    </a>
-                    <span class="text-muted"> | </span> {{ $label }}
-                </h1>
-                <span>
-                    <a href="https://chrome.google.com/webstore/detail/teses-e-s%C3%BAmulas/biigfejcdpcpibfmffgmmndpjhnlcjfb?hl=pt-BR"
-                        class="badge badge-primary">Extensão para o Chrome</a>
-                </span>
-            </div>
-            <p>
-                Faça uma <a href="{{ route('searchpage') }}">pesquisa</a> ou veja as <a
-                    href="{{ route('alltemaspage') }}">pesquisas prontas</a>.
+    <div class="home-pilot-shell tw-pt-4">
+        <section class="home-pilot-card tw-p-5 md:tw-p-6 tw-space-y-2">
+            <h1 class="home-pilot-title tw-m-0">
+                {{ $label }}
+            </h1>
+            <p class="home-pilot-subtitle tw-m-0">
+                Faça uma <a href="{{ route('searchpage') }}" class="tw-text-brand-700 hover:tw-text-brand-800">pesquisa</a> ou veja as
+                <a href="{{ route('alltemaspage') }}" class="tw-text-brand-700 hover:tw-text-brand-800">pesquisas prontas</a>.
                 @if ($admin)
-                    <br><a href="{{ route('admin') }}">Admin</a>
+                    <br><a href="{{ route('admin') }}" class="tw-text-brand-700 hover:tw-text-brand-800">Admin</a>
                 @endif
             </p>
-        </div>
+        </section>
     </div>
     <!-- END Hero -->
 
     <!-- Breadcrumb -->
     @if(isset($breadcrumb))
-    <div class="content content-full pt-2 pb-0">
+    <div class="home-pilot-shell tw-pt-2 tw-pb-0">
         <x-breadcrumb :items="$breadcrumb" />
     </div>
     @endif
     <!-- END Breadcrumb -->
 
-    <div class="content" id="content-results">
+    <div class="home-pilot-shell tw-pt-2" id="content-results">
 
         <!-- Results -->
 
-        <div class="block-content tab-content overflow-hidden">
-            <div class="block-content tab-content overflow-hidden">
+        <div class="home-pilot-card tw-p-5 md:tw-p-6">
+            <div>
 
 
-                <div class="tab-pane fade fade-up active show" role="tabpanel">
+                <div role="tabpanel">
 
-                    <div
-                        class="font-size-h4 font-w600 p-2 mb-4 border-left border-4x border-primary bg-body-light trib-texto-quantidade">
+                    <div class="home-results-count trib-texto-quantidade">
                         {{ $tribunal_nome_completo }} - {{ $tribunal }}
                     </div>
 
-                    <table class="table table-striped table-vcenter table-results table-sumula"
-                        style="border: 2px solid #5c80d1;">
+                    <table class="home-results-table table-results table-sumula">
 
                         <tbody>
 
                             <tr>
                                 <td>
-                                    <h4 class="h5 mt-3 mb-2" style="color:#6d8cd5;">
+                                    <h4 class="tw-text-lg tw-font-semibold tw-mt-0 tw-mb-2 tw-text-brand-700">
                                         @if (!empty($tese->link))
                                             <a href="{{ $tese->link }}" target="_blank">
                                                 {{ $tese->titulo }}
@@ -98,36 +86,35 @@
                                         @endif
                                     </h4>
                                     @if (!empty($tese->questao))
-                                        <p class="d-sm-block" style="">
+                                        <p>
                                             {{ $tese->questao }}
                                         </p>
                                     @endif
                                     @if (!empty($tese->texto))
-                                        <p class="d-sm-block" style="font-weight: bold;" id="tese-texto">
+                                        <p class="tw-font-semibold" id="tese-texto">
                                             {{ $tese->texto }}
                                         </p>
                                     @endif
                                     @if (!empty($tese->text_muted))
-                                        <span class="text-muted"
-                                            style="display: flex;justify-content: flex-end;font-size: 0.8em;">
+                                        <span class="tw-text-slate-500 tw-text-sm tw-flex tw-justify-end">
                                             {{ $tese->text_muted }}
                                         </span>
                                     @endif
                                     
                                     <!-- Botões de Ação -->
-                                    <div class="mt-3 mb-3">
+                                    <div class="tw-mt-3 tw-mb-3 tw-flex tw-flex-wrap tw-gap-2">
                                         @if (!empty($tese->to_be_copied))
-                                        <button class="btn btn-primary btn-sm mr-2" onclick="copiarTese(event)" title="Copiar texto completo da tese">
+                                        <button class="home-pilot-btn tw-py-2 tw-px-3 tw-text-sm" onclick="copiarTese(event)" title="Copiar texto completo da tese">
                                             <i class="fa fa-copy"></i> Copiar Tese
                                         </button>
                                         @endif
                                         
-                                        <button class="btn btn-outline-primary btn-sm mr-2" onclick="compartilharTese()" title="Compartilhar esta tese">
+                                        <button class="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-brand-300 tw-text-brand-700 hover:tw-bg-brand-50 tw-py-2 tw-px-3 tw-text-sm tw-font-medium" onclick="compartilharTese()" title="Compartilhar esta tese">
                                             <i class="fa fa-share-alt"></i> Compartilhar
                                         </button>
                                         
                                         @if (!empty($tese->link))
-                                        <a href="{{ $tese->link }}" target="_blank" class="btn btn-outline-secondary btn-sm" title="Ver no site oficial do {{ $tribunal }}">
+                                        <a href="{{ $tese->link }}" target="_blank" class="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-slate-300 tw-text-slate-700 hover:tw-bg-slate-50 tw-py-2 tw-px-3 tw-text-sm tw-font-medium" title="Ver no site oficial do {{ $tribunal }}">
                                             <i class="fa fa-external-link"></i> Ver Original
                                         </a>
                                         @endif
@@ -153,12 +140,12 @@
 
                     @if (!empty($tese->ementa_texto))
                         {{-- STF --}}
-                        <h4 class="h5 mt-3 mb-2">
+                        <h4 class="tw-text-base tw-font-semibold tw-mt-4 tw-mb-2">
                             Ementa
                         </h4>
-                        <p class="d-sm-block" style="">
+                        <p>
                             {{ $tese->ementa_texto }}
-                            <span class="text-muted" style="display: flex;justify-content: flex-end;font-size: 0.8em;">
+                            <span class="tw-text-slate-500 tw-text-sm tw-flex tw-justify-end">
                                 {{ $tese->relator }}, {{ $tese->acordao }}.
                             </span>
                         </p>
@@ -166,28 +153,28 @@
 
                     @if (!empty($tese->indexacao))
                         {{-- STF --}}
-                        <h4 class="h5 mt-3 mb-2">
+                        <h4 class="tw-text-base tw-font-semibold tw-mt-4 tw-mb-2">
                             Indexação
                         </h4>
-                        <p class="d-sm-block" style="">
+                        <p>
                             {{ $tese->indexacao }}
                         </p>
                     @endif
 
                     @if (!empty($tese->ramos))
                         {{-- STJ --}}
-                        <h4 class="h5 mt-3 mb-2">
+                        <h4 class="tw-text-base tw-font-semibold tw-mt-4 tw-mb-2">
                             Assuntos
                         </h4>
-                        <p class="d-sm-block" style="">
+                        <p>
                             {{ $tese->ramos }}
                         </p>
                     @endif
 
                     @if (!empty($tese->link))
-                        <p class="d-sm-block" style="">
+                        <p>
                             Consulte a fonte
-                            <a href="{{ $tese->link }}" target="_blank">
+                            <a href="{{ $tese->link }}" target="_blank" class="tw-text-brand-700 hover:tw-text-brand-800">
                                 aqui</a>
                         </p>
                     @endif
@@ -200,16 +187,16 @@
             
             <!-- Temas Relacionados -->
             @if(isset($related_themes) && $related_themes->count() > 0)
-            <div class="block-content mt-4 mb-4">
-                <h4 class="h5 mb-3">
+            <div class="tw-mt-6 tw-mb-2">
+                <h4 class="tw-text-base tw-font-semibold tw-mb-3 tw-text-slate-800">
                     <i class="fa fa-link text-primary"></i> Temas Relacionados
                 </h4>
-                <div class="row">
+                <div class="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-3">
                     @foreach($related_themes as $theme)
-                    <div class="col-md-4 col-sm-6 mb-3">
-                        <a href="/tema/{{ $theme->slug }}" class="block block-rounded block-link-shadow text-center h-100" style="text-decoration: none;">
-                            <div class="block-content block-content-full">
-                                <div class="font-size-sm font-w600 text-primary">
+                    <div>
+                        <a href="/tema/{{ $theme->slug }}" class="tw-block tw-border tw-border-slate-200 tw-rounded-lg hover:tw-border-brand-300 hover:tw-bg-brand-50 tw-transition tw-p-4" style="text-decoration: none;">
+                            <div>
+                                <div class="tw-text-sm tw-font-semibold tw-text-brand-800">
                                     {{ $theme->label ?? $theme->keyword }}
                                 </div>
                             </div>
@@ -220,15 +207,10 @@
             </div>
             @endif
 
-            <div class="block-content block-content-full block-content-sm bg-body-light">
-                <div class="row">
-                    <div class="col-sm-12 text-center">
-                        <a href="{{ route($alltesesroute) }}">
-                            <i class="fa fa-arrow-left mr-1"></i> Teses Vinculantes do {{ $tribunal_nome_completo }}
-                        </a>
-                    </div>
-                </div>
-
+            <div class="tw-mt-5 tw-pt-5 tw-border-t tw-border-slate-200 tw-text-center">
+                <a href="{{ route($alltesesroute) }}" class="tw-inline-flex tw-items-center tw-gap-2 tw-text-brand-700 hover:tw-text-brand-800 tw-font-medium">
+                    <i class="fa fa-arrow-left"></i> Teses Vinculantes do {{ $tribunal_nome_completo }}
+                </a>
             </div>
 
         </div>

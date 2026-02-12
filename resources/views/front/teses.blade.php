@@ -6,111 +6,93 @@
 
     <!-- Page Content -->
 
-    <!-- Hero -->
-    <div class="bg-body-light">
-        <div class="content content-full">
-            <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
-                <h1 class="flex-sm-fill h3 my-2">
-                    <a href="{{ url('/') }}">
-                        Teses & Súmulas
-                    </a>
-                    <span class="text-muted"> | </span> {{ $label }}
-                </h1>
-                <span>
-                    <a href="https://chrome.google.com/webstore/detail/teses-e-s%C3%BAmulas/biigfejcdpcpibfmffgmmndpjhnlcjfb?hl=pt-BR"
-                        class="badge badge-primary">Extensão para o Chrome</a>
-                </span>
-            </div>
-            <p>
-                Faça uma <a href="{{ route('searchpage') }}">pesquisa</a> ou veja as <a
-                    href="{{ route('alltemaspage') }}">pesquisas prontas</a>.
+    <div class="home-pilot-shell tw-pt-4">
+        <section class="home-pilot-card tw-p-5 md:tw-p-6 tw-space-y-2">
+            <h1 class="home-pilot-title tw-m-0">{{ $label }}</h1>
+            <p class="home-pilot-subtitle tw-m-0">
+                Faça uma <a href="{{ route('searchpage') }}" class="tw-text-brand-700 hover:tw-text-brand-800">pesquisa</a> ou veja as
+                <a href="{{ route('alltemaspage') }}" class="tw-text-brand-700 hover:tw-text-brand-800">pesquisas prontas</a>.
                 @if ($admin)
-                    <br><a href="{{ route('admin') }}">Admin</a>
+                    <br><a href="{{ route('admin') }}" class="tw-text-brand-700 hover:tw-text-brand-800">Admin</a>
                 @endif
             </p>
-        </div>
+        </section>
     </div>
     <!-- END Hero -->
 
     <!-- Breadcrumb -->
     @if(isset($breadcrumb))
-    <div class="content content-full pt-2 pb-0">
+    <div class="home-pilot-shell tw-pt-2 tw-pb-0">
         <x-breadcrumb :items="$breadcrumb" />
     </div>
     @endif
     <!-- END Breadcrumb -->
 
-    <div class="content" id="content-results">
+    <div class="home-pilot-shell tw-pt-2" id="content-results">
 
         <!-- Results -->
 
-        <div class="block-content tab-content overflow-hidden">
-            <div class="block-content tab-content overflow-hidden">
+        <div class="home-pilot-card tw-p-5 md:tw-p-6">
+            <div>
 
 
                 <div class="tab-pane fade fade-up active show" role="tabpanel">
 
                     <!-- Search Container -->
-                    <div id="search-container" class="d-none mb-3 p-3 bg-white border rounded shadow-sm">
-                        <div class="input-group">
-                            <input type="text" class="form-control form-control-lg" id="table-search-input" 
+                    <div id="search-container" class="tw-hidden tw-mb-3 tw-p-3 tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg tw-shadow-sm">
+                        <div class="tw-flex tw-items-stretch tw-gap-2">
+                            <input type="text" class="home-pilot-input" id="table-search-input" 
                                 placeholder="Pesquisar por tema, número, texto, {{ $tribunal == 'STF' ? 'relator' : 'órgão julgador' }}...">
-                            <div class="input-group-append">
-                                <button class="btn btn-secondary" type="button" id="clear-search-btn" style="display:none;">
+                            <div>
+                                <button class="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-slate-300 tw-bg-white tw-px-3 tw-text-slate-600 hover:tw-bg-slate-100" type="button" id="clear-search-btn" style="display:none;">
                                     <i class="fa fa-times"></i>
                                 </button>
                             </div>
                         </div>
-                        <small class="text-muted ml-1">Digite para filtrar instantaneamente.</small>
+                        <small class="tw-text-slate-500 tw-ml-1">Digite para filtrar instantaneamente.</small>
                     </div>
                     <!-- END Search Container -->
 
-                    <div class="d-flex justify-content-between align-items-center font-size-h4 font-w600 p-2 mb-4 border-left border-4x border-primary bg-body-light trib-texto-quantidade">
+                    <div class="home-results-count trib-texto-quantidade tw-flex tw-justify-between tw-items-center tw-gap-2">
                         <div>
                             <code>Teses</code> - {{ $tribunal }}
                             (resultados: <code>{{ $count }}</code>)
                         </div>
-                        <button class="btn btn-sm btn-alt-primary" id="toggle-search-btn">
-                            <i class="fa fa-search mr-1"></i> Buscar
+                        <button class="home-pilot-btn tw-py-2 tw-px-3 tw-text-sm" id="toggle-search-btn">
+                            <i class="fa fa-search tw-mr-1"></i> Buscar
                         </button>
                     </div>
 
-                    <table class="table table-striped table-vcenter table-results">
+                    <table class="home-results-table table-results">
 
                         <tbody>
                             @foreach ($teses as $tes)
                                 <tr>
                                     <td>
                                         @if (!$tes->isCancelada)
-                                            <h4 class="h5 mt-3 mb-2">
+                                            <h4 class="tw-text-lg tw-font-semibold tw-mt-0 tw-mb-2">
                                                 <a href="{{ route($tese_route, ['tese' => $tes->id]) }}">
                                                     TEMA {{ $tes->numero }}
                                                 </a>
                                             </h4>
                                         @else
-                                            <h4 class="h5 mt-3 mb-2" style="color:#706c6c;">
+                                            <h4 class="tw-text-lg tw-font-semibold tw-mt-0 tw-mb-2 tw-text-slate-500">
                                                 TEMA {{ $tes->numero }}
                                             </h4>
                                         @endif
 
-                                        <p class="d-sm-block text-muted">
+                                        <p class="tw-text-slate-500">
                                             {{ $tes->tema_pure_text }}
                                         </p>
-                                        <p class="d-sm-block" style="font-weight: bold;">
+                                        <p class="tw-font-semibold">
                                             {{ $tes->tese_texto }}
                                         </p>
                                         @if ($tribunal == 'STF')
-                                            <span class="text-muted"
-                                                @if ($tes->isCancelada) style="display: flex;justify-content: flex-end;font-size: 0.8em;color:red !important">
-                                            @else
-                                            style="display: flex;justify-content: flex-end;font-size: 0.8em;"> @endif
+                                            <span class="tw-text-sm tw-flex tw-justify-end {{ $tes->isCancelada ? 'tw-text-red-600' : 'tw-text-slate-500' }}">
                                                 {{ $tes->relator }}, {{ $tes->acordao }} ({{ $tes->situacao }}).
                                                 {{ $tes->tempo }} </span>
                                             @elseif($tribunal == 'STJ')
-                                                <span class="text-muted"
-                                                    @if ($tes->isCancelada) style="display: flex;justify-content: flex-end;font-size: 0.8em;color:red !important">
-                                                @else
-                                                style="display: flex;justify-content: flex-end;font-size: 0.8em;"> @endif
+                                                <span class="tw-text-sm tw-flex tw-justify-end {{ $tes->isCancelada ? 'tw-text-red-600' : 'tw-text-slate-500' }}">
                                                     {{ $tes->orgao }}. Situação: {{ $tes->situacao }}.
                                                     {{ $tes->tempo }} </span>
                                         @endif

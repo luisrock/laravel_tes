@@ -6,63 +6,49 @@
 
     <!-- Page Content -->
 
-    <!-- Hero -->
-    <div class="bg-body-light">
-        <div class="content content-full">
-            <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
-                <h1 class="flex-sm-fill h3 my-2">
-                    <a href="{{ url('/') }}">
-                        Teses & Súmulas
-                    </a>
-                    <span class="text-muted"> | </span> {{ $label }}
-                </h1>
-                <span>
-                    <a href="https://chrome.google.com/webstore/detail/teses-e-s%C3%BAmulas/biigfejcdpcpibfmffgmmndpjhnlcjfb?hl=pt-BR"
-                        class="badge badge-primary">Extensão para o Chrome</a>
-                </span>
-            </div>
-            <p>
-                Faça uma <a href="{{ route('searchpage') }}">pesquisa</a> ou veja as <a
-                    href="{{ route('alltemaspage') }}">pesquisas prontas</a>.
+    <div class="home-pilot-shell tw-pt-4">
+        <section class="home-pilot-card tw-p-5 md:tw-p-6 tw-space-y-2">
+            <h1 class="home-pilot-title tw-m-0">{{ $label }}</h1>
+            <p class="home-pilot-subtitle tw-m-0">
+                Faça uma <a href="{{ route('searchpage') }}" class="tw-text-brand-700 hover:tw-text-brand-800">pesquisa</a> ou veja as
+                <a href="{{ route('alltemaspage') }}" class="tw-text-brand-700 hover:tw-text-brand-800">pesquisas prontas</a>.
                 @if ($admin)
-                    <br><a href="{{ route('admin') }}">Admin</a>
+                    <br><a href="{{ route('admin') }}" class="tw-text-brand-700 hover:tw-text-brand-800">Admin</a>
                 @endif
             </p>
-        </div>
+        </section>
     </div>
     <!-- END Hero -->
 
     <!-- Breadcrumb -->
     @if(isset($breadcrumb))
-    <div class="content content-full pt-2 pb-0">
+    <div class="home-pilot-shell tw-pt-2 tw-pb-0">
         <x-breadcrumb :items="$breadcrumb" />
     </div>
     @endif
     <!-- END Breadcrumb -->
 
-    <div class="content" id="content-results">
+    <div class="home-pilot-shell tw-pt-2" id="content-results">
 
         <!-- Results -->
 
-        <div class="block-content tab-content overflow-hidden">
-            <div class="block-content tab-content overflow-hidden">
+        <div class="home-pilot-card tw-p-5 md:tw-p-6">
+            <div>
 
 
-                <div class="tab-pane fade fade-up active show" role="tabpanel">
+                <div role="tabpanel">
 
-                    <div
-                        class="font-size-h4 font-w600 p-2 mb-4 border-left border-4x border-primary bg-body-light trib-texto-quantidade">
+                    <div class="home-results-count trib-texto-quantidade">
                         {{ $tribunal_nome_completo }} - {{ $tribunal }}
                     </div>
 
-                    <table class="table table-striped table-vcenter table-results table-sumula"
-                        style="border: 2px solid #5c80d1;">
+                    <table class="home-results-table table-results table-sumula">
 
                         <tbody>
 
                             <tr>
                                 <td>
-                                    <h4 class="h5 mt-3 mb-2" style="color:#6d8cd5;">
+                                    <h4 class="tw-text-lg tw-font-semibold tw-mt-0 tw-mb-2 tw-text-brand-700">
                                         @if (!empty($sumula->link))
                                             <a href="{{ $sumula->link }}" target="_blank">
                                                 {{ $sumula->titulo }}
@@ -71,29 +57,28 @@
                                             {{ $sumula->titulo }}
                                         @endif
                                     </h4>
-                                    <p class="d-sm-block" style="font-weight: bold;">
+                                    <p class="tw-font-semibold">
                                         {{ $sumula->texto }}
                                     </p>
 
                                     @if (!empty($sumula->obs))
-                                        <p class="text-muted" style="font-size: 0.9em;">
+                                        <p class="tw-text-slate-500 tw-text-sm">
                                             {{ $sumula->obs }}
                                         </p>
                                     @endif
 
                                     @if (!empty($sumula->isCancelada) && $sumula->isCancelada)
-                                        <p class="text-muted" style="font-size: 0.9em;">
+                                        <p class="tw-text-red-700 tw-text-sm tw-font-medium">
                                             SÚMULA CANCELADA
                                         </p>
                                     @endif
 
-                                    <span class="text-muted"
-                                        style="display: flex;justify-content: flex-end;font-size: 0.8em;">
+                                    <span class="tw-text-slate-500 tw-text-sm tw-flex tw-justify-end">
                                         {{ $sumula->tempo }}
                                     </span>
 
                                     @if (empty($sumula->isCancelada))
-                                        <button class="btn btn-rounded btn-outline-primary btn-sm mr-1 mb-3 btn-copy-text">
+                                        <button class="btn-copy-text tw-mt-2">
                                             <span>
                                                 <i class="fa fa-copy"></i>
                                             </span>
@@ -110,16 +95,16 @@
 
                     </table>
 
-                    <div class="tab-pane fade fade-up active show" role="tabpanel">
-                        <table class="table table-striped table-vcenter table-results">
+                    <div role="tabpanel">
+                        <table class="home-results-table table-results">
                             <tbody>
                                 @if (!empty($sumula->legis))
                                     <tr>
                                         <td>
-                                            <h4 class="h5 mt-3 mb-2">
+                                            <h4 class="tw-text-base tw-font-semibold tw-mt-0 tw-mb-2">
                                                 Referência Legislativa
                                             </h4>
-                                            <p class="d-sm-block" style="">
+                                            <p>
                                                 {{ $sumula->legis }}
                                             </p>
                                         </td>
@@ -128,10 +113,10 @@
                                 @if (!empty($sumula->precedentes))
                                     <tr>
                                         <td>
-                                            <h4 class="h5 mt-3 mb-2">
+                                            <h4 class="tw-text-base tw-font-semibold tw-mt-0 tw-mb-2">
                                                 Precedentes
                                             </h4>
-                                            <p class="d-sm-block" style="">
+                                            <p>
                                                 {{ $sumula->precedentes }}
                                             </p>
                                         </td>
@@ -140,9 +125,9 @@
                                 @if (!empty($sumula->link))
                                     <tr>
                                         <td>
-                                            <p class="d-sm-block" style="">
+                                            <p>
                                                 Consulte a súmula no site do tribunal:
-                                                <a href="{{ $sumula->link }}" target="_blank">
+                                                <a href="{{ $sumula->link }}" target="_blank" class="tw-text-brand-700 hover:tw-text-brand-800">
                                                     {{ $sumula->link }}
                                                 </a>
                                             </p>
@@ -161,15 +146,10 @@
 
         <!-- END Results -->
 
-        <div class="block-content block-content-full block-content-sm bg-body-light">
-            <div class="row">
-                <div class="col-sm-12 text-center">
-                    <a href="{{ route($allsumulasroute) }}">
-                        <i class="fa fa-arrow-left mr-1"></i> Súmulas do {{ $tribunal_nome_completo }}
-                    </a>
-                </div>
-            </div>
-
+        <div class="tw-mt-5 tw-pt-5 tw-border-t tw-border-slate-200 tw-text-center">
+            <a href="{{ route($allsumulasroute) }}" class="tw-inline-flex tw-items-center tw-gap-2 tw-text-brand-700 hover:tw-text-brand-800 tw-font-medium">
+                <i class="fa fa-arrow-left"></i> Súmulas do {{ $tribunal_nome_completo }}
+            </a>
         </div>
 
 

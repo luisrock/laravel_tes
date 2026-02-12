@@ -8,22 +8,28 @@
 
 
 <!-- Search -->
-<div class="content" style="{{ $display_pdf }}">
-    <form method="GET" id="trib-form">
+<div class="tw-home-pilot">
+<div class="home-pilot-shell" style="{{ $display_pdf }}">
+    <form method="GET" id="trib-form" class="home-pilot-card tw-p-5 md:tw-p-6 tw-space-y-5">
+
+        <div class="tw-space-y-2">
+            <h1 class="home-pilot-title">Pesquisa de Teses e Súmulas</h1>
+            <p class="home-pilot-subtitle">Consulta rápida, objetiva e responsiva para jurisprudência dos principais tribunais.</p>
+        </div>
 
         @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
-                <span aria-hidden="true">&times;</span>
+        <div class="home-pilot-alert home-pilot-alert-success" role="alert">
+            <button type="button" class="home-pilot-alert-close" onclick="this.closest('[role=alert]').remove()" aria-label="Fechar">
+                &times;
             </button>
-            <i class="fa fa-check-circle mr-2"></i>
+            <i class="fa fa-check-circle tw-mr-2"></i>
             <strong>{{ session('success') }}</strong>
         </div>
         @endif
 
         @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
+        <div class="home-pilot-alert home-pilot-alert-danger" role="alert">
+            <ul class="tw-mb-0 tw-pl-5 tw-space-y-1">
                 @foreach ($errors->all() as $error)
                 <li>{{ $error }}</li>
                 @endforeach
@@ -31,45 +37,45 @@
         </div>
         @endif
 
-        <div class="input-group">
-            <input type="text" class="form-control" name="q" value="{{ $keyword ?? '' }}" placeholder="Buscar..."
+        <div class="tw-flex tw-gap-2 tw-items-stretch">
+            <input type="text" class="home-pilot-input" name="q" value="{{ $keyword ?? '' }}" placeholder="Buscar tema, tese ou súmula..."
                 required>
             <!-- <input type="hidden" name="keylabel"> -->
-            <div class="input-group-append">
-                <span class="input-group-text" style="cursor:pointer;"
+            <div class="tw-hidden md:tw-flex">
+                <span class="tw-rounded-lg tw-border tw-border-slate-300 tw-bg-slate-50 tw-px-4 tw-text-slate-600 tw-inline-flex tw-items-center" style="cursor:pointer;"
                     onclick="document.getElementById('trib-form').submit();">
                     <i class="fa fa-fw fa-search"></i>
                 </span>
             </div>
         </div>
 
-        <div id="radios-tribunais">
+        <div id="radios-tribunais" class="tw-grid tw-grid-cols-2 sm:tw-grid-cols-4 lg:tw-grid-cols-8 tw-gap-2">
 
             @foreach ($lista_tribunais as $t => $arr)
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="tribunal" id="{{ strtolower($t) }}" value="{{ $t }}"
+            <label class="home-pilot-chip home-pilot-radio" for="{{ strtolower($t) }}">
+                <input class="tw-sr-only" type="radio" name="tribunal" id="{{ strtolower($t) }}" value="{{ $t }}"
                     @if ( !empty($tribunal) && strtolower($tribunal) === strtolower($t) ) checked @endif
                     <?php //echo ($tribunal === $t) ? 'checked' : ''; ?>>
-                <label class="form-check-label" for="{{ strtolower($t) }}">
-                    {{ $t }}
-                </label>
-            </div>
+                <span class="tw-w-full tw-text-center">{{ $t }}</span>
+            </label>
             @endforeach
 
         </div>
 
+        <p class="home-pilot-selection-status" id="selected-tribunal-status">
+            Tribunal selecionado: <strong id="selected-tribunal-label">nenhum</strong>
+        </p>
 
-        <div class="input-group">
-            <input class="btn btn-sm btn-primary" id="btn-send-trib-form" type="submit" value="pesquisar">
+
+        <div class="tw-mt-2">
+            <input class="home-pilot-btn tw-w-full md:tw-w-auto" id="btn-send-trib-form" type="submit" value="Pesquisar">
         </div>
 
     </form>
     
     <!-- Loading Overlay -->
     <div id="loading-overlay">
-        <div class="spinner-border text-primary" role="status">
-            <span class="sr-only">Carregando...</span>
-        </div>
+        <div class="home-pilot-spinner" role="status" aria-label="Carregando"></div>
         <div class="loading-text">
             Buscando jurisprudência...
         </div>
@@ -83,19 +89,21 @@
         @if(in_array(Auth::user()->email, ['mauluis@gmail.com','trator70@gmail.com','ivanaredler@gmail.com']))
             @if(!empty($output['total_count']))
             @php $toStore = true; @endphp
-            <div id="admin-store">
-                <div>
-                    <input type="text" name="store-label" style="width: 300;"><br> 
-                    <button class="btn btn-sm btn-secondary" id="btn-similar-search"> Similares </button>
-                    <select name="typeToCompare">
+            <div id="admin-store" class="home-pilot-card tw-mt-4 tw-p-4 tw-space-y-3">
+                <div class="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+                    <input type="text" name="store-label" class="home-pilot-input sm:tw-max-w-xs">
+                    <button class="home-pilot-btn tw-bg-slate-700 hover:tw-bg-slate-800 tw-py-2 tw-px-3 tw-text-sm" id="btn-similar-search">Similares</button>
+                    <select name="typeToCompare" class="home-pilot-select">
                         <option value="label" selected>by label</option>
                         <option value="keyword">by keyword</option>
                     </select>
-                    <input type="number" name="similarity-percentage" value="80" min="0" max="100" style="width: 50px;">%
+                    <div class="tw-inline-flex tw-items-center tw-gap-1">
+                        <input type="number" name="similarity-percentage" value="80" min="0" max="100" class="home-pilot-input tw-w-16 tw-px-2 tw-py-2">%
+                    </div>
                 </div>
-                <div class="similar-block" style="display:none;">
-                    <div id="similar-searched"></div>
-                    <button class="btn btn-sm btn-primary" id="btn-store-search" disabled> Salvar Pesquisa </button>
+                <div class="similar-block tw-space-y-3" style="display:none;">
+                    <div id="similar-searched" class="tw-space-y-2"></div>
+                    <button class="home-pilot-btn tw-py-2 tw-px-3 tw-text-sm" id="btn-store-search" disabled>Salvar Pesquisa</button>
                     
                 </div>
             </div>
@@ -107,87 +115,85 @@
 
 <!-- Precedentes Vinculantes CPC -->
 @if(!empty($precedentes_home ?? null))
-<div class="content" style="{{ $display_pdf }}">
-    <div class="block">
-        <div class="block-header block-header-default">
-            <h2 class="block-title">{{ optional($precedentes_home)->title ?? '' }}</h2>
-            <div class="block-options">
-                <span class="badge badge-success">Guia Completo</span>
+<div class="home-pilot-shell tw-pt-0" style="{{ $display_pdf }}">
+    <section class="home-pilot-card tw-overflow-hidden">
+        <header class="tw-bg-slate-50 tw-border-b tw-border-slate-200 tw-flex tw-items-center tw-justify-between tw-gap-3 tw-flex-wrap tw-px-5 tw-py-4 md:tw-px-6">
+            <h2 class="tw-text-slate-900 tw-font-semibold tw-text-lg">{{ optional($precedentes_home)->title ?? '' }}</h2>
+            <div>
+                <span class="tw-inline-flex tw-items-center tw-rounded-full tw-bg-emerald-100 tw-text-emerald-800 tw-text-xs tw-font-semibold tw-px-3 tw-py-1">Guia Completo</span>
                 @if($admin)
-                    <a href="{{ route('content.edit', 'precedentes-home') }}" class="btn btn-sm btn-primary ml-2" title="Editar conteúdo">
+                    <a href="{{ route('content.edit', 'precedentes-home') }}" class="home-pilot-btn tw-py-2 tw-px-3 tw-text-sm tw-ml-2" title="Editar conteúdo">
                         <i class="fa fa-pencil"></i> Editar
                     </a>
                 @endif
             </div>
-        </div>
-        <div class="block-content">
+        </header>
+        <div class="tw-p-5 md:tw-p-6">
             {!! optional($precedentes_home)->content ?? '' !!}
         </div>
-    </div>
+    </section>
 </div>
 @endif
 <!-- END Precedentes Vinculantes CPC -->
 
 <!-- Temas Mais Consultados -->
 @if(isset($popular_themes) && $popular_themes->count() > 0)
-<div class="content">
-    <div class="block">
-        <div class="block-header block-header-default">
-            <h3 class="block-title">🔥 Temas Mais Consultados</h3>
-        </div>
-        <div class="block-content">
-            <div class="row">
+<div class="home-pilot-shell tw-pt-0">
+    <section class="home-pilot-card tw-overflow-hidden">
+        <header class="tw-bg-slate-50 tw-border-b tw-border-slate-200 tw-px-5 tw-py-4 md:tw-px-6">
+            <h3 class="tw-text-slate-900 tw-font-semibold tw-text-lg">Temas Mais Consultados</h3>
+        </header>
+        <div class="tw-p-5 md:tw-p-6">
+            <div class="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 lg:tw-grid-cols-4 tw-gap-3">
                 @foreach($popular_themes as $theme)
-                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
-                    <a href="{{ url('/tema/' . $theme->slug) }}" class="block block-link-shadow block-bordered text-center" style="text-decoration: none;">
-                        <div class="block-content block-content-full">
-                            <div class="font-size-sm font-w600 text-primary">
+                <div>
+                    <a href="{{ url('/tema/' . $theme->slug) }}" class="tw-block tw-border tw-border-slate-200 tw-rounded-lg hover:tw-border-brand-300 hover:tw-bg-brand-50 tw-transition tw-p-4" style="text-decoration: none;">
+                        <div class="tw-text-sm tw-font-semibold tw-text-brand-800">
                                 {{ $theme->label ?? $theme->keyword }}
-                            </div>
                         </div>
                     </a>
                 </div>
                 @endforeach
             </div>
         </div>
-    </div>
+    </section>
 </div>
 @endif
 <!-- END Temas Mais Consultados -->
 
 <!-- Quizzes Jurídicos -->
 @if(isset($featured_quizzes) && $featured_quizzes->count() > 0)
-<div class="content">
-    <div class="block">
-        <div class="block-header block-header-default">
-            <h3 class="block-title"><i class="fa fa-graduation-cap text-primary"></i> Teste seus Conhecimentos</h3>
-            <div class="block-options">
-                <a href="{{ route('quizzes.index') }}" class="btn btn-sm btn-primary">
+<div class="home-pilot-shell tw-pt-0">
+    <section class="home-pilot-card tw-overflow-hidden">
+        <header class="tw-bg-slate-50 tw-border-b tw-border-slate-200 tw-flex tw-items-center tw-justify-between tw-gap-3 tw-flex-wrap tw-px-5 tw-py-4 md:tw-px-6">
+            <h3 class="tw-text-slate-900 tw-font-semibold tw-text-lg"><i class="fa fa-graduation-cap tw-text-brand-700"></i> Teste seus Conhecimentos</h3>
+            <div>
+                <a href="{{ route('quizzes.index') }}" class="home-pilot-btn tw-py-2 tw-px-3 tw-text-sm">
                     Ver Todos os Quizzes <i class="fa fa-arrow-right ml-1"></i>
                 </a>
             </div>
-        </div>
-        <div class="block-content">
-            <div class="row">
+        </header>
+        <div class="tw-p-5 md:tw-p-6">
+            <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-3">
                 @foreach($featured_quizzes as $quiz)
-                <div class="col-lg-4 col-md-6 mb-3">
-                    <a href="{{ route('quiz.show', $quiz->slug) }}" class="block block-rounded block-link-shadow h-100" style="text-decoration: none; border-left: 4px solid #5c80d1;">
-                        <div class="block-content block-content-full">
-                            <div class="font-w600 text-primary mb-2">
+                <div>
+                    <a href="{{ route('quiz.show', $quiz->slug) }}" class="tw-block tw-h-full tw-border tw-border-slate-200 tw-rounded-lg hover:tw-border-brand-300 tw-transition tw-p-4 tw-border-l-4 tw-border-l-brand-500" style="text-decoration: none;">
+                        <div>
+                            <div class="tw-font-semibold tw-text-brand-700 tw-mb-2">
                                 {{ $quiz->title }}
                             </div>
-                            <div class="font-size-sm text-muted">
-                                <span class="mr-2"><i class="fa fa-question-circle"></i> {{ $quiz->questions_count }} questões</span>
+                            <div class="tw-text-sm tw-text-slate-600 tw-space-y-1">
+                                <span class="tw-block"><i class="fa fa-question-circle"></i> {{ $quiz->questions_count }} questões</span>
                                 @if($quiz->tribunal)
-                                <span class="mr-2"><i class="fa fa-building"></i> {{ $quiz->tribunal }}</span>
+                                <span class="tw-block"><i class="fa fa-building"></i> {{ $quiz->tribunal }}</span>
                                 @endif
                                 <span>
                                     @if($quiz->difficulty == 'easy')
-                                        <span class="text-success"><i class="fa fa-signal"></i> Fácil</span>
+                                        <span class="tw-text-emerald-700"><i class="fa fa-signal"></i> Fácil</span>
                                     @elseif($quiz->difficulty == 'hard')
-                                        <span class="text-danger"><i class="fa fa-signal"></i> Difícil</span>
+                                        <span class="tw-text-red-700"><i class="fa fa-signal"></i> Difícil</span>
                                     @else
-                                        <span class="text-warning"><i class="fa fa-signal"></i> Médio</span>
+                                        <span class="tw-text-amber-700"><i class="fa fa-signal"></i> Médio</span>
                                     @endif
                                 </span>
                             </div>
@@ -197,7 +203,7 @@
                 @endforeach
             </div>
         </div>
-    </div>
+    </section>
 </div>
 @endif
 <!-- END Quizzes Jurídicos -->
@@ -206,14 +212,48 @@
 
 <!-- END Page Content -->
 
+</div>
 @endsection
 
 
 <!-- Script Loading State -->
 <script>
 (function() {
+    function initSearchHomeScripts() {
     const form = document.getElementById('trib-form');
     const loadingOverlay = document.getElementById('loading-overlay');
+    const tribunalRadios = document.querySelectorAll('#radios-tribunais input[type="radio"]');
+
+    function syncTribunalSelection() {
+        let selectedTribunal = 'nenhum';
+
+        tribunalRadios.forEach(function(radio) {
+            const label = radio.closest('.home-pilot-radio');
+            if (!label) {
+                return;
+            }
+
+            if (radio.checked) {
+                label.classList.add('is-selected');
+                selectedTribunal = (label.textContent || '').trim();
+            } else {
+                label.classList.remove('is-selected');
+            }
+        });
+
+        const selectedTribunalLabel = document.getElementById('selected-tribunal-label');
+        if (selectedTribunalLabel) {
+            selectedTribunalLabel.textContent = selectedTribunal;
+        }
+    }
+
+    if (tribunalRadios.length > 0) {
+        tribunalRadios.forEach(function(radio) {
+            radio.addEventListener('change', syncTribunalSelection);
+        });
+
+        syncTribunalSelection();
+    }
     
     if (form && loadingOverlay) {
         form.addEventListener('submit', function(e) {
@@ -241,6 +281,13 @@
             console.log('✅ Loading ocultado!');
         }, seconds * 1000);
     };
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSearchHomeScripts);
+    } else {
+        initSearchHomeScripts();
+    }
 })();
 </script>
 <!-- END Script Loading State -->
@@ -336,10 +383,10 @@
 
                                 //if item.percentage > 95, disable #btn-store-search and mark the item with a yellow color
                                 //create three columns to fill the similar-searched div
-                                similar += '<div class="row">';
-                                similar += '<div class="col-4">' + itemToShow + '</div>';
-                                similar += '<div class="col-4">' + itemSecondary + '</div>';
-                                similar += '<div class="col-4">' + item.percentage + '%</div>';
+                                similar += '<div class="tw-grid tw-grid-cols-3 tw-gap-2 tw-text-sm tw-p-2 tw-rounded tw-bg-slate-50 tw-border tw-border-slate-200">';
+                                similar += '<div class="tw-text-slate-700">' + itemToShow + '</div>';
+                                similar += '<div class="tw-text-slate-600">' + itemSecondary + '</div>';
+                                similar += '<div class="tw-text-slate-900 tw-font-semibold">' + item.percentage + '%</div>';
                                 similar += '</div>';
 
 
@@ -382,7 +429,7 @@
                     //disable the btn-store-search
                     $('#btn-store-search').attr('disabled', true);
                     $(this).text('Salvando...');
-                    $('#admin-store').empty().html('<div class="alert alert-info" role="alert">Salvando...(seja paciente)</div>');
+                    $('#admin-store').empty().html('<div class="home-pilot-alert home-pilot-alert-info" role="alert">Salvando...(seja paciente)</div>');
                     
                     
                     //make a get request to the route getidbykeyword with the keywordSearched
@@ -408,7 +455,7 @@
                                 success:function(response){
                                     if(response.hasOwnProperty('success') && response['success'] == 1) {
                                         console.log('created successfully');
-                                        $('#admin-store').empty().append('<div class="alert alert-success" role="alert">Pesquisa salva com sucesso!</div>');
+                                        $('#admin-store').empty().append('<div class="home-pilot-alert home-pilot-alert-success" role="alert">Pesquisa salva com sucesso!</div>');
                                     }
                                 //console.log(response);
                                 },

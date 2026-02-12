@@ -22,63 +22,51 @@
 
     <!-- Page Content -->
 
-    <!-- Hero -->
-    <div class="bg-body-light" style="{{ $display_pdf }}">
-        <div class="content content-full">
-            <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
-                <h1 class="flex-sm-fill h3 my-2">
-                    <a href="{{ url('/') }}">
-                        Teses & Súmulas
-                    </a>
-                    <span class="text-muted">sobre</span> {{ $label }}
-                </h1>
-                <span>
-                    <a href="https://chrome.google.com/webstore/detail/teses-e-s%C3%BAmulas/biigfejcdpcpibfmffgmmndpjhnlcjfb?hl=pt-BR"
-                        class="badge badge-primary">Extensão para o Chrome</a>
-                </span>
-            </div>
-            <p>
-                Faça <a href="{{ route('searchpage') }}">outra pesquisa</a> ou veja as <a
-                    href="{{ route('alltemaspage') }}">pesquisas prontas</a>.
+    <div class="home-pilot-shell tw-pt-4" style="{{ $display_pdf }}">
+        <section class="home-pilot-card tw-p-5 md:tw-p-6 tw-space-y-2">
+            <h1 class="home-pilot-title tw-m-0">{{ $label }}</h1>
+            <p class="home-pilot-subtitle tw-m-0">
+                Faça <a href="{{ route('searchpage') }}" class="tw-text-brand-700 hover:tw-text-brand-800">outra pesquisa</a> ou veja as
+                <a href="{{ route('alltemaspage') }}" class="tw-text-brand-700 hover:tw-text-brand-800">pesquisas prontas</a>.
                 @if ($admin)
-                    <br><a href="{{ route('admin') }}">Admin</a>
+                    <br><a href="{{ route('admin') }}" class="tw-text-brand-700 hover:tw-text-brand-800">Admin</a>
                 @endif
             </p>
-        </div>
+        </section>
     </div>
     <!-- END Hero -->
 
-    <div class="content" id="content-results">
+    <div class="home-pilot-shell tw-pt-2" id="content-results">
 
 
         @if ($concept)
             @if ($concept_validated_at || $admin)
                 <!-- conceito -->
-                <div class="block block-conceito">
-                    <table class="table table-striped table-vcenter table-results">
+                <div class="home-pilot-card tw-p-5 md:tw-p-6 tw-mb-4">
+                    <table class="home-results-table table-results">
                         <tbody>
                             <tr>
                                 <td>
-                                    <h4 class="h5 mt-3 mb-2">
-                                        <a id="open-concept" href="#">Resumo</a>
+                                    <h4 class="tw-text-base tw-font-semibold tw-mt-0 tw-mb-2">
+                                        <a id="open-concept" href="#" class="tw-text-brand-700 hover:tw-text-brand-800">Resumo</a>
                                     </h4>
-                                    <p class="d-sm-block text-muted" id="conceito">{{ $concept }}</p>
+                                    <p class="tw-text-slate-600" id="conceito">{{ $concept }}</p>
                                     <!-- <span class="text-muted" style="display: flex;justify-content: flex-end;font-size: 0.8em;">Gerado por GPT-4</span> -->
                                     <!-- if admin, insert 3 buttons: validate, edit or remove  -->
                                     @if ($admin)
                                         <div id = "content-actions-buttons"
-                                            style="display: flex;justify-content: flex-end; column-gap: 10px;">
+                                            class="tw-flex tw-justify-end tw-gap-2">
                                             @if (!$concept_validated_at)
-                                                <button type="button" class="btn btn-sm btn-success" id="#concept-validate"
+                                                <button type="button" class="home-pilot-btn tw-bg-emerald-700 hover:tw-bg-emerald-800 tw-py-2 tw-px-3 tw-text-sm" id="#concept-validate"
                                                     data-concept-id="{{ $id }}">
                                                     <i class="fa fa-check"></i> Validar
                                                 </button>
                                             @endif
-                                            <button type="button" class="btn btn-sm btn-warning" id="#concept-edit"
+                                            <button type="button" class="tw-inline-flex tw-items-center tw-gap-1 tw-rounded-lg tw-border tw-border-amber-300 tw-bg-amber-50 tw-text-amber-800 hover:tw-bg-amber-100 tw-py-2 tw-px-3 tw-text-sm tw-font-medium" id="#concept-edit"
                                                 data-concept-id="{{ $id }}">
                                                 <i class="fa fa-edit"></i> Editar
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-danger" id="#concept-remove"
+                                            <button type="button" class="tw-inline-flex tw-items-center tw-gap-1 tw-rounded-lg tw-border tw-border-red-300 tw-bg-red-50 tw-text-red-700 hover:tw-bg-red-100 tw-py-2 tw-px-3 tw-text-sm tw-font-medium" id="#concept-remove"
                                                 data-concept-id="{{ $id }}">
                                                 <i class="fa fa-trash"></i> Remover
                                             </button>
@@ -148,13 +136,13 @@
             <!-- sem conceito -->
             @if ($admin)
                 <!-- criar um textarea com um botao para buscar conceito via GPT-3  -->
-                <div class="block block-conceito">
-                    <table class="table table-striped table-vcenter table-results">
+                <div class="home-pilot-card tw-p-5 md:tw-p-6 tw-mb-4">
+                    <table class="home-results-table table-results">
                         <tbody>
                             <tr>
                                 <td>
-                                    <h4 class="h5 mt-3 mb-2">
-                                        <a href="#">Gerador de Conceito</a>
+                                    <h4 class="tw-text-base tw-font-semibold tw-mt-0 tw-mb-3">
+                                        <a href="#" class="tw-text-brand-700 hover:tw-text-brand-800">Gerador de Conceito</a>
                                     </h4>
                                     <input type="radio" id="gpt-4" name="gpt-model" value="gpt-4" checked>
                                     <label for="gpt-4">GPT-4</label>
@@ -167,21 +155,21 @@
                             <tr>
                                 <td>
                                     <code>System Prompt</code>
-                                    <textarea id="concept-system-prompt" class="form-control" rows="3">Você é um jurista brasileiro, professor de direito e conhecedor da jurisprudência formada até 2021. Você nunca inventa e quando não sabe, diz apenas 'Desculpe'.</textarea>
+                                    <textarea id="concept-system-prompt" class="home-pilot-input tw-mt-1" rows="3">Você é um jurista brasileiro, professor de direito e conhecedor da jurisprudência formada até 2021. Você nunca inventa e quando não sabe, diz apenas 'Desculpe'.</textarea>
                                 </td>
                                 <td>
                                     <code>User Prompt</code>
-                                    <textarea id="concept-user-prompt" class="form-control" rows="3">Apresente um conceito objetivo e didático sobre o seguinte tema: {{ $label }}</textarea>
+                                    <textarea id="concept-user-prompt" class="home-pilot-input tw-mt-1" rows="3">Apresente um conceito objetivo e didático sobre o seguinte tema: {{ $label }}</textarea>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <p class="d-sm-block text-muted" id="conceito-gerado"></p>
+                                    <p class="tw-text-slate-600" id="conceito-gerado"></p>
                                     <!-- <span class="text-muted" style="display: flex;justify-content: flex-end;font-size: 0.8em;">Gerado por GPT-4</span> -->
                                     <!-- if admin, insert 3 buttons: validate, edit or remove  -->
                                     <div id = "content-actions-buttons"
-                                        style="display: flex;justify-content: flex-end; column-gap: 10px;">
-                                        <button type="button" class="btn btn-sm btn-success" id="concept-create"
+                                        class="tw-flex tw-justify-end tw-gap-2">
+                                        <button type="button" class="home-pilot-btn tw-bg-emerald-700 hover:tw-bg-emerald-800 tw-py-2 tw-px-3 tw-text-sm" id="concept-create"
                                             data-concept-id="{{ $id }}"
                                             data-concept-label="{{ $label }}"
                                             data-concept-save-route="{{ route('save-concept') }}"
@@ -204,35 +192,27 @@
 
 
         <!-- Results -->
-        <div class="block">
-            <ul class="nav nav-tabs nav-tabs-block nav-tabs-tribunais" data-toggle="tabs" role="tablist"
-                style="{{ $display_pdf }}">
+        <div class="home-pilot-card tw-overflow-hidden">
+            <div class="home-results-tabs" role="tablist" style="{{ $display_pdf }}">
 
                 @foreach ($output as $out => $put)
-                    @php
-                        $class_link = $loop->first ? 'nav-link active' : 'nav-link';
-                    @endphp
-                    <li class="nav-item nav-item-tribunal" id="nav-{{ $out }}">
-                        <a class="{{ $class_link }}" href="#tema-{{ $out }}">{{ strtoupper($out) }}</a>
-                    </li>
+                    @php $isActiveTab = $loop->first; @endphp
+                    <button type="button" class="home-results-tab {{ $isActiveTab ? 'is-active' : '' }}" data-tab-target="#tema-{{ $out }}" id="nav-{{ $out }}" aria-selected="{{ $isActiveTab ? 'true' : 'false' }}">{{ strtoupper($out) }}</button>
                 @endforeach
 
-            </ul>
+            </div>
 
-            <div class="block-content tab-content overflow-hidden">
+            <div class="home-results-content">
 
 
                 @foreach ($output as $out => $put)
-                    @php
-                        $class_pane = $loop->first ? 'tab-pane fade fade-up active show' : 'tab-pane fade fade-up';
-                    @endphp
-                    <div class="{{ $class_pane }}" id="tema-{{ $out }}" role="tabpanel">
-                        <div
-                            class="font-size-h4 font-w600 p-2 mb-4 border-left border-4x border-primary bg-body-light trib-texto-quantidade">
+                    @php $isActivePane = $loop->first; @endphp
+                    <section class="home-results-pane {{ $isActivePane ? 'is-active' : '' }}" id="tema-{{ $out }}" role="tabpanel" {{ $isActivePane ? '' : 'hidden' }}>
+                        <div class="home-results-count trib-texto-quantidade">
                             <code>{{ $label }}</code> - {{ strtoupper($out) }}
                             (resultados: <code>{{ $output[$out]['total_count'] }}</code>)
                         </div>
-                        <table class="table table-striped table-vcenter table-results">
+                        <table class="home-results-table table-results">
                             <tbody>
                                 @includeif('front.results.inners.' . strtolower($out) . '_sum', [
                                     'output' => $output[$out],
@@ -242,7 +222,7 @@
                                 ])
                             </tbody>
                         </table>
-                    </div>
+                    </section>
                 @endforeach
 
             </div>
@@ -251,17 +231,15 @@
 
         <!-- Temas Relacionados -->
         @if(isset($related_themes) && $related_themes->count() > 0)
-        <div class="block" style="{{ $display_pdf }}">
-            <div class="block-header block-header-default">
-                <h3 class="block-title">📚 Temas Relacionados</h3>
-            </div>
-            <div class="block-content">
-                <div class="row">
+        <div class="home-pilot-card tw-p-5 md:tw-p-6 tw-mt-4" style="{{ $display_pdf }}">
+            <h3 class="tw-text-base tw-font-semibold tw-text-slate-800 tw-mb-3">Temas Relacionados</h3>
+            <div>
+                <div class="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-3">
                     @foreach($related_themes as $theme)
-                    <div class="col-md-4 col-sm-6 mb-3">
-                        <a href="{{ url('/tema/' . $theme->slug) }}" class="block block-link-shadow text-center" style="text-decoration: none;">
-                            <div class="block-content block-content-full">
-                                <div class="font-size-h6 font-w600 text-primary">
+                    <div>
+                        <a href="{{ url('/tema/' . $theme->slug) }}" class="tw-block tw-border tw-border-slate-200 tw-rounded-lg hover:tw-border-brand-300 hover:tw-bg-brand-50 tw-transition tw-p-4" style="text-decoration: none;">
+                            <div>
+                                <div class="tw-text-sm tw-font-semibold tw-text-brand-800">
                                     {{ $theme->label ?? $theme->keyword }}
                                 </div>
                             </div>
@@ -275,6 +253,37 @@
         <!-- END Temas Relacionados -->
 
     </div>
+
+    <script>
+    (function () {
+        const tabs = document.querySelectorAll('.home-results-tab');
+        const panes = document.querySelectorAll('.home-results-pane');
+
+        if (!tabs.length || !panes.length) {
+            return;
+        }
+
+        function activateTab(targetSelector) {
+            tabs.forEach(function (tab) {
+                const isActive = tab.dataset.tabTarget === targetSelector;
+                tab.classList.toggle('is-active', isActive);
+                tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            });
+
+            panes.forEach(function (pane) {
+                const isActive = `#${pane.id}` === targetSelector;
+                pane.classList.toggle('is-active', isActive);
+                pane.hidden = !isActive;
+            });
+        }
+
+        tabs.forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                activateTab(tab.dataset.tabTarget);
+            });
+        });
+    })();
+    </script>
 
 
 @endsection

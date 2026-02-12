@@ -6,26 +6,13 @@
 
     <!-- Page Content -->
 
-    <!-- Hero -->
-    <div class="bg-body-light">
-        <div class="content content-full">
-            <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
-                <h1 class="flex-sm-fill h3 my-2">
-                    <a href="{{ url('/') }}">
-                        Teses & Súmulas
-                    </a>
-                    <span class="text-muted"> | </span> Teses e Súmulas de Tribunais
-                </h1>
-                <span>
-                    <a href="https://chrome.google.com/webstore/detail/teses-e-s%C3%BAmulas/biigfejcdpcpibfmffgmmndpjhnlcjfb?hl=pt-BR"
-                        class="badge badge-primary">Extensão para o Chrome</a>
-                </span>
-            </div>
-            <p>
-                Faça uma <a href="{{ route('searchpage') }}">pesquisa</a> ou veja as <a
-                    href="{{ route('alltemaspage') }}">pesquisas prontas</a>.
+    <div class="home-pilot-shell tw-pt-4">
+        <section class="home-pilot-card tw-p-5 md:tw-p-6 tw-space-y-2">
+            <h1 class="home-pilot-title tw-m-0">Índice de Súmulas e Teses</h1>
+            <p class="home-pilot-subtitle tw-m-0">
+                Acesse diretamente as coleções por tribunal com navegação rápida e objetiva.
             </p>
-        </div>
+        </section>
     </div>
     <!-- END Hero -->
 
@@ -38,54 +25,26 @@
     </div>
     <!-- END Breadcrumb -->
 
-    <div class="content" id="content-results">
-
-        <div class="block-content tab-content overflow-hidden">
-            <div class="block-content tab-content overflow-hidden">
-                <h2>SÚMULAS</h2>
-                <div class="tab-pane fade fade-up active show" role="tabpanel">
-                    <h4 class="h5 mt-3 mb-2">
-                        <a href="{{ route('stfallsumulaspage') }}">
-                            &rArr; Súmulas do Supremo Tribunal Federal
-                        </a>
-                    </h4>
-                    <h4 class="h5 mt-3 mb-2">
-                        <a href="{{ route('stjallsumulaspage') }}">
-                            &rArr; Súmulas do Superior Tribunal de Justiça
-                        </a>
-                    </h4>
-                    <h4 class="h5 mt-3 mb-2">
-                        <a href="{{ route('tstallsumulaspage') }}">
-                            &rArr; Súmulas do Tribunal Superior do Trabalho
-                        </a>
-                    </h4>
-                    <h4 class="h5 mt-3 mb-2">
-                        <a href="{{ route('tnuallsumulaspage') }}">
-                            &rArr; Súmulas da Turma Nacional de Uniformização dos JEF
-                        </a>
-                    </h4>
+    <div class="home-pilot-shell tw-pt-2" id="content-results">
+        <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-4">
+            <section class="home-pilot-card tw-p-5 md:tw-p-6">
+                <h2 class="tw-text-lg tw-font-semibold tw-text-slate-800 tw-mb-4">Súmulas</h2>
+                <div class="tw-space-y-2.5 tw-text-sm">
+                    <a href="{{ route('stfallsumulaspage') }}" class="tw-block tw-text-brand-700 hover:tw-text-brand-800">→ Súmulas do Supremo Tribunal Federal</a>
+                    <a href="{{ route('stjallsumulaspage') }}" class="tw-block tw-text-brand-700 hover:tw-text-brand-800">→ Súmulas do Superior Tribunal de Justiça</a>
+                    <a href="{{ route('tstallsumulaspage') }}" class="tw-block tw-text-brand-700 hover:tw-text-brand-800">→ Súmulas do Tribunal Superior do Trabalho</a>
+                    <a href="{{ route('tnuallsumulaspage') }}" class="tw-block tw-text-brand-700 hover:tw-text-brand-800">→ Súmulas da Turma Nacional de Uniformização dos JEF</a>
                 </div>
-            </div>
-        </div>
+            </section>
 
-        <div class="block-content tab-content overflow-hidden">
-            <div class="block-content tab-content overflow-hidden">
-                <h2>TESES</h2>
-                <div class="tab-pane fade fade-up active show" role="tabpanel">
-                    <h4 class="h5 mt-3 mb-2">
-                        <a href="{{ route('stfalltesespage') }}">
-                            &rArr; Teses Vinculantes do Supremo Tribunal Federal
-                        </a>
-                    </h4>
-                    <h4 class="h5 mt-3 mb-2">
-                        <a href="{{ route('stjalltesespage') }}">
-                            &rArr; Teses Vinculantes do Superior Tribunal de Justiça
-                        </a>
-                    </h4>
+            <section class="home-pilot-card tw-p-5 md:tw-p-6">
+                <h2 class="tw-text-lg tw-font-semibold tw-text-slate-800 tw-mb-4">Teses</h2>
+                <div class="tw-space-y-2.5 tw-text-sm">
+                    <a href="{{ route('stfalltesespage') }}" class="tw-block tw-text-brand-700 hover:tw-text-brand-800">→ Teses Vinculantes do Supremo Tribunal Federal</a>
+                    <a href="{{ route('stjalltesespage') }}" class="tw-block tw-text-brand-700 hover:tw-text-brand-800">→ Teses Vinculantes do Superior Tribunal de Justiça</a>
                 </div>
-            </div>
+            </section>
         </div>
-
     </div>
 
 

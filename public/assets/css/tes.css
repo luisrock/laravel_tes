@@ -55,10 +55,12 @@ nav.navbar-tes {
   justify-content: center;
   align-items: center;
   font-size: 18px;
+  background-color: #3f5a78;
+  color: #ffffff;
 }
 
 #back-to-top:hover {
-  background-color: #0056b3;
+  background-color: #354a62;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
   transform: translateY(-2px);
 }

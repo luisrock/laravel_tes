@@ -1,0 +1,20 @@
+{
+  "resources/css/tailwind.css": {
+    "file": "assets/tailwind-tbEqD0Wd.js",
+    "name": "tailwind",
+    "src": "resources/css/tailwind.css",
+    "isEntry": true,
+    "css": [
+      "assets/tailwind-CqF_EyLi.css"
+    ]
+  },
+  "resources/js/tailwind-home.js": {
+    "file": "assets/tailwind-home-BtaAjBYl.js",
+    "name": "tailwind-home",
+    "src": "resources/js/tailwind-home.js",
+    "isEntry": true,
+    "imports": [
+      "resources/css/tailwind.css"
+    ]
+  }
+}
