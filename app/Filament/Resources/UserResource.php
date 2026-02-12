@@ -6,12 +6,11 @@ use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Models\User;
 use App\Support\SubscriptionUi;
 use Filament\Resources\Resource;
-use Filament\Resources\Table;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 class UserResource extends Resource
@@ -37,11 +36,12 @@ class UserResource extends Resource
                     ->label('Email')
                     ->searchable()
                     ->sortable(),
-                BadgeColumn::make('subscription_status')
+                TextColumn::make('subscription_status')
                     ->label('Assinatura')
+                    ->badge()
                     ->getStateUsing(function (User $record): string {
                         $subscriptionName = config('subscription.default_subscription_name', 'default');
-                        $subscription = $record->subscriptions->firstWhere('name', $subscriptionName);
+                        $subscription = $record->subscriptions->firstWhere('type', $subscriptionName);
 
                         if (!$subscription) {
                             return SubscriptionUi::LABEL_NONE;
@@ -50,11 +50,12 @@ class UserResource extends Resource
                         return SubscriptionUi::statusLabel($subscription->stripe_status, $subscription->ends_at);
                     })
                     ->color(fn (string $state): string => SubscriptionUi::statusColor($state)),
-                BadgeColumn::make('subscription_plan')
+                TextColumn::make('subscription_plan')
                     ->label('Plano')
+                    ->badge()
                     ->getStateUsing(function (User $record): string {
                         $subscriptionName = config('subscription.default_subscription_name', 'default');
-                        $subscription = $record->subscriptions->firstWhere('name', $subscriptionName);
+                        $subscription = $record->subscriptions->firstWhere('type', $subscriptionName);
 
                         if (!$subscription) {
                             return SubscriptionUi::LABEL_NONE;

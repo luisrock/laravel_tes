@@ -4,6 +4,8 @@ namespace App\Filament\Widgets;
 
 use App\Models\RefundRequest;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -11,26 +13,25 @@ class PendingRefundRequests extends BaseWidget
 {
     protected static ?string $heading = 'Estornos pendentes';
 
-    protected function getTableQuery(): Builder
+    public function table(Table $table): Table
     {
-        return RefundRequest::query()
-            ->with('user')
-            ->where('status', RefundRequest::STATUS_PENDING)
-            ->latest();
-    }
-
-    protected function getTableColumns(): array
-    {
-        return [
-            Tables\Columns\TextColumn::make('user.email')
-                ->label('Usuário')
-                ->searchable(),
-            Tables\Columns\TextColumn::make('reason')
-                ->label('Motivo')
-                ->limit(40),
-            Tables\Columns\TextColumn::make('created_at')
-                ->label('Criado em')
-                ->dateTime('d/m/Y H:i'),
-        ];
+        return $table
+            ->query(
+                RefundRequest::query()
+                    ->with('user')
+                    ->where('status', RefundRequest::STATUS_PENDING)
+                    ->latest()
+            )
+            ->columns([
+                TextColumn::make('user.email')
+                    ->label('Usuário')
+                    ->searchable(),
+                TextColumn::make('reason')
+                    ->label('Motivo')
+                    ->limit(40),
+                TextColumn::make('created_at')
+                    ->label('Criado em')
+                    ->dateTime('d/m/Y H:i'),
+            ]);
     }
 }

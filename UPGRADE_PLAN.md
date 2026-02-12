@@ -5,17 +5,19 @@
 ### Versões Atuais
 | Componente | Versão Atual | Observação |
 |---|---|---|
-| Laravel Framework | ^10.0 (v10.50.0) | L8→L9→L10 concluídos |
+| Laravel Framework | ^11.0 (v11.48.0) | L8→L9→L10→L11 concluídos |
 | PHP | 8.3 (dev e prod) | OK para todos os upgrades |
-| Filament | ^2.0 | Precisa upgrade para 3.x (próxima fase) |
-| Laravel Cashier | ^14.0 | OK |
-| Spatie Permission | ^5.10 | OK |
+| Filament | ^3.2 (v3.3.48) | Upgrade v2→v3 concluído na Fase 3a |
+| Livewire | v3.7.10 | Atualizado junto com Filament v3 |
+| Laravel Cashier | ^15.0 (v15.7.1) | Upgrade v14→v15 concluído na Fase 3b |
+| Spatie Permission | ^6.0 (v6.24.1) | Upgrade v5→v6 concluído na Fase 3b |
 | Spatie Honeypot | ^4.3 | OK |
 | Spatie Sitemap | ^7.0 | OK |
 | Laravel UI | ^4.0 | OK |
-| PHPUnit | ^10.0 (v10.5.63) | Atualizado para v10 |
-| Pest | ^2.0 (v2.36.1) | Instalado e configurado |
-| Collision | ^7.0 (v7.12.0) | Atualizado para v7 |
+| Carbon | 3.11.1 | Upgrade v2→v3 (via L11) |
+| PHPUnit | ^10.0 (v10.5.x) | OK |
+| Pest | ^2.0 (v2.36.x) | OK |
+| Collision | ^8.1 (v8.5.0) | Atualizado para v8 |
 
 ### Pacotes que Serão Removidos/Substituídos
 | Pacote L8 | Substituição |Quando |
@@ -33,7 +35,7 @@
 - **17 Models** (User, Quiz*, Newsletter, Tese*, Subscription-related)
 - **81 Views** (Blade templates)
 - **13 Middleware** (incl. TrustProxies, AdminMiddleware, BearerToken, Subscription*)
-- **34 Migrations**
+- **35 Migrations** (inclui rename subscriptions name→type)
 - **67 Testes Pest** (Feature, Arch — cobertura ampliada)
 - **5 Providers** (App, Auth, Broadcast, Event, Route)
 - **1082 linhas** em `bootstrap/tes_functions.php` (helper autoloaded)
@@ -47,7 +49,7 @@
 3. **`FILESYSTEM_DRIVER`** em `config/filesystems.php` — renomear para `FILESYSTEM_DISK`
 4. **S3 disk** configurado — precisa do Flysystem 3.x com `league/flysystem-aws-s3-v3 ^3.0`
 5. **`auth_mode`** em `config/mail.php` — pode ser removido (auto-negociado no L9+)
-6. **Filament 2** — precisa upgrade para v3 (breaking changes significativas, alinhar com L10+)
+6. **Filament 2→3** — ✅ upgrade concluído (Fase 3a)
 7. **`config/app.php`** lista providers manualmente — L11 simplifica isso
 8. **`RouteServiceProvider`** usa estilo L8 — será refatorado em L10/L11
 9. **`password` validation rule** — renomear para `current_password` (se usado)
@@ -112,14 +114,26 @@ Os testes usam SQLite in-memory (`phpunit.xml`). Rotas que dependem de queries
 MySQL-específicas (FULLTEXT, enums) aceitam 200 ou 500. Quando migrarmos os
 testes para MySQL, todos devem retornar 200.
 
-### Fase 3: L10 → L11 🚧 PRÓXIMO PASSO
-**Guia detalhado:** `UPGRADE_L10_TO_L11.md` (a ser criado)
+### Fase 3: L10 → L11 ✅ CONCLUÍDO
+**Guia detalhado:** `UPGRADE_L10_TO_L11.md` (Concluído em 12/02/2026)
 
-Mudanças previstas:
-- Remoção de `app/Http/Kernel.php` (migrar para `bootstrap/app.php`)
-- Simplificação do `config/app.php`
-- Remoção de providers avulsos (App, Auth, Event, Route, Broadcast)
-- Novas casts como métodos
+Incluiu duas sub-fases:
+
+**Fase 3a — Filament v2 → v3 (pré-requisito):**
+- Filament v2 era incompatível com L11 (constraints `illuminate/* ^10.0` máx.)
+- Upgrade feito no L10 antes do upgrade do framework
+- Livewire v2 → v3, Heroicons v1 → v2
+- PanelProvider criado (`AdminPanelProvider.php`)
+- Resources, Widgets e User model atualizados
+
+**Fase 3b — Laravel 10 → 11:**
+- Framework v10.50.0 → v11.48.0
+- Cashier v14 → v15 (coluna `name` → `type` em subscriptions)
+- Spatie Permission v5 → v6 (migration atualizada)
+- Collision v7 → v8, Carbon 2 → 3
+- Estrutura da aplicação MANTIDA (Kernel.php, Providers, config/app.php)
+- `amirami/localizator` removido (incompatível com L11)
+- 67 testes passando, zero regressões
 
 ### Fase 4: L11 → L12
 **Guia detalhado:** `UPGRADE_L11_TO_L12.md` (a ser criado)
@@ -136,7 +150,7 @@ Mudanças previstas:
 1. **L8→L9**: testes manuais + PHPUnit ✅
 2. **L9→L10**: PHPUnit smoke tests ✅
 3. **L10 (Fase 2.5)**: Pest v2 instalado, testes migrados e expandidos ✅
-4. **L10→L11**: rodar suite Pest, corrigir regressões
+4. **L10→L11**: Pest suite rodada, regressões corrigidas ✅
 5. **L11→L12**: expandir cobertura, migrar para MySQL nos testes
 
 ### Testes Implementados
@@ -172,7 +186,7 @@ Para **cada fase** de upgrade:
 
 | Risco | Impacto | Mitigação |
 |---|---|---|
-| Filament 2→3 (breaking) | Alto | Fase separada, L10 |
+| Filament 2→3 (breaking) | Alto | ✅ Concluído na Fase 3a |
 | Flysystem S3 breaking | Médio | Testar upload/download S3 |
 | Symfony Mailer | Baixo | Sem uso direto de SwiftMailer |
 | Cashier upgrade | Médio | Testar fluxo de assinatura |

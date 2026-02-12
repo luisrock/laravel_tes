@@ -20,7 +20,7 @@ it('envia lembrete para assinaturas ativas com renovação em 7 dias', function 
 
     Subscription::create([
         'user_id' => $user->id,
-        'name' => 'default',
+        'type' => 'default',
         'stripe_id' => 'sub_active_1',
         'stripe_status' => 'active',
         'stripe_price' => 'price_test_1',
@@ -42,7 +42,7 @@ it('ignora assinaturas não ativas', function () {
 
     Subscription::create([
         'user_id' => $user->id,
-        'name' => 'default',
+        'type' => 'default',
         'stripe_id' => 'sub_past_due',
         'stripe_status' => 'past_due',
         'stripe_price' => 'price_test_2',
@@ -64,7 +64,7 @@ it('não filtra por ends_at', function () {
 
     Subscription::create([
         'user_id' => $user->id,
-        'name' => 'default',
+        'type' => 'default',
         'stripe_id' => 'sub_active_with_ends_at',
         'stripe_status' => 'active',
         'stripe_price' => 'price_test_3',

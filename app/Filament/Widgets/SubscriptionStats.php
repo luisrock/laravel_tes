@@ -5,11 +5,11 @@ namespace App\Filament\Widgets;
 use App\Models\RefundRequest;
 use Illuminate\Support\Facades\DB;
 use Filament\Widgets\StatsOverviewWidget;
-use Filament\Widgets\StatsOverviewWidget\Card;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class SubscriptionStats extends StatsOverviewWidget
 {
-    protected function getCards(): array
+    protected function getStats(): array
     {
         $activeCount = DB::table('subscriptions')
             ->where('stripe_status', 'active')
@@ -26,10 +26,10 @@ class SubscriptionStats extends StatsOverviewWidget
             ->count();
 
         return [
-            Card::make('Assinantes ativos', $activeCount),
-            Card::make('Grace period', $graceCount),
-            Card::make('Estornos pendentes', $pendingRefunds),
-            Card::make('Stripe Dashboard', 'Abrir')
+            Stat::make('Assinantes ativos', $activeCount),
+            Stat::make('Grace period', $graceCount),
+            Stat::make('Estornos pendentes', $pendingRefunds),
+            Stat::make('Stripe Dashboard', 'Abrir')
                 ->url($this->getStripeDashboardBaseUrl(), true),
         ];
     }

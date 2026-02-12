@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Log;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Laravel\Cashier\Billable;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -49,7 +50,7 @@ class User extends Authenticatable implements FilamentUser
     /**
      * Autoriza acesso ao painel Filament.
      */
-    public function canAccessFilament(): bool
+    public function canAccessPanel(Panel $panel): bool
     {
         if (app()->environment('local')) {
             return true;

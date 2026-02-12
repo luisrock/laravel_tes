@@ -8,15 +8,13 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::create('subscriptions', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('user_id');
-            $table->string('name');
+            $table->id();
+            $table->foreignId('user_id');
+            $table->string('type');
             $table->string('stripe_id')->unique();
             $table->string('stripe_status');
             $table->string('stripe_price')->nullable();
@@ -31,10 +29,8 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('subscriptions');
     }

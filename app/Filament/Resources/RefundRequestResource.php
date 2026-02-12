@@ -9,14 +9,13 @@ use Filament\Forms;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Resources\Form;
+use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Resources\Table;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 class RefundRequestResource extends Resource
@@ -24,7 +23,7 @@ class RefundRequestResource extends Resource
     protected static ?string $model = RefundRequest::class;
 
     protected static ?string $navigationGroup = 'Assinaturas';
-    protected static ?string $navigationIcon = 'heroicon-o-receipt-tax';
+    protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
     protected static ?string $navigationLabel = 'Estornos';
     protected static ?string $modelLabel = 'Solicitação de Estorno';
     protected static ?string $pluralModelLabel = 'Solicitações de Estorno';
@@ -74,8 +73,9 @@ class RefundRequestResource extends Resource
                 TextColumn::make('user.email')
                     ->label('Usuário')
                     ->searchable(),
-                BadgeColumn::make('status')
+                TextColumn::make('status')
                     ->label('Status')
+                    ->badge()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         RefundRequest::STATUS_PENDING => 'Pendente',
                         RefundRequest::STATUS_APPROVED => 'Aprovado',
@@ -88,7 +88,7 @@ class RefundRequestResource extends Resource
                         RefundRequest::STATUS_APPROVED => 'success',
                         RefundRequest::STATUS_REJECTED => 'danger',
                         RefundRequest::STATUS_PROCESSED => 'primary',
-                        default => 'secondary',
+                        default => 'gray',
                     }),
                 TextColumn::make('stripe_subscription_id')
                     ->label('Stripe Subscription')

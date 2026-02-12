@@ -11,12 +11,11 @@ use App\Support\SubscriptionUi;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Resources\Form;
+use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Resources\Table;
 use Filament\Tables;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 class PlanFeatureResource extends Resource
@@ -24,7 +23,7 @@ class PlanFeatureResource extends Resource
     protected static ?string $model = PlanFeature::class;
 
     protected static ?string $navigationGroup = 'Assinaturas';
-    protected static ?string $navigationIcon = 'heroicon-o-adjustments';
+    protected static ?string $navigationIcon = 'heroicon-o-adjustments-horizontal';
     protected static ?string $navigationLabel = 'Features do Plano';
     protected static ?string $modelLabel = 'Feature do Plano';
     protected static ?string $pluralModelLabel = 'Features do Plano';
@@ -58,8 +57,9 @@ class PlanFeatureResource extends Resource
     {
         return $table
             ->columns([
-                BadgeColumn::make('stripe_product_label')
+                TextColumn::make('stripe_product_label')
                     ->label('Plano')
+                    ->badge()
                     ->getStateUsing(fn (PlanFeature $record): string => SubscriptionUi::tierLabel($record->stripe_product_id))
                     ->color(fn (string $state): string => SubscriptionUi::tierColor($state)),
                 TextColumn::make('stripe_product_id')

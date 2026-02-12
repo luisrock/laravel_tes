@@ -78,7 +78,7 @@ it('envia notificação de estorno ao criar solicitação', function () {
 
     $subscription = Subscription::create([
         'user_id' => $user->id,
-        'name' => config('subscription.default_subscription_name', 'default'),
+        'type' => config('subscription.default_subscription_name', 'default'),
         'stripe_id' => 'sub_test_123',
         'stripe_status' => 'active',
         'stripe_price' => 'price_test_123',
