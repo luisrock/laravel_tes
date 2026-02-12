@@ -18,7 +18,7 @@ class CreateTeseAnalysisSectionsTable extends Migration
                 'contornos_juridicos',
                 'modulacao',
                 'tese_explicada',
-                'teaser'
+                'teaser',
             ]);
 
             // Conteúdo
@@ -73,10 +73,10 @@ class CreateTeseAnalysisSectionsTable extends Migration
             ");
 
             // Índice único na coluna gerada
-            DB::statement("
+            DB::statement('
                 ALTER TABLE tese_analysis_sections
                 ADD UNIQUE KEY uniq_active_key (active_key)
-            ");
+            ');
         }
     }
 

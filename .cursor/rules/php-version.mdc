@@ -1,0 +1,36 @@
+---
+description: PHP version and CLI configuration for this project
+globs:
+alwaysApply: true
+---
+
+# PHP Version Rule
+
+This project uses **PHP 8.3**. The macOS system CLI defaults to PHP 8.5, which is NOT compatible.
+
+## ALWAYS use this PHP binary for ALL project commands:
+
+```
+/opt/homebrew/opt/php@8.3/bin/php
+```
+
+## Examples:
+
+```bash
+# Artisan commands
+/opt/homebrew/opt/php@8.3/bin/php artisan migrate
+/opt/homebrew/opt/php@8.3/bin/php artisan cache:clear
+/opt/homebrew/opt/php@8.3/bin/php artisan make:model Foo
+
+# Composer
+/opt/homebrew/opt/php@8.3/bin/php /opt/homebrew/bin/composer install
+/opt/homebrew/opt/php@8.3/bin/php /opt/homebrew/bin/composer require some/package
+
+# Tests (Pest)
+/opt/homebrew/opt/php@8.3/bin/php vendor/bin/pest
+
+# Pint (code style)
+/opt/homebrew/opt/php@8.3/bin/php vendor/bin/pint
+```
+
+## NEVER use bare `php` or `php artisan` — always prefix with the full path above.

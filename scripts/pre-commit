@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# =============================================================
+# Pre-commit hook: Laravel Pint (style) + Pest (tests)
+# =============================================================
+# This hook prevents commits if:
+#   1. Code style issues are found (Pint)
+#   2. Tests fail (Pest)
+#
+# To bypass in emergencies: git commit --no-verify
+# =============================================================
+
+PHP="/opt/homebrew/opt/php@8.3/bin/php"
+PINT="vendor/bin/pint"
+PEST="vendor/bin/pest"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+echo ""
+echo -e "${YELLOW}══════════════════════════════════════════${NC}"
+echo -e "${YELLOW}  Pre-commit hook: Pint + Pest${NC}"
+echo -e "${YELLOW}══════════════════════════════════════════${NC}"
+
+# -----------------------------------------------------------
+# 1. Check PHP 8.3 is available
+# -----------------------------------------------------------
+if [ ! -x "$PHP" ]; then
+    echo -e "${RED}✗ PHP 8.3 not found at $PHP${NC}"
+    echo "  Install with: brew install php@8.3"
+    exit 1
+fi
+
+# -----------------------------------------------------------
+# 2. Run Pint (code style check)
+# -----------------------------------------------------------
+echo ""
+echo -e "${YELLOW}▸ Running Laravel Pint (--test)...${NC}"
+
+$PHP $PINT --test --quiet 2>&1
+PINT_EXIT=$?
+
+if [ $PINT_EXIT -ne 0 ]; then
+    echo -e "${RED}✗ Pint found style issues!${NC}"
+    echo ""
+    echo "  Fix with:  $PHP $PINT"
+    echo "  Then:      git add -A && git commit"
+    echo ""
+    exit 1
+fi
+
+echo -e "${GREEN}✓ Pint: code style OK${NC}"
+
+# -----------------------------------------------------------
+# 3. Run Pest (tests)
+# -----------------------------------------------------------
+echo ""
+echo -e "${YELLOW}▸ Running Pest tests...${NC}"
+
+$PHP $PEST --compact 2>&1
+PEST_EXIT=$?
+
+if [ $PEST_EXIT -ne 0 ]; then
+    echo ""
+    echo -e "${RED}✗ Tests failed! Commit aborted.${NC}"
+    echo ""
+    exit 1
+fi
+
+echo ""
+echo -e "${GREEN}✓ All checks passed. Committing...${NC}"
+echo ""
+exit 0

@@ -2,22 +2,24 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Newsletter;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
-use App\Models\Newsletter;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
 
 class ImportLegacyNewsletters extends Command
 {
     protected $signature = 'newsletters:import-legacy {file}';
+
     protected $description = 'Import legacy newsletters from JSON file';
 
     public function handle()
     {
         $file = $this->argument('file');
-        if (!file_exists($file)) {
+        if (! file_exists($file)) {
             $this->error("File not found: $file");
+
             return 1;
         }
 
@@ -35,18 +37,19 @@ class ImportLegacyNewsletters extends Command
                 }
             }
         }
-        
+
         // Fallback if structure is simple
         if (empty($campaignsData) && isset($data['campaigns'])) {
             $campaignsData = $data['campaigns'];
         } elseif (empty($campaignsData) && is_array($data) && isset($data[0]['id'])) {
-             $campaignsData = $data;
+            $campaignsData = $data;
         }
 
         $data = $campaignsData;
 
         if (empty($data)) {
-            $this->error("Could not find campaigns data in JSON file.");
+            $this->error('Could not find campaigns data in JSON file.');
+
             return 1;
         }
 
@@ -56,7 +59,7 @@ class ImportLegacyNewsletters extends Command
         foreach ($data as $item) {
             // Check if ID is in target list
             // Note: JSON keys might be strings, so we cast to int for comparison
-            if (!in_array((int)$item['id'], $targetIds)) {
+            if (! in_array((int) $item['id'], $targetIds)) {
                 continue;
             }
 
@@ -66,22 +69,22 @@ class ImportLegacyNewsletters extends Command
             $newsletter = Newsletter::where('sendy_id', $item['id'])->first();
 
             // Create slug if new
-            if (!$newsletter) {
+            if (! $newsletter) {
                 $slug = Str::slug($item['title']);
                 $slugCount = 1;
                 $originalSlug = $slug;
                 while (Newsletter::where('slug', $slug)->exists()) {
-                    $slug = $originalSlug . '-' . $slugCount++;
+                    $slug = $originalSlug.'-'.$slugCount++;
                 }
             } else {
                 $slug = $newsletter->slug;
             }
 
             // Map fields
-            $sentAt = isset($item['sent']) && !empty($item['sent']) ? Carbon::createFromTimestamp($item['sent']) : Carbon::now();
-            
+            $sentAt = isset($item['sent']) && ! empty($item['sent']) ? Carbon::createFromTimestamp($item['sent']) : Carbon::now();
+
             // Fix plain text: use JSON value if present, otherwise strip tags from HTML
-            $plainText = !empty($item['plain_text']) ? $item['plain_text'] : strip_tags($item['html_text']);
+            $plainText = ! empty($item['plain_text']) ? $item['plain_text'] : strip_tags($item['html_text']);
             $plainText = html_entity_decode($plainText);
 
             $data = [
@@ -96,18 +99,19 @@ class ImportLegacyNewsletters extends Command
             try {
                 if ($newsletter) {
                     $newsletter->update($data);
-                    $this->info(" - Updated successfully.");
+                    $this->info(' - Updated successfully.');
                 } else {
                     Newsletter::create($data);
-                    $this->info(" - Imported successfully.");
+                    $this->info(' - Imported successfully.');
                 }
                 $count++;
             } catch (Exception $e) {
-                $this->error(" - Error: " . $e->getMessage());
+                $this->error(' - Error: '.$e->getMessage());
             }
         }
 
         $this->info("Done. Imported $count newsletters.");
+
         return 0;
     }
 }

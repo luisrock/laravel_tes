@@ -20,7 +20,7 @@ class WelcomeSubscriberNotification extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject('Bem-vindo ao Teses e Súmulas!')
-            ->greeting('Olá, ' . $notifiable->name . '!')
+            ->greeting('Olá, '.$notifiable->name.'!')
             ->line('Sua assinatura foi ativada com sucesso.')
             ->line('Agora você tem acesso a:')
             ->line('✓ Navegação sem anúncios')

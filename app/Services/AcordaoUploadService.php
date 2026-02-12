@@ -4,24 +4,22 @@ namespace App\Services;
 
 use App\Models\TeseAcordao;
 use App\Models\User;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
 use Exception;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class AcordaoUploadService
 {
     private const MAX_FILE_SIZE = 15728640; // 15MB em bytes (temporário - reduzir para 5MB após upload do tema 1031)
+
     private const MAX_FILES_PER_TESE = 10;
+
     private const ALLOWED_MIME_TYPES = ['application/pdf'];
 
     /**
      * Upload de acórdão com validações robustas
      *
-     * @param UploadedFile $file
-     * @param array $data
-     * @param User $user
-     * @return TeseAcordao
      * @throws Exception Se validações falharem
      */
     public function upload(UploadedFile $file, array $data, User $user): TeseAcordao
@@ -33,7 +31,7 @@ class AcordaoUploadService
 
         // 2. Validação de MIME type real (não apenas extensão)
         $mimeType = $file->getMimeType();
-        if (!in_array($mimeType, self::ALLOWED_MIME_TYPES)) {
+        if (! in_array($mimeType, self::ALLOWED_MIME_TYPES)) {
             throw new Exception('Apenas arquivos PDF são permitidos');
         }
 
@@ -44,7 +42,7 @@ class AcordaoUploadService
             ->count();
 
         if ($existingCount >= self::MAX_FILES_PER_TESE) {
-            throw new Exception("Limite de " . self::MAX_FILES_PER_TESE . " arquivos por tese atingido");
+            throw new Exception('Limite de '.self::MAX_FILES_PER_TESE.' arquivos por tese atingido');
         }
 
         // 4. Calcular checksum (SHA-256)
@@ -92,10 +90,10 @@ class AcordaoUploadService
             Storage::disk('s3')->put($s3Key, $fileContent, [
                 'ContentType' => 'application/pdf',
                 'Metadata' => [
-                    'tese_id' => (string)$data['tese_id'],
+                    'tese_id' => (string) $data['tese_id'],
                     'tribunal' => $data['tribunal'],
-                    'uploaded_by' => (string)$user->id,
-                ]
+                    'uploaded_by' => (string) $user->id,
+                ],
             ]);
         } catch (Exception $e) {
             Log::error('Erro ao fazer upload para S3', [
@@ -137,10 +135,6 @@ class AcordaoUploadService
 
     /**
      * Soft delete com período de retenção de 30 dias
-     *
-     * @param TeseAcordao $acordao
-     * @param User $user
-     * @return bool
      */
     public function delete(TeseAcordao $acordao, User $user): bool
     {
@@ -161,9 +155,6 @@ class AcordaoUploadService
     /**
      * Exclusão definitiva do S3 (após período de retenção)
      * NOTA: Será implementado via job agendado na Fase 2
-     *
-     * @param TeseAcordao $acordao
-     * @return bool
      */
     public function forceDelete(TeseAcordao $acordao): bool
     {
@@ -183,18 +174,13 @@ class AcordaoUploadService
 
     /**
      * Gera nome do arquivo padronizado
-     *
-     * @param string $tipo
-     * @param string $numeroAcordao
-     * @param int $version
-     * @return string
      */
     private function generateFilename(string $tipo, string $numeroAcordao, int $version): string
     {
         // Sanitizar tipo e número do acórdão
         $tipoSlug = strtolower(str_replace([' ', 'ç', 'ã', 'õ'], ['-', 'c', 'a', 'o'], $tipo));
         $tipoSlug = preg_replace('/[^a-z0-9-]/', '', $tipoSlug);
-        
+
         $numeroSlug = strtolower(str_replace(' ', '-', $numeroAcordao));
         $numeroSlug = preg_replace('/[^a-z0-9-]/', '', $numeroSlug);
 

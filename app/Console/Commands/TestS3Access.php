@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
+use Aws\Exception\AwsException;
+use Aws\S3\S3Client;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
-use Aws\S3\S3Client;
-use Aws\Exception\AwsException;
 
 class TestS3Access extends Command
 {
@@ -44,6 +44,7 @@ class TestS3Access extends Command
         if (empty($accessKey) || empty($secretKey)) {
             $this->error('❌ Credenciais AWS não configuradas no .env');
             $this->warn('   Configure: AWS_ACCESS_KEY_ID e AWS_SECRET_ACCESS_KEY');
+
             return 1;
         }
 
@@ -53,7 +54,7 @@ class TestS3Access extends Command
             $bucket = 'tesesesumulas';
         }
 
-        $this->info("   ✓ Access Key ID: " . substr($accessKey, 0, 8) . '...');
+        $this->info('   ✓ Access Key ID: '.substr($accessKey, 0, 8).'...');
         $this->info("   ✓ Region: {$region}");
         $this->info("   ✓ Bucket: {$bucket}");
         $this->newLine();
@@ -75,7 +76,7 @@ class TestS3Access extends Command
                 $result = $s3Client->listBuckets();
                 $this->info('   ✓ Conexão estabelecida com sucesso');
                 $this->info('   ✓ Permissão s3:ListAllMyBuckets: OK');
-                
+
                 $bucketNames = array_column($result->get('Buckets'), 'Name');
                 if (in_array($bucket, $bucketNames)) {
                     $this->info("   ✓ Bucket '{$bucket}' encontrado na lista");
@@ -90,11 +91,13 @@ class TestS3Access extends Command
                 }
             }
         } catch (AwsException $e) {
-            $this->error('   ❌ Erro ao conectar com S3: ' . $e->getMessage());
-            $this->error('   Código: ' . $e->getAwsErrorCode());
+            $this->error('   ❌ Erro ao conectar com S3: '.$e->getMessage());
+            $this->error('   Código: '.$e->getAwsErrorCode());
+
             return 1;
         } catch (Exception $e) {
-            $this->error('   ❌ Erro inesperado: ' . $e->getMessage());
+            $this->error('   ❌ Erro inesperado: '.$e->getMessage());
+
             return 1;
         }
         $this->newLine();
@@ -111,12 +114,15 @@ class TestS3Access extends Command
                 $this->error('   ❌ Acesso negado ao bucket');
                 $this->error('   As credenciais podem ter apenas permissão para SES, não para S3');
                 $this->warn('   Solução: Adicione permissões S3 ao IAM user/role');
+
                 return 1;
             } elseif ($e->getAwsErrorCode() === '404') {
                 $this->error("   ❌ Bucket '{$bucket}' não encontrado");
+
                 return 1;
             } else {
-                $this->error('   ❌ Erro: ' . $e->getMessage());
+                $this->error('   ❌ Erro: '.$e->getMessage());
+
                 return 1;
             }
         }
@@ -124,16 +130,17 @@ class TestS3Access extends Command
 
         // 4. Testar upload usando Laravel Storage
         $this->info('4. Testando upload usando Laravel Storage...');
-        $testKey = 'test/access-test-' . time() . '.txt';
-        $testContent = 'Teste de acesso ao S3 - ' . date('Y-m-d H:i:s');
-        
+        $testKey = 'test/access-test-'.time().'.txt';
+        $testContent = 'Teste de acesso ao S3 - '.date('Y-m-d H:i:s');
+
         try {
             Storage::disk('s3')->put($testKey, $testContent);
             $this->info("   ✓ Upload realizado com sucesso: {$testKey}");
             $this->info('   ✓ Permissão s3:PutObject: OK');
         } catch (Exception $e) {
-            $this->error('   ❌ Erro no upload: ' . $e->getMessage());
+            $this->error('   ❌ Erro no upload: '.$e->getMessage());
             $this->warn('   Verifique permissão s3:PutObject');
+
             return 1;
         }
         $this->newLine();
@@ -149,7 +156,7 @@ class TestS3Access extends Command
                 $this->warn('   ⚠ Conteúdo lido não corresponde ao esperado');
             }
         } catch (Exception $e) {
-            $this->error('   ❌ Erro na leitura: ' . $e->getMessage());
+            $this->error('   ❌ Erro na leitura: '.$e->getMessage());
             $this->warn('   Verifique permissão s3:GetObject');
         }
         $this->newLine();
@@ -162,7 +169,7 @@ class TestS3Access extends Command
             $this->info('   ✓ Permissão s3:GetObject (para presigned): OK');
             $this->line("   URL: {$url}");
         } catch (Exception $e) {
-            $this->error('   ❌ Erro ao gerar presigned URL: ' . $e->getMessage());
+            $this->error('   ❌ Erro ao gerar presigned URL: '.$e->getMessage());
         }
         $this->newLine();
 
@@ -173,7 +180,7 @@ class TestS3Access extends Command
             $this->info('   ✓ Arquivo de teste removido');
             $this->info('   ✓ Permissão s3:DeleteObject: OK');
         } catch (Exception $e) {
-            $this->warn('   ⚠ Erro ao remover arquivo de teste: ' . $e->getMessage());
+            $this->warn('   ⚠ Erro ao remover arquivo de teste: '.$e->getMessage());
             $this->warn("   Arquivo pode precisar ser removido manualmente: {$testKey}");
         }
         $this->newLine();

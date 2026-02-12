@@ -26,7 +26,7 @@ return [
             env('STRIPE_PRODUCT_PRO') => 'PRO',
             env('STRIPE_PRODUCT_PREMIUM') => 'PREMIUM',
         ],
-        fn ($value, $key) => !empty($key) && !empty($value),
+        fn ($value, $key) => ! empty($key) && ! empty($value),
         ARRAY_FILTER_USE_BOTH
     ),
 

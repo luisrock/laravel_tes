@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\TeseAcordao;
 use App\Services\AcordaoUploadService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Exception;
 
 class AcordaoAdminController extends Controller
 {
@@ -29,17 +29,17 @@ class AcordaoAdminController extends Controller
         $tribunal = $request->get('tribunal', 'STF');
         $search = $request->get('search');
         $onlyWithout = $request->boolean('only_without');
-        
+
         // Itens por página (validar contra valores permitidos)
         $allowedPerPage = [10, 20, 50, 100, 200, 500, 1000];
         $perPage = (int) $request->get('per_page', 50);
-        if (!in_array($perPage, $allowedPerPage)) {
+        if (! in_array($perPage, $allowedPerPage)) {
             $perPage = 50;
         }
-        
+
         // Ordenação (asc ou desc, default: desc)
         $order = strtolower($request->get('order', 'desc'));
-        if (!in_array($order, ['asc', 'desc'])) {
+        if (! in_array($order, ['asc', 'desc'])) {
             $order = 'desc';
         }
         // Filtro pré-marcado: apenas temas com tese divulgada (tese_texto não nulo)
@@ -53,12 +53,12 @@ class AcordaoAdminController extends Controller
         }
 
         $table = $tribunal === 'STF' ? 'stf_teses' : 'stj_teses';
-        
+
         // Nomes das colunas variam por tribunal
         // STF: tema_texto, acordao, link
         // STJ: tema (sem acordao nem link)
         $temaColumn = $tribunal === 'STF' ? 'tema_texto' : 'tema';
-        
+
         // Colunas base comuns
         $selectColumns = [
             "{$table}.id as tese_id",
@@ -66,7 +66,7 @@ class AcordaoAdminController extends Controller
             "{$table}.{$temaColumn} as tema",
             "{$table}.tese_texto",
         ];
-        
+
         // Colunas específicas por tribunal
         if ($tribunal === 'STF') {
             $selectColumns[] = "{$table}.acordao";
@@ -76,9 +76,9 @@ class AcordaoAdminController extends Controller
             $selectColumns[] = DB::raw('NULL as acordao');
             $selectColumns[] = DB::raw('NULL as link');
         }
-        
+
         $selectColumns[] = DB::raw('COUNT(tese_acordaos.id) as acordaos_count');
-        
+
         // Colunas para GROUP BY (sem acordao/link para STJ)
         $groupByColumns = [
             "{$table}.id",
@@ -86,7 +86,7 @@ class AcordaoAdminController extends Controller
             "{$table}.{$temaColumn}",
             "{$table}.tese_texto",
         ];
-        
+
         if ($tribunal === 'STF') {
             $groupByColumns[] = "{$table}.acordao";
             $groupByColumns[] = "{$table}.link";
@@ -96,21 +96,21 @@ class AcordaoAdminController extends Controller
             ->select($selectColumns)
             ->leftJoin('tese_acordaos', function ($join) use ($table, $tribunal) {
                 $join->on('tese_acordaos.tese_id', '=', "{$table}.id")
-                     ->on('tese_acordaos.tribunal', '=', DB::raw("'{$tribunal}'"))
-                     ->whereNull('tese_acordaos.deleted_at');
+                    ->on('tese_acordaos.tribunal', '=', DB::raw("'{$tribunal}'"))
+                    ->whereNull('tese_acordaos.deleted_at');
             })
             ->groupBy($groupByColumns);
 
         // Filtro: apenas temas com tese divulgada (pré-marcado por padrão)
         if ($onlyWithTese) {
             $query->whereNotNull("{$table}.tese_texto")
-                  ->where("{$table}.tese_texto", '!=', '');
+                ->where("{$table}.tese_texto", '!=', '');
         }
 
         if ($search) {
             $query->where(function ($q) use ($search, $table, $temaColumn) {
                 $q->where("{$table}.{$temaColumn}", 'LIKE', "%{$search}%")
-                  ->orWhere("{$table}.numero", 'LIKE', "%{$search}%");
+                    ->orWhere("{$table}.numero", 'LIKE', "%{$search}%");
             });
         }
 
@@ -119,7 +119,7 @@ class AcordaoAdminController extends Controller
         }
 
         $teses = $query->orderBy("{$table}.numero", $order)
-                      ->paginate($perPage);
+            ->paginate($perPage);
 
         // Buscar acórdãos de cada tese e gerar link "Ver Original" para STF
         foreach ($teses as $tese) {
@@ -127,13 +127,13 @@ class AcordaoAdminController extends Controller
                 ->orderBy('version', 'desc')
                 ->orderBy('created_at', 'desc')
                 ->get();
-            
+
             // Gerar link "Ver Original" (mesma lógica do TesePageController)
             if ($tribunal === 'STF') {
-                if ((empty($tese->link) || $tese->link == '-') && !empty($tese->acordao)) {
-                    $tese->link = "https://jurisprudencia.stf.jus.br/pages/search?base=acordaos&sinonimo=true&plural=true&page=1&&pageSize=10&sort=_score&sortBy=desc&isAdvance=true&classeNumeroIncidente=" . urlencode($tese->acordao);
+                if ((empty($tese->link) || $tese->link == '-') && ! empty($tese->acordao)) {
+                    $tese->link = 'https://jurisprudencia.stf.jus.br/pages/search?base=acordaos&sinonimo=true&plural=true&page=1&&pageSize=10&sort=_score&sortBy=desc&isAdvance=true&classeNumeroIncidente='.urlencode($tese->acordao);
                 }
-            } else if ($tribunal === 'STJ') {
+            } elseif ($tribunal === 'STJ') {
                 // STJ: link para o portal de temas repetitivos
                 $tese->link = "https://processo.stj.jus.br/repetitivos/temas_repetitivos/pesquisa.jsp?novaConsulta=true&tipo_pesquisa=T&cod_tema_inicial={$tese->numero}&cod_tema_final={$tese->numero}";
             }
@@ -185,7 +185,7 @@ class AcordaoAdminController extends Controller
             return back()->with('success', 'Acórdão removido com sucesso!');
 
         } catch (Exception $e) {
-            return back()->with('error', 'Erro ao remover acórdão: ' . $e->getMessage());
+            return back()->with('error', 'Erro ao remover acórdão: '.$e->getMessage());
         }
     }
 }

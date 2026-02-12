@@ -56,7 +56,7 @@ class Quiz extends Model
             $originalSlug = $quiz->slug;
             $count = 1;
             while (static::where('slug', $quiz->slug)->exists()) {
-                $quiz->slug = $originalSlug . '-' . $count++;
+                $quiz->slug = $originalSlug.'-'.$count++;
             }
         });
     }
@@ -141,9 +141,12 @@ class Quiz extends Model
     public function getCompletionRateAttribute()
     {
         $total = $this->attempts()->count();
-        if ($total === 0) return 0;
-        
+        if ($total === 0) {
+            return 0;
+        }
+
         $completed = $this->attempts()->where('status', 'completed')->count();
+
         return round(($completed / $total) * 100, 1);
     }
 
@@ -170,7 +173,7 @@ class Quiz extends Model
      */
     public function getDifficultyLabelAttribute()
     {
-        return match($this->difficulty) {
+        return match ($this->difficulty) {
             'easy' => 'Fácil',
             'medium' => 'Intermediário',
             'hard' => 'Difícil',
@@ -183,7 +186,7 @@ class Quiz extends Model
      */
     public function getStatusLabelAttribute()
     {
-        return match($this->status) {
+        return match ($this->status) {
             'draft' => 'Rascunho',
             'published' => 'Publicado',
             'archived' => 'Arquivado',

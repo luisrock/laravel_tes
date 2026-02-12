@@ -11,12 +11,14 @@ class UserController extends Controller
     public function index()
     {
         $users = User::all();
+
         return view('users.index', compact('users'));
     }
 
     public function create()
     {
         $roles = Role::all();
+
         return view('users.create', compact('roles'));
     }
 
@@ -42,6 +44,7 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $roles = Role::all();
+
         return view('users.edit', compact('user', 'roles'));
     }
 
@@ -49,7 +52,7 @@ class UserController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'email' => 'required|email|unique:users,email,'.$user->id,
             'role' => 'required|exists:roles,name',
         ]);
 
@@ -66,6 +69,7 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         $user->delete();
+
         return redirect()->route('users.index')->with('success', 'User deleted successfully');
     }
 }

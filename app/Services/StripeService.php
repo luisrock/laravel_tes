@@ -154,7 +154,7 @@ class StripeService
 
         $tierProductIds = config('subscription.tier_product_ids', []);
         foreach ($tierProductIds as $productId) {
-            if (!empty($productId)) {
+            if (! empty($productId)) {
                 Cache::forget("stripe_prices_{$productId}");
             }
         }

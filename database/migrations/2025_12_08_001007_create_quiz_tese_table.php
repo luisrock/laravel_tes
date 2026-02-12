@@ -17,12 +17,12 @@ class CreateQuizTeseTable extends Migration
             $table->foreignId('quiz_id')
                 ->constrained('quizzes')
                 ->cascadeOnDelete();
-            
+
             $table->unsignedBigInteger('pesquisa_id'); // FK para tabela pesquisas
-            
+
             $table->primary(['quiz_id', 'pesquisa_id']);
-            
-            // Nota: Não criamos foreign key para pesquisas pois a tabela 
+
+            // Nota: Não criamos foreign key para pesquisas pois a tabela
             // pode não existir no momento da migration ou ter estrutura diferente.
             // O relacionamento será gerenciado pela aplicação.
             $table->index(['pesquisa_id']);

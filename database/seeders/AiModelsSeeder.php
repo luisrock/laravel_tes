@@ -47,6 +47,6 @@ class AiModelsSeeder extends Seeder
             );
         }
 
-        $this->command->info('Seeded ' . count($models) . ' AI models.');
+        $this->command->info('Seeded '.count($models).' AI models.');
     }
 }

@@ -27,7 +27,7 @@ class EditableContentSeeder extends Seeder
 
     private function getContent()
     {
-        return <<<HTML
+        return <<<'HTML'
 <h2>O que são Precedentes Vinculantes?</h2>
 
 <p>Os <strong>precedentes vinculantes</strong> são decisões judiciais que, por expressa determinação legal, devem ser obrigatoriamente observadas por juízes e tribunais na solução de casos futuros. O Código de Processo Civil de 2015 (Lei 13.105/2015) consolidou e ampliou significativamente o sistema de precedentes no Brasil, estabelecendo no <strong>artigo 927</strong> um rol de decisões de observância obrigatória.</p>

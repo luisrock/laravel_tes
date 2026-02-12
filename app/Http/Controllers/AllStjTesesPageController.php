@@ -2,23 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-
 
 class AllStjTesesPageController extends Controller
 {
     public function index()
     {
         $teses = DB::table('stj_teses')
-            //select all fields
+            // select all fields
             ->select('*')
-            //order by numero DESC
+            // order by numero DESC
             ->orderBy('numero', 'DESC')
-            //get all from the DB (no items limit)
+            // get all from the DB (no items limit)
             ->get();
 
         $tribunal = 'STJ';
@@ -36,12 +32,12 @@ class AllStjTesesPageController extends Controller
         $breadcrumb = [
             ['name' => 'Início', 'url' => url('/')],
             ['name' => 'Índice', 'url' => url('/index')],
-            ['name' => 'Teses STJ', 'url' => null]
+            ['name' => 'Teses STJ', 'url' => null],
         ];
 
         $admin = false;
         if (auth()->check()) {
-            //check the email
+            // check the email
             $useremail = auth()->user()->email;
             if (in_array($useremail, ['mauluis@gmail.com', 'trator70@gmail.com', 'ivanaredler@gmail.com'])) {
                 $admin = true;
@@ -49,12 +45,12 @@ class AllStjTesesPageController extends Controller
         }
 
         foreach ($teses as $tese) {
-            $tese->isCancelada = !empty($tese->situacao) && Str::contains($tese->situacao, 'ancelad');
+            $tese->isCancelada = ! empty($tese->situacao) && Str::contains($tese->situacao, 'ancelad');
             $tese->tempo = '';
             if (isset($tese->atualizadaEm) && $tese->atualizadaEm) {
                 $tese->tempo = "Última atualização: {$tese->atualizadaEm}";
             }
-            $tese->tema_pure_text = "";
+            $tese->tema_pure_text = '';
             if (isset($tese->tema) && $tese->tema) {
                 $tese->tema_pure_text = $tese->tema;
             }
@@ -62,5 +58,5 @@ class AllStjTesesPageController extends Controller
 
         // dd($teses);
         return view('front.teses', compact('tribunal', 'teses', 'count', 'label', 'description', 'admin', 'display_pdf', 'tese_route', 'breadcrumb'));
-    } //end public function
+    } // end public function
 }

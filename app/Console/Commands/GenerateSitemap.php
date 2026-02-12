@@ -30,19 +30,19 @@ class GenerateSitemap extends Command
     public function handle()
     {
         $baseUrl = config('app.url');
-        
+
         SitemapGenerator::create($baseUrl)
             ->hasCrawled(function (Url $url) use ($baseUrl) {
                 // Excluir URLs com query strings (paginação)
                 if (str_contains($url->url, '?')) {
                     return null;
                 }
-                
+
                 // Excluir /index (duplicata da home)
-                if ($url->url === $baseUrl . '/index') {
+                if ($url->url === $baseUrl.'/index') {
                     return null;
                 }
-                
+
                 // Excluir URL vazia ou apenas com barra final duplicada
                 // Manter apenas a versão canônica (sem barra final)
                 $path = parse_url($url->url, PHP_URL_PATH);
@@ -50,11 +50,11 @@ class GenerateSitemap extends Command
                     // Manter apenas uma versão da home
                     $url->url = $baseUrl;
                 }
-                
+
                 return $url;
             })
             ->writeToFile(public_path('sitemap.xml'));
-            
+
         $this->info('Sitemap generated successfully!');
     }
 }

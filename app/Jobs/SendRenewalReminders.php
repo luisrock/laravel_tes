@@ -2,9 +2,9 @@
 
 namespace App\Jobs;
 
-use Exception;
 use App\Notifications\SubscriptionRenewingSoonNotification;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -29,7 +29,7 @@ class SendRenewalReminders implements ShouldQueue
             ->get();
 
         foreach ($subscriptions as $subscription) {
-            if (!$subscription->user) {
+            if (! $subscription->user) {
                 continue;
             }
 

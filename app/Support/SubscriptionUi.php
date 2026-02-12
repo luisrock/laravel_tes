@@ -8,8 +8,11 @@ use Illuminate\Support\Arr;
 class SubscriptionUi
 {
     public const LABEL_ACTIVE = 'Ativa';
+
     public const LABEL_GRACE = 'Carência';
+
     public const LABEL_CANCELED = 'Cancelada';
+
     public const LABEL_NONE = 'Sem assinatura';
 
     public static function tierLabels(): array
@@ -19,7 +22,7 @@ class SubscriptionUi
 
     public static function tierLabel(?string $productId): string
     {
-        if (!$productId) {
+        if (! $productId) {
             return self::LABEL_NONE;
         }
 
@@ -63,7 +66,7 @@ class SubscriptionUi
             return self::LABEL_ACTIVE;
         }
 
-        if (!$stripeStatus) {
+        if (! $stripeStatus) {
             return self::LABEL_NONE;
         }
 

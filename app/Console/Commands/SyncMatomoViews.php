@@ -4,8 +4,8 @@ namespace App\Console\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class SyncMatomoViews extends Command
 {
@@ -32,9 +32,10 @@ class SyncMatomoViews extends Command
     {
         $token = env('MATOMO_TOKEN');
         $days = $this->option('days');
-        
-        if (!$token) {
+
+        if (! $token) {
             $this->error('❌ MATOMO_TOKEN não configurado no .env');
+
             return 1;
         }
 
@@ -53,25 +54,27 @@ class SyncMatomoViews extends Command
                 'token_auth' => $token,
                 'filter_limit' => 500,
                 'expanded' => 1,
-                'flat' => 1
+                'flat' => 1,
             ]);
 
-            if (!$response->successful()) {
-                $this->error('❌ Erro ao conectar com Matomo: ' . $response->status());
+            if (! $response->successful()) {
+                $this->error('❌ Erro ao conectar com Matomo: '.$response->status());
+
                 return 1;
             }
 
             $data = $response->json();
-            
+
             // Filtrar apenas páginas /tema/
             $themes = collect($data)
-                ->filter(function($item) {
-                    return isset($item['label']) && 
+                ->filter(function ($item) {
+                    return isset($item['label']) &&
                            strpos($item['label'], '/tema/') !== false;
                 })
-                ->map(function($item) {
+                ->map(function ($item) {
                     $slug = str_replace('/tema/', '', $item['label']);
                     $slug = trim($slug, '/');
+
                     return [
                         'slug' => $slug,
                         'visits' => $item['nb_visits'] ?? 0,
@@ -80,6 +83,7 @@ class SyncMatomoViews extends Command
 
             if ($themes->isEmpty()) {
                 $this->warn('⚠️  Nenhum dado de tema encontrado no Matomo');
+
                 return 0;
             }
 
@@ -97,7 +101,7 @@ class SyncMatomoViews extends Command
                     ->where('slug', $theme['slug'])
                     ->update([
                         'views_count' => $theme['visits'],
-                        'last_synced_at' => now()
+                        'last_synced_at' => now(),
                     ]);
 
                 if ($result > 0) {
@@ -121,7 +125,7 @@ class SyncMatomoViews extends Command
                     ['Temas encontrados no Matomo', $themes->count()],
                     ['Temas atualizados no banco', $updated],
                     ['Temas não encontrados no banco', $notFound],
-                    ['Top 5 mais visitados', '']
+                    ['Top 5 mais visitados', ''],
                 ]
             );
 
@@ -139,11 +143,11 @@ class SyncMatomoViews extends Command
                 $this->info('🔥 Top 5 Temas Mais Visitados:');
                 $this->table(
                     ['#', 'Tema', 'Views'],
-                    $top5->map(function($t, $i) {
+                    $top5->map(function ($t, $i) {
                         return [
                             $i + 1,
                             $t->label ?? $t->keyword,
-                            number_format($t->views_count)
+                            number_format($t->views_count),
                         ];
                     })
                 );
@@ -152,7 +156,8 @@ class SyncMatomoViews extends Command
             return 0;
 
         } catch (Exception $e) {
-            $this->error('❌ Erro: ' . $e->getMessage());
+            $this->error('❌ Erro: '.$e->getMessage());
+
             return 1;
         }
     }

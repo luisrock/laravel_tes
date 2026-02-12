@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
-use Str;
-use App\Models\Quiz;
 use App\Http\Controllers\Controller;
 use App\Models\Question;
-use App\Models\QuestionOption;
 use App\Models\QuestionTag;
+use App\Models\Quiz;
 use Illuminate\Http\Request;
+use Str;
 
 class QuestionApiController extends Controller
 {
@@ -33,7 +32,7 @@ class QuestionApiController extends Controller
             $tagIds = is_array($request->tags) ? $request->tags : explode(',', $request->tags);
             $query->byTags($tagIds);
         }
-        
+
         // Exclude questions already in a quiz
         if ($request->has('exclude_quiz_id')) {
             $query->whereDoesntHave('quizzes', function ($q) use ($request) {
@@ -58,7 +57,7 @@ class QuestionApiController extends Controller
     {
         $question = Question::with(['category', 'options', 'tags', 'quizzes'])->find($id);
 
-        if (!$question) {
+        if (! $question) {
             return response()->json([
                 'success' => false,
                 'error' => 'Pergunta não encontrada.',
@@ -118,12 +117,12 @@ class QuestionApiController extends Controller
         }
 
         // Attach tags
-        if (!empty($validated['tags'])) {
+        if (! empty($validated['tags'])) {
             $question->tags()->sync($validated['tags']);
         }
 
         // Attach teses
-        if (!empty($validated['tese_ids'])) {
+        if (! empty($validated['tese_ids'])) {
             $question->teses()->sync($validated['tese_ids']);
         }
 
@@ -141,7 +140,7 @@ class QuestionApiController extends Controller
     {
         $question = Question::find($id);
 
-        if (!$question) {
+        if (! $question) {
             return response()->json([
                 'success' => false,
                 'error' => 'Pergunta não encontrada.',
@@ -187,7 +186,7 @@ class QuestionApiController extends Controller
         if (isset($validated['options'])) {
             // Delete existing options and recreate
             $question->options()->delete();
-            
+
             foreach ($validated['options'] as $optionData) {
                 $question->options()->create([
                     'letter' => strtoupper($optionData['letter']),
@@ -221,7 +220,7 @@ class QuestionApiController extends Controller
     {
         $question = Question::find($id);
 
-        if (!$question) {
+        if (! $question) {
             return response()->json([
                 'success' => false,
                 'error' => 'Pergunta não encontrada.',
@@ -299,7 +298,7 @@ class QuestionApiController extends Controller
         $query = Question::with(['category', 'options'])
             ->where('text', 'like', "%{$validated['q']}%");
 
-        if (!empty($validated['exclude_quiz_id'])) {
+        if (! empty($validated['exclude_quiz_id'])) {
             $query->whereDoesntHave('quizzes', function ($q) use ($validated) {
                 $q->where('quizzes.id', $validated['exclude_quiz_id']);
             });
@@ -341,6 +340,7 @@ class QuestionApiController extends Controller
             $correctCount = collect($questionData['options'])->where('is_correct', true)->count();
             if ($correctCount !== 1) {
                 $errors[] = "Pergunta {$index}: Exatamente uma alternativa deve ser marcada como correta.";
+
                 continue;
             }
 
@@ -359,7 +359,7 @@ class QuestionApiController extends Controller
                 ]);
             }
 
-            if (!empty($questionData['tags'])) {
+            if (! empty($questionData['tags'])) {
                 $question->tags()->sync($questionData['tags']);
             }
 
@@ -367,10 +367,10 @@ class QuestionApiController extends Controller
         }
 
         // Optionally add to quiz
-        if (!empty($validated['quiz_id']) && !empty($createdQuestions)) {
+        if (! empty($validated['quiz_id']) && ! empty($createdQuestions)) {
             $quiz = Quiz::find($validated['quiz_id']);
             $maxOrder = $quiz->questions()->max('quiz_question.order') ?? 0;
-            
+
             foreach ($createdQuestions as $index => $question) {
                 $quiz->questions()->attach($question->id, ['order' => $maxOrder + $index + 1]);
             }
@@ -378,7 +378,7 @@ class QuestionApiController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => count($createdQuestions) . ' pergunta(s) criada(s) com sucesso.',
+            'message' => count($createdQuestions).' pergunta(s) criada(s) com sucesso.',
             'data' => $createdQuestions,
             'errors' => $errors,
         ], 201);

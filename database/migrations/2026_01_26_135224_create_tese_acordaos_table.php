@@ -24,7 +24,7 @@ class CreateTeseAcordaosTable extends Migration
                 'Modulação de Efeitos',
                 'Recurso Extraordinário',
                 'Recurso Especial',
-                'Outros'
+                'Outros',
             ])->default('Principal');
             $table->string('label', 255)->nullable();     // Descrição livre
             $table->string('s3_key', 500);                // Caminho no S3
@@ -38,7 +38,7 @@ class CreateTeseAcordaosTable extends Migration
             $table->softDeletes();                         // Soft delete para auditoria
             $table->unsignedBigInteger('deleted_by')->nullable(); // user_id que deletou
             $table->timestamps();
-            
+
             // Índices para performance
             $table->index(['tribunal', 'tese_id']);
             $table->index(['tese_id', 'tribunal', 'numero_acordao']); // Busca rápida

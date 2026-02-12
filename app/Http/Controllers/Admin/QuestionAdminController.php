@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Str;
 use App\Http\Controllers\Controller;
 use App\Models\Question;
-use App\Models\QuestionOption;
 use App\Models\QuestionTag;
 use App\Models\QuizCategory;
 use Illuminate\Http\Request;
+use Str;
 
 class QuestionAdminController extends Controller
 {
@@ -100,7 +99,7 @@ class QuestionAdminController extends Controller
         }
 
         // Attach tags
-        if (!empty($validated['tags'])) {
+        if (! empty($validated['tags'])) {
             $question->tags()->sync($validated['tags']);
         }
 
@@ -235,7 +234,7 @@ class QuestionAdminController extends Controller
         }
 
         // Attach tags
-        if (!empty($validated['tags'])) {
+        if (! empty($validated['tags'])) {
             $question->tags()->sync($validated['tags']);
         }
 

@@ -28,11 +28,11 @@ class SubscriptionCanceledNotification extends Notification implements ShouldQue
     {
         $message = (new MailMessage)
             ->subject('Sua assinatura foi cancelada')
-            ->greeting('Olá, ' . $notifiable->name)
+            ->greeting('Olá, '.$notifiable->name)
             ->line('Confirmamos o cancelamento da sua assinatura.');
 
         if ($this->endsAt) {
-            $message->line('Você ainda terá acesso até: ' . $this->endsAt->format('d/m/Y'));
+            $message->line('Você ainda terá acesso até: '.$this->endsAt->format('d/m/Y'));
         }
 
         return $message

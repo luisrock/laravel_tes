@@ -2,11 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use SimpleXMLElement;
-use DateTime;
-use DateTimeZone;
-
 use App\Models\Newsletter;
 
 class CampaignsPageController extends Controller

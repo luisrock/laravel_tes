@@ -28,8 +28,8 @@ class SubscriptionRenewingSoonNotification extends Notification implements Shoul
     {
         return (new MailMessage)
             ->subject('Sua assinatura será renovada em breve')
-            ->greeting('Olá, ' . $notifiable->name)
-            ->line('Sua assinatura do Teses e Súmulas será renovada automaticamente em ' . $this->renewsAt->format('d/m/Y') . '.')
+            ->greeting('Olá, '.$notifiable->name)
+            ->line('Sua assinatura do Teses e Súmulas será renovada automaticamente em '.$this->renewsAt->format('d/m/Y').'.')
             ->line('Se você deseja cancelar ou alterar seu plano, pode fazer isso a qualquer momento.')
             ->action('Gerenciar Assinatura', route('subscription.portal'))
             ->line('Obrigado por continuar conosco!');

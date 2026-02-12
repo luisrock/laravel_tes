@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use Exception;
-use Log;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Log;
 
 class TeseAcordao extends Model
 {
@@ -68,6 +68,7 @@ class TeseAcordao extends Model
 
         return Cache::remember($cacheKey, 3600, function () {
             $table = $this->tribunal === 'STF' ? 'stf_teses' : 'stj_teses';
+
             return DB::table($table)->where('id', $this->tese_id)->first();
         });
     }
@@ -78,7 +79,7 @@ class TeseAcordao extends Model
      */
     public function getPresignedUrlAttribute(): ?string
     {
-        if (!$this->s3_key) {
+        if (! $this->s3_key) {
             return null;
         }
 
@@ -96,6 +97,7 @@ class TeseAcordao extends Model
                     's3_key' => $this->s3_key,
                     'error' => $e->getMessage(),
                 ]);
+
                 return null;
             }
         });
@@ -107,7 +109,7 @@ class TeseAcordao extends Model
     public function scopeForTese($query, int $teseId, string $tribunal)
     {
         return $query->where('tese_id', $teseId)
-                    ->where('tribunal', $tribunal);
+            ->where('tribunal', $tribunal);
     }
 
     /**
@@ -124,8 +126,8 @@ class TeseAcordao extends Model
     public static function findDuplicate(string $checksum, int $teseId, string $tribunal): ?self
     {
         return self::where('checksum', $checksum)
-                   ->where('tese_id', $teseId)
-                   ->where('tribunal', $tribunal)
-                   ->first();
+            ->where('tese_id', $teseId)
+            ->where('tribunal', $tribunal)
+            ->first();
     }
 }

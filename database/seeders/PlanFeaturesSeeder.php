@@ -20,6 +20,7 @@ class PlanFeaturesSeeder extends Seeder
 
         if (empty($productIds)) {
             Log::warning('PlanFeaturesSeeder: tier_product_ids vazio; seed ignorado.');
+
             return;
         }
 

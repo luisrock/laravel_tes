@@ -82,13 +82,13 @@ function createAdminUser(): \App\Models\User
 function createPublishedQuiz(int $questionCount = 3): \App\Models\Quiz
 {
     $category = \App\Models\QuizCategory::create([
-        'name' => 'Categoria Teste ' . uniqid(),
-        'slug' => 'cat-teste-' . uniqid(),
+        'name' => 'Categoria Teste '.uniqid(),
+        'slug' => 'cat-teste-'.uniqid(),
     ]);
 
     $quiz = \App\Models\Quiz::create([
-        'title' => 'Quiz de Teste ' . uniqid(),
-        'slug' => 'quiz-teste-' . uniqid(),
+        'title' => 'Quiz de Teste '.uniqid(),
+        'slug' => 'quiz-teste-'.uniqid(),
         'description' => 'Descrição do quiz de teste',
         'category_id' => $category->id,
         'status' => 'published',
@@ -129,7 +129,7 @@ function createSubscribedUser(string $productId = 'prod_test'): \App\Models\User
     $subscription = \Laravel\Cashier\Subscription::create([
         'user_id' => $user->id,
         'type' => config('subscription.default_subscription_name', 'default'),
-        'stripe_id' => 'sub_test_' . uniqid(),
+        'stripe_id' => 'sub_test_'.uniqid(),
         'stripe_status' => 'active',
         'stripe_price' => 'price_test_123',
         'quantity' => 1,
@@ -137,7 +137,7 @@ function createSubscribedUser(string $productId = 'prod_test'): \App\Models\User
 
     // Criar SubscriptionItem para que getSubscriptionPlan() e hasFeature() funcionem
     $subscription->items()->create([
-        'stripe_id' => 'si_test_' . uniqid(),
+        'stripe_id' => 'si_test_'.uniqid(),
         'stripe_product' => $productId,
         'stripe_price' => 'price_test_123',
         'quantity' => 1,

@@ -21,9 +21,9 @@ class CreateRefundRequestsTable extends Migration
             $table->timestamps();
 
             $table->foreign('cashier_subscription_id')
-                  ->references('id')
-                  ->on('subscriptions')
-                  ->onDelete('set null');
+                ->references('id')
+                ->on('subscriptions')
+                ->onDelete('set null');
         });
     }
 

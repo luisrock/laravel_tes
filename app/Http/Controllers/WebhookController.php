@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
-use Stripe\StripeClient;
 use App\Models\StripeWebhookEvent;
 use App\Models\User;
 use App\Notifications\SubscriptionCanceledNotification;
 use App\Notifications\WelcomeSubscriberNotification;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Laravel\Cashier\Http\Controllers\WebhookController as CashierWebhookController;
 use Laravel\Cashier\Subscription;
+use Stripe\StripeClient;
 
 class WebhookController extends CashierWebhookController
 {
@@ -26,7 +26,7 @@ class WebhookController extends CashierWebhookController
         $eventType = $payload['type'] ?? null;
         $data = $payload['data']['object'] ?? [];
 
-        if (!$eventId || !$eventType) {
+        if (! $eventId || ! $eventType) {
             return response()->json(['error' => 'Invalid payload'], 400);
         }
 
@@ -51,7 +51,7 @@ class WebhookController extends CashierWebhookController
         }
 
         // Se não foi recém-criado, é reprocessamento
-        if (!$webhookEvent->wasRecentlyCreated) {
+        if (! $webhookEvent->wasRecentlyCreated) {
             $webhookEvent->increment('attempts');
         }
 
@@ -100,7 +100,7 @@ class WebhookController extends CashierWebhookController
             $user = User::find($clientReferenceId);
             if ($user) {
                 try {
-                    $user->notify(new WelcomeSubscriberNotification());
+                    $user->notify(new WelcomeSubscriberNotification);
                 } catch (Exception $e) {
                     Log::error('Erro ao enviar email de boas-vindas', [
                         'user_id' => $user->id,
@@ -190,7 +190,7 @@ class WebhookController extends CashierWebhookController
         $stripeId = $stripeSubscription['id'] ?? null;
         $currentPeriodEnd = $stripeSubscription['current_period_end'] ?? null;
 
-        if (!$stripeId || !$currentPeriodEnd) {
+        if (! $stripeId || ! $currentPeriodEnd) {
             return;
         }
 
@@ -204,7 +204,7 @@ class WebhookController extends CashierWebhookController
      */
     protected function extractObjectId(string $eventType, array $data): ?string
     {
-        return match($eventType) {
+        return match ($eventType) {
             'checkout.session.completed' => $data['id'] ?? null,
             'customer.subscription.created',
             'customer.subscription.updated',
@@ -223,6 +223,7 @@ class WebhookController extends CashierWebhookController
         // Para checkout.session.completed, usamos client_reference_id
         if ($eventType === 'checkout.session.completed') {
             $refId = $data['client_reference_id'] ?? null;
+
             return $refId ? (int) $refId : null;
         }
 
@@ -230,6 +231,7 @@ class WebhookController extends CashierWebhookController
         $customerId = $data['customer'] ?? null;
         if ($customerId) {
             $user = User::where('stripe_id', $customerId)->first();
+
             return $user?->id;
         }
 

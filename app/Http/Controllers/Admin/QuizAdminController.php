@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Quiz;
-use App\Models\Question;
-use App\Models\QuizCategory;
 use App\Models\EditableContent;
+use App\Models\Question;
+use App\Models\Quiz;
+use App\Models\QuizCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -47,7 +47,7 @@ class QuizAdminController extends Controller
 
         $quizzes = $query->orderBy('created_at', 'desc')->paginate(20);
         $categories = QuizCategory::orderBy('name')->get();
-        
+
         // Verificar se a seção de quizzes está visível na home
         $homeVisibility = EditableContent::where('slug', 'quizzes-home-visibility')->first();
         $isVisibleOnHome = $homeVisibility ? $homeVisibility->published : false;
@@ -257,11 +257,11 @@ class QuizAdminController extends Controller
                 $q->where('quizzes.id', $quiz->id);
             });
 
-        if (!empty($search)) {
+        if (! empty($search)) {
             $query->where('text', 'like', "%{$search}%");
         }
 
-        if (!empty($categoryId)) {
+        if (! empty($categoryId)) {
             $query->where('category_id', $categoryId);
         }
 
@@ -279,7 +279,7 @@ class QuizAdminController extends Controller
     public function duplicate(Quiz $quiz)
     {
         $newQuiz = $quiz->replicate();
-        $newQuiz->title = $quiz->title . ' (Cópia)';
+        $newQuiz->title = $quiz->title.' (Cópia)';
         $newQuiz->slug = Str::slug($newQuiz->title);
         $newQuiz->status = 'draft';
         $newQuiz->views_count = 0;
@@ -310,11 +310,11 @@ class QuizAdminController extends Controller
             ]
         );
 
-        $setting->published = !$setting->published;
+        $setting->published = ! $setting->published;
         $setting->save();
 
         $status = $setting->published ? 'visível' : 'oculta';
-        
+
         return redirect()
             ->route('admin.quizzes.index')
             ->with('success', "Seção de Quizzes na Home agora está {$status}!");

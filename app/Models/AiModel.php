@@ -57,6 +57,7 @@ class AiModel extends Model
     {
         $inputCost = ($inputTokens / 1_000_000) * $this->price_input_per_million;
         $outputCost = ($outputTokens / 1_000_000) * $this->price_output_per_million;
+
         return round($inputCost + $outputCost, 6);
     }
 }

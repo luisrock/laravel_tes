@@ -111,7 +111,7 @@ describe('Webhook - Checkout Session Completed', function () {
         $user = User::factory()->create();
 
         // Testar via controller diretamente (como SubscriptionNotificationsTest)
-        $controller = new TestableWebhookControllerForWebhookTest();
+        $controller = new TestableWebhookControllerForWebhookTest;
         $controller->callHandleCheckoutSessionCompleted([
             'data' => [
                 'object' => [

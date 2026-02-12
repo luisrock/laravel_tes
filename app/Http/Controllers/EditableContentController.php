@@ -17,17 +17,17 @@ class EditableContentController extends Controller
             ->where('published', true)
             ->first();
 
-        if (!$content) {
+        if (! $content) {
             abort(404);
         }
 
         $display_pdf = '';
         $description = $content->meta_description ?? config('tes_constants.options.meta_description');
-        
+
         // Breadcrumb
         $breadcrumb = [
             ['name' => 'Início', 'url' => url('/')],
-            ['name' => $content->title, 'url' => null]
+            ['name' => $content->title, 'url' => null],
         ];
 
         return view('front.editable-content', compact('content', 'display_pdf', 'description', 'breadcrumb'));
@@ -39,7 +39,7 @@ class EditableContentController extends Controller
     public function edit($slug)
     {
         // Verificar se é admin
-        if (!auth()->check() || !in_array(auth()->user()->email, config('tes_constants.admins'))) {
+        if (! auth()->check() || ! in_array(auth()->user()->email, config('tes_constants.admins'))) {
             abort(403, 'Acesso negado');
         }
 
@@ -47,7 +47,7 @@ class EditableContentController extends Controller
             ->where('slug', $slug)
             ->first();
 
-        if (!$content) {
+        if (! $content) {
             abort(404);
         }
 
@@ -60,7 +60,7 @@ class EditableContentController extends Controller
     public function update(Request $request, $slug)
     {
         // Verificar se é admin
-        if (!auth()->check() || !in_array(auth()->user()->email, config('tes_constants.admins'))) {
+        if (! auth()->check() || ! in_array(auth()->user()->email, config('tes_constants.admins'))) {
             abort(403, 'Acesso negado');
         }
 
@@ -68,7 +68,7 @@ class EditableContentController extends Controller
             'title' => 'required|string|max:255',
             'meta_description' => 'nullable|string|max:500',
             'content' => 'required|string',
-            'published' => 'boolean'
+            'published' => 'boolean',
         ]);
 
         DB::table('editable_contents')
@@ -78,7 +78,7 @@ class EditableContentController extends Controller
                 'meta_description' => $validated['meta_description'] ?? null,
                 'content' => $validated['content'],
                 'published' => $request->has('published') ? 1 : 0,
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
 
         // Se for conteúdo da home, redireciona para homepage

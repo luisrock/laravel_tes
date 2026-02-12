@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Laravel\Cashier\Subscription;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Laravel\Cashier\Subscription;
 
 class RefundRequest extends Model
 {
@@ -26,8 +26,11 @@ class RefundRequest extends Model
      * Status possíveis para solicitações de estorno.
      */
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_APPROVED = 'approved';
+
     public const STATUS_REJECTED = 'rejected';
+
     public const STATUS_PROCESSED = 'processed';
 
     /**

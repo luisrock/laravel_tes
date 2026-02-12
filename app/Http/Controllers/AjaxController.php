@@ -3,13 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 
 class AjaxController extends Controller
 {
-
-    //make a public function to get the id from the table 'pesquisas' by the keyword
+    // make a public function to get the id from the table 'pesquisas' by the keyword
     public function getidbykeyword(Request $request)
     {
         if ($request->isMethod('get') === false) {
@@ -17,7 +16,7 @@ class AjaxController extends Controller
         }
 
         $request->validate([
-            'keyword' => 'required'
+            'keyword' => 'required',
         ]);
 
         $keyword = $request['keyword'];
@@ -34,7 +33,7 @@ class AjaxController extends Controller
 
         $request->validate([
             'create' => 'required|in:0,1',
-            'id' => 'numeric'
+            'id' => 'numeric',
         ]);
 
         $create = $request['create'];
@@ -52,7 +51,7 @@ class AjaxController extends Controller
                         'created_at' => DB::raw('NOW()'),
                         'checked_at' => DB::raw('NOW()'),
                         'label' => $label,
-                        'slug' => slugify($label)
+                        'slug' => slugify($label),
                     ]
                 );
         }
@@ -68,7 +67,7 @@ class AjaxController extends Controller
         }
 
         $request->validate([
-            'id' => 'numeric'
+            'id' => 'numeric',
         ]);
 
         $id = $request['id'];
@@ -78,7 +77,7 @@ class AjaxController extends Controller
         return response()->json(['success' => $del]);
     }
 
-    //new (dez/2022)
+    // new (dez/2022)
     public function searchByKeywordSimilarity(Request $request)
     {
         if ($request->isMethod('post') === false) {
@@ -94,7 +93,6 @@ class AjaxController extends Controller
             $termToCompare = str_replace([' ', '-', '"', "'"], '', $termToCompare);
             $termToCompare = strtolower($termToCompare);
         }
-
 
         // Get all records from the table 'pesquisas' where created_at is not null; get only label and id fields
         $records = DB::table('pesquisas')
@@ -114,13 +112,12 @@ class AjaxController extends Controller
                 $termFromDB = $record->keyword;
             }
 
-
             // Get the similarity score of the record with the keyword
             $similarityScore = similar_text($termToCompare, $termFromDB, $percentage);
 
             // Check if the similarity score is at least 70%.
             if ($percentage >= $percentage_requested) {
-                //add round percentage to record
+                // add round percentage to record
                 $record->percentage = round($percentage);
                 $record->criteria = $typeToCompare;
                 $record->termCompared = $termToCompare;
@@ -128,7 +125,7 @@ class AjaxController extends Controller
                 array_push($results, $record);
             }
         }
+
         return response()->json(['success' => $results]);
     }
-
 }

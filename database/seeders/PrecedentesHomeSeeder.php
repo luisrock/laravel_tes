@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use App\Models\EditableContent;
+use Illuminate\Database\Seeder;
 
 class PrecedentesHomeSeeder extends Seeder
 {

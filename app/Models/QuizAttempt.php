@@ -98,7 +98,10 @@ class QuizAttempt extends Model
      */
     public function getScorePercentageAttribute()
     {
-        if ($this->total_questions === 0) return 0;
+        if ($this->total_questions === 0) {
+            return 0;
+        }
+
         return round(($this->score / $this->total_questions) * 100, 1);
     }
 
@@ -107,14 +110,17 @@ class QuizAttempt extends Model
      */
     public function getFormattedTimeAttribute()
     {
-        if (!$this->time_spent_seconds) return '--';
-        
+        if (! $this->time_spent_seconds) {
+            return '--';
+        }
+
         $minutes = floor($this->time_spent_seconds / 60);
         $seconds = $this->time_spent_seconds % 60;
-        
+
         if ($minutes > 0) {
             return "{$minutes}m {$seconds}s";
         }
+
         return "{$seconds}s";
     }
 

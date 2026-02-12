@@ -15,17 +15,17 @@ class CreateQuestionOptionsTable extends Migration
     {
         Schema::create('question_options', function (Blueprint $table) {
             $table->id();
-            
+
             $table->foreignId('question_id')
                 ->constrained('questions')
                 ->cascadeOnDelete();
-            
+
             $table->char('letter', 1); // A, B, C, D, E
             $table->text('text'); // Texto da alternativa
             $table->boolean('is_correct')->default(false);
-            
+
             $table->timestamps();
-            
+
             // Índices
             $table->index(['question_id', 'letter']);
             $table->unique(['question_id', 'letter']); // Uma letra por questão

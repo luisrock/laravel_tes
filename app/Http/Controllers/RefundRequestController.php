@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
 use App\Models\RefundRequest;
 use App\Notifications\RefundRequestReceivedNotification;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -20,7 +20,7 @@ class RefundRequestController extends Controller
         $subscription = $user->subscription($subscriptionName);
 
         // Verificar se usuário tem assinatura
-        if (!$subscription) {
+        if (! $subscription) {
             return redirect()->route('subscription.plans')
                 ->with('error', 'Você não possui uma assinatura ativa.');
         }
@@ -58,7 +58,7 @@ class RefundRequestController extends Controller
         $subscriptionName = config('subscription.default_subscription_name', 'default');
         $subscription = $user->subscription($subscriptionName);
 
-        if (!$subscription) {
+        if (! $subscription) {
             return back()->with('error', 'Você não possui uma assinatura ativa.');
         }
 

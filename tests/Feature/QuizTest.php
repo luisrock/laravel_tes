@@ -71,12 +71,12 @@ describe('Visualizar Quiz', function () {
     it('retorna 404 para quiz draft', function () {
         $category = QuizCategory::create([
             'name' => 'Teste Draft',
-            'slug' => 'teste-draft-' . uniqid(),
+            'slug' => 'teste-draft-'.uniqid(),
         ]);
 
         $quiz = Quiz::create([
             'title' => 'Quiz Draft',
-            'slug' => 'quiz-draft-' . uniqid(),
+            'slug' => 'quiz-draft-'.uniqid(),
             'category_id' => $category->id,
             'status' => 'draft',
         ]);

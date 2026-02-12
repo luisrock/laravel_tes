@@ -10,8 +10,6 @@ class EnsureSubscriptionConfigured
     /**
      * Handle an incoming request.
      *
-     * @param Request $request
-     * @param Closure $next
      * @return mixed
      */
     public function handle(Request $request, Closure $next)
@@ -20,7 +18,7 @@ class EnsureSubscriptionConfigured
         $stripeKey = config('cashier.key');
         $stripeSecret = config('cashier.secret');
 
-        $isConfigured = !empty($tierProductIds) && !empty($stripeKey) && !empty($stripeSecret);
+        $isConfigured = ! empty($tierProductIds) && ! empty($stripeKey) && ! empty($stripeSecret);
 
         if ($isConfigured) {
             return $next($request);

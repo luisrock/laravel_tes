@@ -22,9 +22,9 @@ class CreateStripeWebhookEventsTable extends Migration
             $table->timestamps();
 
             $table->foreign('user_id')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('set null');
+                ->references('id')
+                ->on('users')
+                ->onDelete('set null');
         });
     }
 

@@ -2,12 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-
 
 class SumulaPageController extends Controller
 {
@@ -15,26 +11,26 @@ class SumulaPageController extends Controller
     {
         $route = request()->route()->getName();
 
-        $tribunal = "";
+        $tribunal = '';
         $tribunal_nome_completo = '';
-        $table = "";
-        $allsumulasroute = "";
+        $table = '';
+        $allsumulasroute = '';
         if ($route == 'stfsumulapage') {
             $tribunal = 'STF';
             $tribunal_nome_completo = 'Supremo Tribunal Federal';
             $table = 'stf_sumulas';
             $allsumulasroute = 'stfallsumulaspage';
-        } else if ($route == 'stjsumulapage') {
+        } elseif ($route == 'stjsumulapage') {
             $tribunal = 'STJ';
             $tribunal_nome_completo = 'Superior Tribunal de Justiça';
             $table = 'stj_sumulas';
             $allsumulasroute = 'stjallsumulaspage';
-        } else if ($route == 'tstsumulapage') {
+        } elseif ($route == 'tstsumulapage') {
             $tribunal = 'TST';
             $tribunal_nome_completo = 'Tribunal Superior do Trabalho';
             $table = 'tst_sumulas';
             $allsumulasroute = 'tstallsumulaspage';
-        } else if ($route == 'tnusumulapage') {
+        } elseif ($route == 'tnusumulapage') {
             $tribunal = 'TNU';
             $tribunal_nome_completo = 'Turma Nacional de Uniformização dos JEF';
             $table = 'tnu_sumulas';
@@ -43,31 +39,31 @@ class SumulaPageController extends Controller
             return redirect()->route('searchpage');
         }
 
-        //considering the route above, get the sumula id var using laravel method, Must be a number
+        // considering the route above, get the sumula id var using laravel method, Must be a number
         $sumula_id = intval(request()->route('sumula'));
-        //if no sumula id, redirect to all sumulas page
-        if (!$sumula_id) {
+        // if no sumula id, redirect to all sumulas page
+        if (! $sumula_id) {
             return redirect()->route($allsumulasroute);
         }
 
         $sumula = DB::table($table)
-            //select all fields
+            // select all fields
             ->select('*')
             ->where('id', $sumula_id)
             ->first();
 
-        if (!$sumula) {
+        if (! $sumula) {
             return redirect()->route($allsumulasroute);
         }
 
         $text = "$tribunal, {$sumula->titulo}. {$sumula->texto}";
         $text = trim($text);
-        //remove double spaces inside
+        // remove double spaces inside
         $text = preg_replace('/\s+/', ' ', $text);
 
         if ($tribunal == 'STF') {
-            //add to_be_copied property
-            $text = $text . " Aprovada em {$sumula->aprovadaEm}";
+            // add to_be_copied property
+            $text = $text." Aprovada em {$sumula->aprovadaEm}";
             $sumula->tempo = '';
             if (isset($sumula->aprovadaEm) && $sumula->aprovadaEm) {
                 $sumula->tempo = "Aprovada em {$sumula->aprovadaEm}";
@@ -76,8 +72,8 @@ class SumulaPageController extends Controller
             if (Str::contains(strtolower($sumula->obs), 'revogada') || Str::contains(strtolower($sumula->obs), 'cancelada')) {
                 $sumula->isCancelada = 1;
             }
-        } else if ($tribunal == 'STJ') {
-            $text = $text . " Publicada em {$sumula->publicadaEm}";
+        } elseif ($tribunal == 'STJ') {
+            $text = $text." Publicada em {$sumula->publicadaEm}";
             if (isset($sumula->ramos)) {
                 $sumula->obs = $sumula->ramos;
             } else {
@@ -86,20 +82,20 @@ class SumulaPageController extends Controller
             $sumula->tempo = ' ';
             if (isset($sumula->publicadaEm) && $sumula->publicadaEm) {
                 $sumula->tempo = "Publicada em {$sumula->publicadaEm}";
-            } else if (isset($sumula->julgadaEm) && $sumula->julgadaEm) {
+            } elseif (isset($sumula->julgadaEm) && $sumula->julgadaEm) {
                 $sumula->tempo = "Julgada em {$sumula->julgadaEm}";
             }
             if (empty($sumula->link)) {
-                $sumula->link = "https://scon.stj.jus.br/SCON/sumstj/";
+                $sumula->link = 'https://scon.stj.jus.br/SCON/sumstj/';
             }
-        } else if ($tribunal == 'TST') {
+        } elseif ($tribunal == 'TST') {
             if (isset($sumula->tema)) {
                 $sumula->obs = $sumula->tema;
             } else {
                 $sumula->obs = '';
             }
             $sumula->tempo = ' ';
-        } else if ($tribunal == 'TNU') {
+        } elseif ($tribunal == 'TNU') {
             if (isset($sumula->dados)) {
                 $sumula->obs = $sumula->dados;
             } else {
@@ -108,9 +104,9 @@ class SumulaPageController extends Controller
             $sumula->tempo = ' ';
         }
 
-        //if there is no "." at the end of the text, add it
-        if (!Str::endsWith($text, '.')) {
-            $text = $text . '.';
+        // if there is no "." at the end of the text, add it
+        if (! Str::endsWith($text, '.')) {
+            $text = $text.'.';
         }
         $sumula->to_be_copied = $text;
 
@@ -123,18 +119,19 @@ class SumulaPageController extends Controller
             ['name' => 'Início', 'url' => url('/')],
             ['name' => 'Índice', 'url' => url('/index')],
             ['name' => "Súmulas $tribunal", 'url' => route($allsumulasroute)],
-            ['name' => $sumula->titulo, 'url' => null]
+            ['name' => $sumula->titulo, 'url' => null],
         ];
 
         $admin = false;
         if (auth()->check()) {
-            //check the email
+            // check the email
             $useremail = auth()->user()->email;
             if (in_array($useremail, ['mauluis@gmail.com', 'trator70@gmail.com', 'ivanaredler@gmail.com'])) {
                 $admin = true;
             }
         }
+
         // dd($sumulas);
         return view('front.sumula', compact('tribunal', 'tribunal_nome_completo', 'sumula', 'label', 'description', 'admin', 'display_pdf', 'allsumulasroute', 'breadcrumb'));
-    } //end public function
+    } // end public function
 }

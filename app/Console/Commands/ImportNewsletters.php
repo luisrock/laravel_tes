@@ -2,22 +2,23 @@
 
 namespace App\Console\Commands;
 
-use PDO;
-use PDOException;
+use App\Models\Newsletter;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
-use App\Models\Newsletter;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
+use PDO;
+use PDOException;
 
 class ImportNewsletters extends Command
 {
     protected $signature = 'newsletters:import';
+
     protected $description = 'Import newsletters from Sendy RSS feed and scrape content';
 
     public function handle()
     {
-        $this->info("Connecting to Sendy database...");
+        $this->info('Connecting to Sendy database...');
 
         // Sendy DB Configuration (from env or hardcoded as per user preference in this context)
         // Ideally should be in config/database.php, but for now we use the known credentials
@@ -32,7 +33,8 @@ class ImportNewsletters extends Command
             $pdo = new PDO("mysql:host={$sourceDb['host']};dbname={$sourceDb['name']};charset=utf8mb4", $sourceDb['user'], $sourceDb['pass']);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
-            $this->error("Failed to connect to Sendy DB: " . $e->getMessage());
+            $this->error('Failed to connect to Sendy DB: '.$e->getMessage());
+
             return 1;
         }
 
@@ -44,9 +46,9 @@ class ImportNewsletters extends Command
                 AND app = 1 
                 AND from_name = 'Newsletter T&S' 
                 ORDER BY id DESC";
-        
+
         $stmt = $pdo->query($sql);
-        
+
         $count = 0;
         $skipped = 0;
 
@@ -57,8 +59,9 @@ class ImportNewsletters extends Command
             $this->info("Processing: $title (ID: $sendyId)");
 
             if (Newsletter::where('sendy_id', $sendyId)->exists()) {
-                $this->info(" - Already exists. Skipping.");
+                $this->info(' - Already exists. Skipping.');
                 $skipped++;
+
                 continue;
             }
 
@@ -69,13 +72,13 @@ class ImportNewsletters extends Command
                 if (strlen($slug) <= 200) {
                     break;
                 }
-                
+
                 $lastSlash = strrpos($tempTitle, '/');
                 if ($lastSlash === false) {
                     $slug = substr($slug, 0, 200);
                     break;
                 }
-                
+
                 $tempTitle = substr($tempTitle, 0, $lastSlash);
                 $tempTitle = trim($tempTitle);
             }
@@ -84,7 +87,7 @@ class ImportNewsletters extends Command
             $slugCount = 1;
             $originalSlug = $slug;
             while (Newsletter::where('slug', $slug)->exists()) {
-                $slug = $originalSlug . '-' . $slugCount++;
+                $slug = $originalSlug.'-'.$slugCount++;
             }
 
             $htmlContent = $campaign['html_text'];
@@ -110,14 +113,15 @@ class ImportNewsletters extends Command
                     'plain_text' => $plainText,
                     'sent_at' => $sentAt,
                 ]);
-                $this->info(" - Imported successfully.");
+                $this->info(' - Imported successfully.');
                 $count++;
             } catch (Exception $e) {
-                $this->error(" - Database Error for '$title': " . $e->getMessage());
+                $this->error(" - Database Error for '$title': ".$e->getMessage());
             }
         }
 
         $this->info("Import completed. $count imported, $skipped skipped.");
+
         return 0;
     }
 }

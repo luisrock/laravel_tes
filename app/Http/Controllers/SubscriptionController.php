@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
 use App\Models\StripeWebhookEvent;
 use App\Services\StripeService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -42,11 +42,12 @@ class SubscriptionController extends Controller
         $user = $request->user();
 
         // Validar price ID contra allowlist
-        if (!$this->stripeService->isValidPriceId($priceId)) {
+        if (! $this->stripeService->isValidPriceId($priceId)) {
             Log::warning('Tentativa de checkout com priceId inválido', [
                 'user_id' => $user->id,
                 'price_id' => $priceId,
             ]);
+
             return back()->with('error', 'Plano inválido selecionado.');
         }
 
@@ -63,7 +64,7 @@ class SubscriptionController extends Controller
         try {
             $checkoutSession = $user->newSubscription($subscriptionName, $priceId)
                 ->checkout([
-                    'success_url' => route('subscription.success') . '?session_id={CHECKOUT_SESSION_ID}',
+                    'success_url' => route('subscription.success').'?session_id={CHECKOUT_SESSION_ID}',
                     'cancel_url' => route('subscription.cancel'),
                     'client_reference_id' => (string) $user->id,
                     'allow_promotion_codes' => true,
@@ -76,7 +77,7 @@ class SubscriptionController extends Controller
                 'price_id' => $priceId,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return back()->with('error', 'Erro ao iniciar checkout. Por favor, tente novamente.');
         }
     }
@@ -88,7 +89,7 @@ class SubscriptionController extends Controller
     {
         $sessionId = $request->query('session_id');
 
-        if (!$sessionId) {
+        if (! $sessionId) {
             return redirect()->route('subscription.plans')
                 ->with('error', 'Sessão inválida.');
         }
@@ -143,7 +144,7 @@ class SubscriptionController extends Controller
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return back()->with('error', 'Erro ao acessar portal. Por favor, tente novamente.');
         }
     }
@@ -155,7 +156,7 @@ class SubscriptionController extends Controller
     {
         $sessionId = $request->query('session_id');
 
-        if (!$sessionId) {
+        if (! $sessionId) {
             return response()->json(['status' => 'error', 'message' => 'Session ID required'], 400);
         }
 

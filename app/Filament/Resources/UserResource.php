@@ -2,12 +2,11 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Actions\Action;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Models\User;
 use App\Support\SubscriptionUi;
+use Filament\Actions\Action;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -17,11 +16,16 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Assinaturas';
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
+    protected static string|\UnitEnum|null $navigationGroup = 'Assinaturas';
+
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user-group';
+
     protected static ?string $navigationLabel = 'Usuários';
+
     protected static ?string $modelLabel = 'Usuário';
+
     protected static ?string $pluralModelLabel = 'Usuários';
+
     protected static ?int $navigationSort = 10;
 
     public static function table(Table $table): Table
@@ -43,7 +47,7 @@ class UserResource extends Resource
                         $subscriptionName = config('subscription.default_subscription_name', 'default');
                         $subscription = $record->subscriptions->firstWhere('type', $subscriptionName);
 
-                        if (!$subscription) {
+                        if (! $subscription) {
                             return SubscriptionUi::LABEL_NONE;
                         }
 
@@ -57,7 +61,7 @@ class UserResource extends Resource
                         $subscriptionName = config('subscription.default_subscription_name', 'default');
                         $subscription = $record->subscriptions->firstWhere('type', $subscriptionName);
 
-                        if (!$subscription) {
+                        if (! $subscription) {
                             return SubscriptionUi::LABEL_NONE;
                         }
 
@@ -112,7 +116,7 @@ class UserResource extends Resource
                     ->query(function (Builder $query, array $data) {
                         $productId = $data['value'] ?? null;
 
-                        if (!$productId) {
+                        if (! $productId) {
                             return $query;
                         }
 
@@ -126,7 +130,7 @@ class UserResource extends Resource
                     ->label('Stripe')
                     ->url(fn (User $record): ?string => static::getStripeCustomerUrl($record))
                     ->openUrlInNewTab()
-                    ->visible(fn (User $record): bool => !empty($record->stripe_id)),
+                    ->visible(fn (User $record): bool => ! empty($record->stripe_id)),
             ])
             ->toolbarActions([]);
     }

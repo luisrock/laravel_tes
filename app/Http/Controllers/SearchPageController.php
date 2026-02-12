@@ -1,29 +1,27 @@
 <?php
-//ALTER: rename fonaje tables
-//ALTER: TST => merged $output['orientacao_jurisprudencia'] and $output['precedente_normativo'] to $output['orientacao_precedente']
+
+// ALTER: rename fonaje tables
+// ALTER: TST => merged $output['orientacao_jurisprudencia'] and $output['precedente_normativo'] to $output['orientacao_precedente']
 
 namespace App\Http\Controllers;
 
-use Mpdf\Mpdf;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use App\Jobs\SearchToDbPesquisas;
 use App\Models\EditableContent;
 use App\Models\Quiz;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+use Mpdf\Mpdf;
 
 class SearchPageController extends Controller
 {
-
     public function index(Request $request)
     {
 
         $lista_tribunais = Config::get('tes_constants.lista_tribunais');
-        $lista_tribunais_string = implode(",", array_keys($lista_tribunais));
+        $lista_tribunais_string = implode(',', array_keys($lista_tribunais));
         $display_pdf = '';
-        //Initial view (no search)
+        // Initial view (no search)
         if (empty($request->query())) {
             // Buscar temas mais consultados
             $popular_themes = DB::table('pesquisas')
@@ -67,14 +65,14 @@ class SearchPageController extends Controller
             return view('front.search', compact('lista_tribunais', 'display_pdf', 'popular_themes', 'precedentes_home', 'admin', 'featured_quizzes'));
         }
 
-        //User is searching. Prepare and return results
+        // User is searching. Prepare and return results
         $query = $request->validate(
             [
-                //compat with extension
+                // compat with extension
                 'q' => 'required_without:keyword|min:3',
                 'keyword' => 'required_without:q|min:3',
-                'tribunal' => 'required|in:' . $lista_tribunais_string,
-                'print' => 'string|nullable'
+                'tribunal' => 'required|in:'.$lista_tribunais_string,
+                'print' => 'string|nullable',
             ],
             [
                 'q.required' => 'Por favor, defina o(s) termo(s) de busca.',
@@ -84,23 +82,23 @@ class SearchPageController extends Controller
             ]
         );
 
-        $keyword = $query['q'] ?? $query['keyword']; //compat with extension
+        $keyword = $query['q'] ?? $query['keyword']; // compat with extension
         $tribunal = $query['tribunal'];
-        $pdf = !empty($query['print']) && 'pdf' == $query['print'];
+        $pdf = ! empty($query['print']) && $query['print'] == 'pdf';
         $display_pdf = ($pdf) ? 'display:none;' : '';
         $tribunal_lower = strtolower($tribunal);
         $tribunal_upper = strtoupper($tribunal);
         $tribunal_array = $lista_tribunais[$tribunal_upper];
-        $results_view = 'front.results.' . $tribunal_lower;
+        $results_view = 'front.results.'.$tribunal_lower;
         $output = [];
 
-        //search in db (not through tribunal API)
+        // search in db (not through tribunal API)
         if ($lista_tribunais[$tribunal]['db']) {
-            //Getting the results by querying tes db
+            // Getting the results by querying tes db
             $output = tes_search_db($keyword, $tribunal_lower, $tribunal_array);
         } else {
-            //Getting the results by calling the tribunal API
-            //tratando keyword
+            // Getting the results by calling the tribunal API
+            // tratando keyword
             $keyword = buildFinalSearchStringForApi($keyword, $tribunal_upper);
             $output = call_request_api($tribunal_lower, $keyword);
 
@@ -108,18 +106,18 @@ class SearchPageController extends Controller
 
         // dd($output);
 
-        //dd($output);
+        // dd($output);
         $canonical_url = '';
 
-        //If search is fruitful, save it to db in order to generate page (SEO purposes)
-        if (!empty($output['total_count']) && $output['total_count'] > 0) {
+        // If search is fruitful, save it to db in order to generate page (SEO purposes)
+        if (! empty($output['total_count']) && $output['total_count'] > 0) {
             SearchToDbPesquisas::dispatch($keyword);
-            $canonical_url = url('/') . '/tema/' . slugify($keyword);
+            $canonical_url = url('/').'/tema/'.slugify($keyword);
         }
 
-        //obs: when searching by calling the tribunal API and getting 500 error, output will be a string...
+        // obs: when searching by calling the tribunal API and getting 500 error, output will be a string...
         $html = view($results_view, compact('lista_tribunais', 'keyword', 'tribunal', 'output', 'display_pdf', 'canonical_url'));
-        if (!$pdf) {
+        if (! $pdf) {
             return $html;
         }
 
@@ -130,15 +128,15 @@ class SearchPageController extends Controller
             'mode' => 'utf-8',
             'CSSselectMedia' => 'screen',
             'showWatermarkText' => true,
-            'useSubstitutions' => false
+            'useSubstitutions' => false,
         ]);
 
         $mpdf->setBasePath($url_request);
         $mpdf->SetWatermarkText('T&S', 0.05);
         $mpdf->SetHeader("$keyword|{DATE d/m/Y}|{PAGENO}");
-        $mpdf->SetFooter('|' . url()->current() . '|');
+        $mpdf->SetFooter('|'.url()->current().'|');
         $mpdf->WriteHTML($html->render());
-        $mpdf->Output('tes_' . $tribunal . '_' . $keyword . '.pdf', 'D');
+        $mpdf->Output('tes_'.$tribunal.'_'.$keyword.'.pdf', 'D');
 
-    } //end public function
+    } // end public function
 }

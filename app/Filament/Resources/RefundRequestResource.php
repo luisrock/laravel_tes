@@ -2,18 +2,16 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Actions\EditAction;
-use Filament\Actions\Action;
 use App\Filament\Resources\RefundRequestResource\Pages\EditRefundRequest;
 use App\Filament\Resources\RefundRequestResource\Pages\ListRefundRequests;
 use App\Models\RefundRequest;
-use Filament\Forms;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -23,11 +21,16 @@ class RefundRequestResource extends Resource
 {
     protected static ?string $model = RefundRequest::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Assinaturas';
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-receipt-percent';
+    protected static string|\UnitEnum|null $navigationGroup = 'Assinaturas';
+
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-receipt-percent';
+
     protected static ?string $navigationLabel = 'Estornos';
+
     protected static ?string $modelLabel = 'Solicitação de Estorno';
+
     protected static ?string $pluralModelLabel = 'Solicitações de Estorno';
+
     protected static ?int $navigationSort = 20;
 
     public static function form(Schema $schema): Schema
@@ -118,17 +121,17 @@ class RefundRequestResource extends Resource
                     ->label('Stripe Sub')
                     ->url(fn (RefundRequest $record): ?string => static::getStripeSubscriptionUrl($record))
                     ->openUrlInNewTab()
-                    ->visible(fn (RefundRequest $record): bool => !empty($record->stripe_subscription_id)),
+                    ->visible(fn (RefundRequest $record): bool => ! empty($record->stripe_subscription_id)),
                 Action::make('stripe_invoice')
                     ->label('Stripe Invoice')
                     ->url(fn (RefundRequest $record): ?string => static::getStripeInvoiceUrl($record))
                     ->openUrlInNewTab()
-                    ->visible(fn (RefundRequest $record): bool => !empty($record->stripe_invoice_id)),
+                    ->visible(fn (RefundRequest $record): bool => ! empty($record->stripe_invoice_id)),
                 Action::make('stripe_payment_intent')
                     ->label('Stripe Payment')
                     ->url(fn (RefundRequest $record): ?string => static::getStripePaymentIntentUrl($record))
                     ->openUrlInNewTab()
-                    ->visible(fn (RefundRequest $record): bool => !empty($record->stripe_payment_intent_id)),
+                    ->visible(fn (RefundRequest $record): bool => ! empty($record->stripe_payment_intent_id)),
             ])
             ->toolbarActions([]);
     }

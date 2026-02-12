@@ -3,20 +3,19 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Log;
-use Filament\Models\Contracts\FilamentUser;
-use Filament\Panel;
 use Laravel\Cashier\Billable;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser
 {
-    use HasFactory, Notifiable, HasRoles, Billable;
+    use Billable, HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -64,7 +63,7 @@ class User extends Authenticatable implements FilamentUser
 
     /**
      * Retorna a fonte da assinatura (prepara para assinaturas coletivas futuras).
-     * 
+     *
      * Hoje: retorna $this (assinatura individual)
      * Futuro: pode retornar Team se usuário faz parte de um
      */
@@ -74,7 +73,7 @@ class User extends Authenticatable implements FilamentUser
         // if ($team = $this->currentTeam) {
         //     return $team;
         // }
-        
+
         return $this;
     }
 
@@ -85,7 +84,7 @@ class User extends Authenticatable implements FilamentUser
     {
         $source = $this->getSubscriptionSource();
         $subscriptionName = config('subscription.default_subscription_name', 'default');
-        
+
         return $source?->subscribed($subscriptionName) ?? false;
     }
 
@@ -97,12 +96,12 @@ class User extends Authenticatable implements FilamentUser
         $source = $this->getSubscriptionSource();
         $subscriptionName = config('subscription.default_subscription_name', 'default');
 
-        if (!$source || !$source->subscribed($subscriptionName)) {
+        if (! $source || ! $source->subscribed($subscriptionName)) {
             return false;
         }
 
         $subscription = $source->subscription($subscriptionName);
-        if (!$subscription) {
+        if (! $subscription) {
             return false;
         }
 
@@ -114,6 +113,7 @@ class User extends Authenticatable implements FilamentUser
                 'user_id' => $this->id,
                 'feature_key' => $featureKey,
             ]);
+
             return false;
         }
 
@@ -121,12 +121,13 @@ class User extends Authenticatable implements FilamentUser
             ->whereIn('stripe_product', $tierProductIds)
             ->first();
 
-        if (!$item) {
+        if (! $item) {
             Log::warning('hasFeature: subscription sem item de tier válido', [
                 'user_id' => $this->id,
                 'subscription_id' => $subscription->id,
                 'tier_product_ids' => $tierProductIds,
             ]);
+
             return false;
         }
 
@@ -141,12 +142,12 @@ class User extends Authenticatable implements FilamentUser
         $source = $this->getSubscriptionSource();
         $subscriptionName = config('subscription.default_subscription_name', 'default');
 
-        if (!$source || !$source->subscribed($subscriptionName)) {
+        if (! $source || ! $source->subscribed($subscriptionName)) {
             return null;
         }
 
         $subscription = $source->subscription($subscriptionName);
-        if (!$subscription) {
+        if (! $subscription) {
             return null;
         }
 
@@ -171,7 +172,7 @@ class User extends Authenticatable implements FilamentUser
      */
     public function shouldSeeAds(): bool
     {
-        return !$this->hasFeature(config('subscription.features.no_ads', 'no_ads'));
+        return ! $this->hasFeature(config('subscription.features.no_ads', 'no_ads'));
     }
 
     /**
@@ -183,7 +184,7 @@ class User extends Authenticatable implements FilamentUser
         $subscriptionName = config('subscription.default_subscription_name', 'default');
 
         $subscription = $source?->subscription($subscriptionName);
-        
+
         return $subscription?->onGracePeriod() ?? false;
     }
 
@@ -196,7 +197,7 @@ class User extends Authenticatable implements FilamentUser
         $subscriptionName = config('subscription.default_subscription_name', 'default');
 
         $subscription = $source?->subscription($subscriptionName);
-        
+
         return $subscription?->ends_at;
     }
 }

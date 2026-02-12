@@ -38,4 +38,3 @@ class EditableContent extends Model
         'published' => 'boolean',
     ];
 }
-

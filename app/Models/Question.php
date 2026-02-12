@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Str;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Str;
 
 class Question extends Model
 {
@@ -86,7 +86,10 @@ class Question extends Model
      */
     public function getSuccessRateAttribute()
     {
-        if ($this->times_answered === 0) return 0;
+        if ($this->times_answered === 0) {
+            return 0;
+        }
+
         return round(($this->times_correct / $this->times_answered) * 100, 1);
     }
 
@@ -95,7 +98,7 @@ class Question extends Model
      */
     public function getDifficultyLabelAttribute()
     {
-        return match($this->difficulty) {
+        return match ($this->difficulty) {
             'easy' => 'Fácil',
             'medium' => 'Intermediário',
             'hard' => 'Difícil',
@@ -119,8 +122,10 @@ class Question extends Model
      */
     public function scopeSearch($query, $search)
     {
-        if (empty($search)) return $query;
-        
+        if (empty($search)) {
+            return $query;
+        }
+
         return $query->where('text', 'like', "%{$search}%");
     }
 
@@ -129,8 +134,10 @@ class Question extends Model
      */
     public function scopeByCategory($query, $categoryId)
     {
-        if (empty($categoryId)) return $query;
-        
+        if (empty($categoryId)) {
+            return $query;
+        }
+
         return $query->where('category_id', $categoryId);
     }
 
@@ -139,8 +146,10 @@ class Question extends Model
      */
     public function scopeByDifficulty($query, $difficulty)
     {
-        if (empty($difficulty)) return $query;
-        
+        if (empty($difficulty)) {
+            return $query;
+        }
+
         return $query->where('difficulty', $difficulty);
     }
 
@@ -149,8 +158,10 @@ class Question extends Model
      */
     public function scopeByTags($query, array $tagIds)
     {
-        if (empty($tagIds)) return $query;
-        
+        if (empty($tagIds)) {
+            return $query;
+        }
+
         return $query->whereHas('tags', function ($q) use ($tagIds) {
             $q->whereIn('question_tags.id', $tagIds);
         });

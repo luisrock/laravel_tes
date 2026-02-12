@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Quiz;
 use App\Models\Question;
-use App\Models\QuizAttempt;
+use App\Models\Quiz;
 use App\Models\QuizAnswer;
+use App\Models\QuizAttempt;
 use App\Models\QuizCategory;
 use Illuminate\Http\Request;
 
@@ -41,7 +41,7 @@ class QuizController extends Controller
         }])->having('quizzes_count', '>', 0)->orderBy('name')->get();
 
         $display_pdf = 'display:none;';
-        
+
         return view('front.quizzes', compact('quizzes', 'categories', 'display_pdf'));
     }
 
@@ -71,7 +71,7 @@ class QuizController extends Controller
             ->where('status', 'in_progress')
             ->first();
 
-        if (!$attempt) {
+        if (! $attempt) {
             $attempt = QuizAttempt::start($quiz, auth()->id(), $sessionId);
         }
 
@@ -176,9 +176,9 @@ class QuizController extends Controller
     public function restart(Request $request, $slug)
     {
         $quiz = Quiz::where('slug', $slug)->published()->firstOrFail();
-        
+
         $sessionId = $request->session()->getId();
-        
+
         // Abandon any in-progress attempts
         QuizAttempt::where('quiz_id', $quiz->id)
             ->where('session_id', $sessionId)
@@ -194,7 +194,7 @@ class QuizController extends Controller
     public function byCategory($categorySlug)
     {
         $category = QuizCategory::where('slug', $categorySlug)->firstOrFail();
-        
+
         $quizzes = Quiz::published()
             ->where('category_id', $category->id)
             ->withCount('questions')

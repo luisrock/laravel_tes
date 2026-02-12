@@ -17,11 +17,11 @@ class CreateQuestionTagTable extends Migration
             $table->foreignId('question_id')
                 ->constrained('questions')
                 ->cascadeOnDelete();
-            
+
             $table->foreignId('tag_id')
                 ->constrained('question_tags')
                 ->cascadeOnDelete();
-            
+
             $table->primary(['question_id', 'tag_id']);
         });
     }

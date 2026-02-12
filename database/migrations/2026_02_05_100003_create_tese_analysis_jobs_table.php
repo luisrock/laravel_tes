@@ -18,7 +18,7 @@ class CreateTeseAnalysisJobsTable extends Migration
                 'contornos_juridicos',
                 'modulacao',
                 'tese_explicada',
-                'teaser'
+                'teaser',
             ])->default('all');
 
             $table->unsignedBigInteger('ai_model_id');

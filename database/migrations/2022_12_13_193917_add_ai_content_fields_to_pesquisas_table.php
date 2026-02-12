@@ -14,7 +14,7 @@ class AddAiContentFieldsToPesquisasTable extends Migration
     public function up()
     {
         Schema::table('pesquisas', function (Blueprint $table) {
-            //add column
+            // add column
             $table->text('ai_prompt')->nullable()->after('tribunal');
             $table->text('ai_answer')->nullable()->after('ai_prompt');
         });
@@ -28,7 +28,7 @@ class AddAiContentFieldsToPesquisasTable extends Migration
     public function down()
     {
         Schema::table('pesquisas', function (Blueprint $table) {
-            //undo
+            // undo
             $table->dropColumn('ai_prompt');
             $table->dropColumn('ai_answer');
         });

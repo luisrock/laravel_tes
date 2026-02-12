@@ -14,7 +14,7 @@ it('envia notificação de boas-vindas ao completar checkout', function () {
     Notification::fake();
 
     $user = User::factory()->create();
-    $controller = new TestableWebhookController();
+    $controller = new TestableWebhookController;
 
     $controller->callHandleCheckoutSessionCompleted([
         'data' => [
@@ -35,7 +35,7 @@ it('envia notificação de cancelamento quando cancel_at_period_end é ativado',
     $user->forceFill(['stripe_id' => 'cus_123'])->save();
 
     $endsAt = Carbon::now()->addDays(10);
-    $controller = new TestableWebhookController();
+    $controller = new TestableWebhookController;
 
     expect($controller->callExtractUserId('customer.subscription.updated', [
         'customer' => 'cus_123',

@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Str;
-use DOMDocument;
 use App\Models\Newsletter;
-use Illuminate\Http\Request;
+use DOMDocument;
+use Illuminate\Support\Str;
 
 class NewsletterController extends Controller
 {
@@ -17,7 +16,7 @@ class NewsletterController extends Controller
             'newsletter' => $newsletter,
             'newsletterContent' => $this->sanitizeNewsletterContent($newsletter->web_content ?? $newsletter->html_content ?? ''),
             'display_pdf' => false,
-            'description' => Str::limit(strip_tags($newsletter->plain_text ?? $newsletter->html_content), 155)
+            'description' => Str::limit(strip_tags($newsletter->plain_text ?? $newsletter->html_content), 155),
         ]);
     }
 
@@ -27,14 +26,14 @@ class NewsletterController extends Controller
             return '';
         }
 
-        $doc = new DOMDocument();
+        $doc = new DOMDocument;
         $previous = libxml_use_internal_errors(true);
         $doc->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
         libxml_clear_errors();
         libxml_use_internal_errors($previous);
 
         $body = $doc->getElementsByTagName('body')->item(0);
-        if (!$body) {
+        if (! $body) {
             return $doc->saveHTML();
         }
 

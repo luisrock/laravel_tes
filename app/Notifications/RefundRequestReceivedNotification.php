@@ -28,7 +28,7 @@ class RefundRequestReceivedNotification extends Notification implements ShouldQu
     {
         return (new MailMessage)
             ->subject('Recebemos sua solicitação de estorno')
-            ->greeting('Olá, ' . $notifiable->name)
+            ->greeting('Olá, '.$notifiable->name)
             ->line('Recebemos sua solicitação de estorno e ela será analisada pela nossa equipe.')
             ->line('Prazo de resposta: até 5 dias úteis.')
             ->line('Você receberá um email com nossa decisão.')

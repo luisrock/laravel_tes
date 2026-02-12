@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Quiz;
 use App\Models\Question;
-use App\Models\QuizAttempt;
+use App\Models\Quiz;
 use App\Models\QuizAnswer;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Models\QuizAttempt;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class QuizStatsController extends Controller
 {
@@ -43,7 +42,7 @@ class QuizStatsController extends Controller
             ->value('avg') ?? 0;
 
         // Calculate completion rate
-        $stats['completion_rate'] = $stats['total_attempts'] > 0 
+        $stats['completion_rate'] = $stats['total_attempts'] > 0
             ? round(($stats['completed_attempts'] / $stats['total_attempts']) * 100, 1)
             : 0;
 
@@ -51,10 +50,10 @@ class QuizStatsController extends Controller
         $popularQuizzes = Quiz::withCount(['attempts' => function ($q) {
             $q->where('status', 'completed');
         }])
-        ->having('attempts_count', '>', 0)
-        ->orderBy('attempts_count', 'desc')
-        ->limit(10)
-        ->get();
+            ->having('attempts_count', '>', 0)
+            ->orderBy('attempts_count', 'desc')
+            ->limit(10)
+            ->get();
 
         // Hardest questions (lowest success rate)
         $hardestQuestions = Question::where('times_answered', '>=', 5)
@@ -118,11 +117,11 @@ class QuizStatsController extends Controller
             'average_time' => $quiz->attempts()->where('status', 'completed')->avg('time_spent_seconds') ?? 0,
         ];
 
-        $stats['completion_rate'] = $stats['total_attempts'] > 0 
+        $stats['completion_rate'] = $stats['total_attempts'] > 0
             ? round(($stats['completed_attempts'] / $stats['total_attempts']) * 100, 1)
             : 0;
 
-        $stats['average_percentage'] = $quiz->questions()->count() > 0 
+        $stats['average_percentage'] = $quiz->questions()->count() > 0
             ? round(($stats['average_score'] / $quiz->questions()->count()) * 100, 1)
             : 0;
 

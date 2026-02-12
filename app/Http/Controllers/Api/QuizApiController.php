@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Quiz;
 use App\Models\Question;
-use App\Models\QuestionOption;
+use App\Models\Quiz;
 use App\Models\QuizCategory;
-use App\Models\QuestionTag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -54,7 +52,7 @@ class QuizApiController extends Controller
             ? Quiz::with(['category', 'questions.options', 'questions.tags'])->find($identifier)
             : Quiz::with(['category', 'questions.options', 'questions.tags'])->where('slug', $identifier)->first();
 
-        if (!$quiz) {
+        if (! $quiz) {
             return response()->json([
                 'success' => false,
                 'error' => 'Quiz não encontrado.',
@@ -112,7 +110,7 @@ class QuizApiController extends Controller
     {
         $quiz = Quiz::find($id);
 
-        if (!$quiz) {
+        if (! $quiz) {
             return response()->json([
                 'success' => false,
                 'error' => 'Quiz não encontrado.',
@@ -154,7 +152,7 @@ class QuizApiController extends Controller
     {
         $quiz = Quiz::find($id);
 
-        if (!$quiz) {
+        if (! $quiz) {
             return response()->json([
                 'success' => false,
                 'error' => 'Quiz não encontrado.',
@@ -176,7 +174,7 @@ class QuizApiController extends Controller
     {
         $quiz = Quiz::find($quizId);
 
-        if (!$quiz) {
+        if (! $quiz) {
             return response()->json([
                 'success' => false,
                 'error' => 'Quiz não encontrado.',
@@ -200,9 +198,9 @@ class QuizApiController extends Controller
         ]);
 
         // If question_id is provided, use existing question
-        if (!empty($validated['question_id'])) {
+        if (! empty($validated['question_id'])) {
             $questionId = $validated['question_id'];
-            
+
             // Check if already attached
             if ($quiz->questions()->where('questions.id', $questionId)->exists()) {
                 return response()->json([
@@ -230,7 +228,7 @@ class QuizApiController extends Controller
             }
 
             // Attach tags
-            if (!empty($questionData['tags'])) {
+            if (! empty($questionData['tags'])) {
                 $question->tags()->sync($questionData['tags']);
             }
 
@@ -257,14 +255,14 @@ class QuizApiController extends Controller
     {
         $quiz = Quiz::find($quizId);
 
-        if (!$quiz) {
+        if (! $quiz) {
             return response()->json([
                 'success' => false,
                 'error' => 'Quiz não encontrado.',
             ], 404);
         }
 
-        if (!$quiz->questions()->where('questions.id', $questionId)->exists()) {
+        if (! $quiz->questions()->where('questions.id', $questionId)->exists()) {
             return response()->json([
                 'success' => false,
                 'error' => 'Pergunta não encontrada neste quiz.',
@@ -286,7 +284,7 @@ class QuizApiController extends Controller
     {
         $quiz = Quiz::find($quizId);
 
-        if (!$quiz) {
+        if (! $quiz) {
             return response()->json([
                 'success' => false,
                 'error' => 'Quiz não encontrado.',

@@ -190,7 +190,7 @@ describe('Reset de Senha', function () {
 
         $token = Password::broker()->createToken($user);
 
-        $this->get("/password/reset/{$token}?email=" . urlencode($user->email))
+        $this->get("/password/reset/{$token}?email=".urlencode($user->email))
             ->assertStatus(200);
     });
 

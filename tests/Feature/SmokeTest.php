@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Newsletter;
 use App\Models\EditableContent;
+use App\Models\Newsletter;
 
 /**
  * Smoke tests para todas as rotas públicas da aplicação.

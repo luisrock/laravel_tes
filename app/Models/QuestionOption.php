@@ -50,8 +50,10 @@ class QuestionOption extends Model
     public function getSelectionPercentageAttribute()
     {
         $totalAnswers = $this->question->times_answered;
-        if ($totalAnswers === 0) return 0;
-        
+        if ($totalAnswers === 0) {
+            return 0;
+        }
+
         return round(($this->times_selected / $totalAnswers) * 100, 1);
     }
 }

@@ -28,7 +28,7 @@ it('envia lembrete para assinaturas ativas com renovação em 7 dias', function 
         'current_period_end' => $renewsAt,
     ]);
 
-    (new SendRenewalReminders())->handle();
+    (new SendRenewalReminders)->handle();
 
     Notification::assertSentTo($user, SubscriptionRenewingSoonNotification::class);
 });
@@ -50,7 +50,7 @@ it('ignora assinaturas não ativas', function () {
         'current_period_end' => $renewsAt,
     ]);
 
-    (new SendRenewalReminders())->handle();
+    (new SendRenewalReminders)->handle();
 
     Notification::assertNotSentTo($user, SubscriptionRenewingSoonNotification::class);
 });
@@ -73,7 +73,7 @@ it('não filtra por ends_at', function () {
         'ends_at' => Carbon::now()->addDays(1),
     ]);
 
-    (new SendRenewalReminders())->handle();
+    (new SendRenewalReminders)->handle();
 
     Notification::assertSentTo($user, SubscriptionRenewingSoonNotification::class);
 });

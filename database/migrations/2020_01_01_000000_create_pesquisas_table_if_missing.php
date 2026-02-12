@@ -36,7 +36,7 @@ class CreatePesquisasTableIfMissing extends Migration
      */
     public function down()
     {
-        if (!Schema::hasTable('pesquisas')) {
+        if (! Schema::hasTable('pesquisas')) {
             return;
         }
 

@@ -3,9 +3,9 @@
 namespace App\Filament\Widgets;
 
 use App\Models\RefundRequest;
-use Illuminate\Support\Facades\DB;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\DB;
 
 class SubscriptionStats extends StatsOverviewWidget
 {

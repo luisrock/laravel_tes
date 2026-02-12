@@ -30,8 +30,8 @@ class TestMatomoApi extends Command
     public function handle()
     {
         $token = $this->argument('token') ?? env('MATOMO_TOKEN');
-        
-        if (!$token) {
+
+        if (! $token) {
             $this->error('❌ Token do Matomo não encontrado!');
             $this->info('');
             $this->info('Para obter o token:');
@@ -39,6 +39,7 @@ class TestMatomoApi extends Command
             $this->info('2. Login → Configurações → API');
             $this->info('3. Copie o token e execute: php artisan matomo:test SEU_TOKEN');
             $this->info('4. Ou adicione no .env: MATOMO_TOKEN=seu_token');
+
             return 1;
         }
 
@@ -57,29 +58,29 @@ class TestMatomoApi extends Command
                 'token_auth' => $token,
                 'filter_limit' => 100,
                 'expanded' => 1,  // Expandir subníveis
-                'flat' => 1       // Retornar em lista plana
+                'flat' => 1,       // Retornar em lista plana
             ]);
 
             if ($response->successful()) {
                 $data = $response->json();
-                
+
                 $this->info('✅ API do Matomo está funcionando!');
                 $this->info('');
-                
+
                 // Debug: mostrar primeiros 5 itens
                 $this->info('🔍 DEBUG - Análise dos dados:');
-                $this->info('Total de itens retornados: ' . count($data));
+                $this->info('Total de itens retornados: '.count($data));
                 $this->info('');
-                
+
                 if (count($data) > 0) {
                     $this->info('Exemplo do primeiro item:');
                     $first = $data[0];
                     foreach ($first as $key => $value) {
-                        $this->line("  $key: " . (is_array($value) ? json_encode($value) : $value));
+                        $this->line("  $key: ".(is_array($value) ? json_encode($value) : $value));
                     }
                 }
                 $this->info('');
-                
+
                 $this->info('📊 Top 20 Temas Mais Visitados (último mês):');
                 $this->info('');
 
@@ -87,18 +88,20 @@ class TestMatomoApi extends Command
                     $this->warn('⚠️  Nenhum dado encontrado. Isso pode significar:');
                     $this->warn('   - O filtro não encontrou páginas /tema/');
                     $this->warn('   - Não há dados no período selecionado');
+
                     return 0;
                 }
 
                 $themes = collect($data)
-                    ->filter(function($item) {
-                        return isset($item['label']) && 
+                    ->filter(function ($item) {
+                        return isset($item['label']) &&
                                strpos($item['label'], '/tema/') !== false;
                     })
                     ->take(20)
-                    ->map(function($item, $index) {
+                    ->map(function ($item, $index) {
                         $slug = str_replace('/tema/', '', $item['label']);
                         $slug = trim($slug, '/');
+
                         return [
                             'pos' => $index + 1,
                             'slug' => $slug,
@@ -110,13 +113,13 @@ class TestMatomoApi extends Command
 
                 $this->table(
                     ['#', 'Slug do Tema', 'Visitas', 'Pageviews', 'Tempo Médio'],
-                    $themes->map(function($t) {
+                    $themes->map(function ($t) {
                         return [
                             $t['pos'],
                             $t['slug'],
                             $t['visits'],
                             $t['hits'],
-                            gmdate('i:s', $t['avg_time'])
+                            gmdate('i:s', $t['avg_time']),
                         ];
                     })
                 );
@@ -126,16 +129,18 @@ class TestMatomoApi extends Command
                 $this->info('   1. Adicionar MATOMO_TOKEN ao .env de produção');
                 $this->info('   2. Criar comando para sincronizar views_count com Matomo');
                 $this->info('   3. Agendar comando semanal no cron');
-                
+
                 return 0;
             } else {
-                $this->error('❌ Erro na API: ' . $response->status());
+                $this->error('❌ Erro na API: '.$response->status());
                 $this->error($response->body());
+
                 return 1;
             }
 
         } catch (Exception $e) {
-            $this->error('❌ Erro ao conectar com Matomo: ' . $e->getMessage());
+            $this->error('❌ Erro ao conectar com Matomo: '.$e->getMessage());
+
             return 1;
         }
     }

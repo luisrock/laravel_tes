@@ -19,22 +19,22 @@ class CreateQuestionsTable extends Migration
             $table->id();
             $table->text('text'); // Enunciado da questão
             $table->text('explanation')->nullable(); // Explicação da resposta correta
-            
+
             // Categoria
             $table->foreignId('category_id')
                 ->nullable()
                 ->constrained('quiz_categories')
                 ->nullOnDelete();
-            
+
             // Dificuldade
             $table->enum('difficulty', ['easy', 'medium', 'hard'])->default('medium');
-            
+
             // Estatísticas
             $table->unsignedInteger('times_answered')->default(0);
             $table->unsignedInteger('times_correct')->default(0);
-            
+
             $table->timestamps();
-            
+
             // Índices
             $table->index(['category_id']);
             $table->index(['difficulty']);

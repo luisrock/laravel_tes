@@ -198,7 +198,7 @@ describe('Modelo User - Subscription helpers com assinatura ativa', function () 
         Subscription::create([
             'user_id' => $user->id,
             'type' => 'default',
-            'stripe_id' => 'sub_grace_' . uniqid(),
+            'stripe_id' => 'sub_grace_'.uniqid(),
             'stripe_status' => 'active',
             'stripe_price' => 'price_test_123',
             'quantity' => 1,
@@ -217,7 +217,7 @@ describe('Modelo User - Subscription helpers com assinatura ativa', function () 
         Subscription::create([
             'user_id' => $user->id,
             'type' => 'default',
-            'stripe_id' => 'sub_ends_' . uniqid(),
+            'stripe_id' => 'sub_ends_'.uniqid(),
             'stripe_status' => 'active',
             'stripe_price' => 'price_test_123',
             'quantity' => 1,

@@ -7,7 +7,7 @@ return [
         'tst_search_url' => 'https://jurisprudencia-backend.tst.jus.br/rest/pesquisa-textual/1/200',
         'tcu_search_url' => 'https://pesquisa.apps.tcu.gov.br/rest/publico/base',
         'operadores' => ['AND', 'OR', 'NOT'],
-        'meta_description' => 'Pesquisa simplificada de Teses de Repercussão e Repetitivos e de Súmulas dos tribunais superiores (STF, STJ, TST) e de outros órgãos relevantes federais (TNU, FONAJE/CNJ, CEJ/CJF, TCU, CARF), com opcional geração de PDF. Ideal para a preparação de aula, decisão, petição, estudo etc.'
+        'meta_description' => 'Pesquisa simplificada de Teses de Repercussão e Repetitivos e de Súmulas dos tribunais superiores (STF, STJ, TST) e de outros órgãos relevantes federais (TNU, FONAJE/CNJ, CEJ/CJF, TCU, CARF), com opcional geração de PDF. Ideal para a preparação de aula, decisão, petição, estudo etc.',
     ],
     'lista_tribunais' => [
         'STF' => [
@@ -20,9 +20,9 @@ return [
             'tese_name' => 'tese',
             'tables' => [
                 'sumulas' => ['sumulas'],
-                'teses' => ['teses']
+                'teses' => ['teses'],
             ],
-            'db' => true // if false, pesquisa = busca via API; temas = busca via db | true, both via db
+            'db' => true, // if false, pesquisa = busca via API; temas = busca via db | true, both via db
         ],
         'TST' => [
             'color' => '#F39C12',
@@ -34,9 +34,9 @@ return [
             'tese_name' => 'tese',
             'tables' => [
                 'sumulas' => ['sumulas'],
-                'teses' => ['teses']
+                'teses' => ['teses'],
             ],
-            'db' => true
+            'db' => true,
         ],
         'STJ' => [
             'color' => '#e3342f',
@@ -48,9 +48,9 @@ return [
             'tese_name' => 'tese',
             'tables' => [
                 'sumulas' => ['sumulas'],
-                'teses' => ['teses']
+                'teses' => ['teses'],
             ],
-            'db' => true
+            'db' => true,
         ],
         'TNU' => [
             'color' => '#F39C12',
@@ -58,14 +58,14 @@ return [
             'trib_url' => 'https://www2.cjf.jus.br/jurisprudencia/tnu/',
             'request' => 'tnu_request',
             'to_match_sum' => 'titulo,texto',
-            //serve para QO tb
+            // serve para QO tb
             'to_match_rep' => 'titulo,tema,tese',
             'tese_name' => 'tese',
             'tables' => [
                 'sumulas' => ['sumulas', 'questoesdeordem'],
-                'teses' => ['teses']
+                'teses' => ['teses'],
             ],
-            'db' => true
+            'db' => true,
         ],
         'TCU' => [
             'color' => '#F39C12',
@@ -76,7 +76,7 @@ return [
             'to_match_rep' => '',
             'tese_name' => 'tese',
             'tables' => [],
-            'db' => false
+            'db' => false,
         ],
         'CARF' => [
             'color' => '#F39C12',
@@ -87,9 +87,9 @@ return [
             'tese_name' => 'tese',
             'tables' => [
                 'sumulas' => ['sumulas'],
-                'teses' => []
+                'teses' => [],
             ],
-            'db' => true
+            'db' => true,
         ],
         'FONAJE' => [
             'color' => '#F39C12',
@@ -101,9 +101,9 @@ return [
             'tese_name' => 'tese',
             'tables' => [
                 'sumulas' => ['civ_sumulas', 'cri_sumulas', 'faz_sumulas'],
-                'teses' => []
+                'teses' => [],
             ],
-            'db' => true
+            'db' => true,
         ],
         'CEJ' => [
             'color' => '#F39C12',
@@ -115,21 +115,19 @@ return [
             'tese_name' => 'tese',
             'tables' => [
                 'sumulas' => ['sumulas'],
-                'teses' => []
+                'teses' => [],
             ],
-            'db' => true
+            'db' => true,
         ],
     ],
     'sem_tese' => [
         'CARF',
         'FONAJE',
-        'CEJ'
+        'CEJ',
     ],
     'sem_sumula' => [],
 
-
 ];
-
 
 /*
 And you can access them as follows
@@ -147,4 +145,4 @@ config('constants.options.stf_search_url');
 //       //production or localhost with laravel Valet on DescoMac
 //       define('BASE_PATH', $_SERVER['DOCUMENT_ROOT'] . '/' );
 //     }
-//   } 
+//   }

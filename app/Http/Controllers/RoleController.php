@@ -3,20 +3,22 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
     public function index()
     {
         $roles = Role::all();
+
         return view('roles.index', compact('roles'));
     }
 
     public function create()
     {
         $permissions = Permission::all();
+
         return view('roles.create', compact('permissions'));
     }
 
@@ -41,13 +43,14 @@ class RoleController extends Controller
     public function edit(Role $role)
     {
         $permissions = Permission::all();
+
         return view('roles.edit', compact('role', 'permissions'));
     }
 
     public function update(Request $request, Role $role)
     {
         $this->validate($request, [
-            'name' => 'required|unique:roles,name,' . $role->id,
+            'name' => 'required|unique:roles,name,'.$role->id,
             'permissions' => 'nullable|array',
         ]);
 
@@ -60,6 +63,7 @@ class RoleController extends Controller
     public function destroy(Role $role)
     {
         $role->delete();
+
         return redirect()->route('roles.index')->with('success', 'Role deleted successfully');
     }
 }

@@ -15,19 +15,19 @@ class CreateQuizQuestionTable extends Migration
     {
         Schema::create('quiz_question', function (Blueprint $table) {
             $table->id();
-            
+
             $table->foreignId('quiz_id')
                 ->constrained('quizzes')
                 ->cascadeOnDelete();
-            
+
             $table->foreignId('question_id')
                 ->constrained('questions')
                 ->cascadeOnDelete();
-            
+
             $table->unsignedInteger('order')->default(0); // Ordem da pergunta no quiz
-            
+
             $table->timestamp('created_at')->useCurrent();
-            
+
             // Índices
             $table->unique(['quiz_id', 'question_id']); // Evita duplicatas
             $table->index(['quiz_id', 'order']);

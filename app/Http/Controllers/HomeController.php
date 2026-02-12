@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Question;
+use App\Models\Quiz;
+use App\Models\QuizAttempt;
+use App\Models\QuizCategory;
+use App\Models\TeseAcordao;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
-use App\Models\Quiz;
-use App\Models\Question;
-use App\Models\QuizCategory;
-use App\Models\QuizAttempt;
-use App\Models\TeseAcordao;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -83,7 +83,6 @@ class HomeController extends Controller
     /**
      * Get temas via AJAX with pagination and filters
      *
-     * @param Request $request
      * @return JsonResponse
      */
     public function getTemas(Request $request)
@@ -112,14 +111,14 @@ class HomeController extends Controller
             case 'pending':
                 $query->whereNull('created_at')->whereNull('checked_at');
                 break;
-            // 'all' - no filter
+                // 'all' - no filter
         }
 
         // Apply search filter
-        if (!empty($search)) {
-            $query->where(function($q) use ($search) {
+        if (! empty($search)) {
+            $query->where(function ($q) use ($search) {
                 $q->where('keyword', 'LIKE', "%{$search}%")
-                  ->orWhere('label', 'LIKE', "%{$search}%");
+                    ->orWhere('label', 'LIKE', "%{$search}%");
             });
         }
 
@@ -149,7 +148,7 @@ class HomeController extends Controller
                 'last_page' => ceil($total / $perPage),
                 'from' => $offset + 1,
                 'to' => min($offset + $perPage, $total),
-            ]
+            ],
         ]);
     }
 }

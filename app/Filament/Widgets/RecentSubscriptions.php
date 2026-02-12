@@ -3,11 +3,9 @@
 namespace App\Filament\Widgets;
 
 use App\Support\SubscriptionUi;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Illuminate\Database\Eloquent\Builder;
 use Laravel\Cashier\Subscription;
 
 class RecentSubscriptions extends BaseWidget

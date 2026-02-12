@@ -12,9 +12,6 @@ class EnsureUserHasFeature
      *
      * Uso: Route::get('/rota', [Controller::class, 'method'])->middleware('feature:no_ads');
      *
-     * @param Request $request
-     * @param Closure $next
-     * @param  string  $featureKey
      * @return mixed
      */
     public function handle(Request $request, Closure $next, string $featureKey)
@@ -22,15 +19,15 @@ class EnsureUserHasFeature
         $user = $request->user();
 
         // Se não está logado, redirecionar para login
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login')
                 ->with('error', 'Você precisa estar logado para acessar esta página.');
         }
 
         // Se não tem a feature, redirecionar para página de planos
-        if (!$user->hasFeature($featureKey)) {
+        if (! $user->hasFeature($featureKey)) {
             return redirect()->route('subscription.plans')
-                ->with('info', 'Esta funcionalidade requer um plano que inclua: ' . $this->getFeatureLabel($featureKey));
+                ->with('info', 'Esta funcionalidade requer um plano que inclua: '.$this->getFeatureLabel($featureKey));
         }
 
         return $next($request);

@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\PlanFeature;
 use App\Models\User;
-use Illuminate\Support\Collection;
 
 class SubscriptionService
 {
@@ -21,8 +20,8 @@ class SubscriptionService
     public function getUserFeatures(User $user): array
     {
         $productId = $user->getSubscriptionPlan();
-        
-        if (!$productId) {
+
+        if (! $productId) {
             return [];
         }
 
@@ -58,7 +57,7 @@ class SubscriptionService
         // Verificar features com produtos inválidos
         $featuresProductIds = PlanFeature::pluck('stripe_product_id')->unique();
         foreach ($featuresProductIds as $productId) {
-            if (!in_array($productId, $tierProductIds)) {
+            if (! in_array($productId, $tierProductIds)) {
                 $issues['features_with_invalid_product'][] = $productId;
             }
         }
