@@ -7,7 +7,7 @@
     <!-- Schema.org Structured Data para SEO -->
     <script type="application/ld+json">
     {
-      "@context": "https://schema.org",
+      "@@context": "https://schema.org",
       "@type": "LegalDocument",
       "name": "{{ $label }}",
       "description": "{{ $description }}",

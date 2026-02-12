@@ -7,7 +7,7 @@
     <!-- Schema.org Structured Data -->
     <script type="application/ld+json">
     {
-      "@context": "https://schema.org",
+      "@@context": "https://schema.org",
       "@type": "NewsArticle",
       "headline": "{{ $newsletter->subject }}",
       "datePublished": "{{ $newsletter->sent_at ? $newsletter->sent_at->toIso8601String() : $newsletter->created_at->toIso8601String() }}",

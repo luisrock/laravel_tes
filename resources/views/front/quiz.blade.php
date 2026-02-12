@@ -522,7 +522,7 @@
 <!-- Schema.org for SEO -->
 <script type="application/ld+json">
 {
-    "@context": "https://schema.org",
+    "@@context": "https://schema.org",
     "@type": "Quiz",
     "name": "{{ $quiz->title }}",
     "description": "{{ $description }}",
