@@ -16,9 +16,13 @@ ads.txtSearch-Console-*/
 .DS_Store
 .psysh/
 
-# Ignore all .md files except README.md and upgrade docs
+# Ignore all .md files except README.md
 *.md
 !README.md
-!UPGRADE_PLAN.md
-!UPGRADE_L8_TO_L9.md
-!UPGRADE_L9_TO_L10.md
+
+# Laravel Boost (auto-generated, regenerate with: php artisan boost:install)
+.mcp.json
+.cursor/mcp.json
+boost.json
+.codex/
+.gemini/
