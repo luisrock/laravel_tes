@@ -7,6 +7,7 @@ export default defineConfig({
             input: [
                 'resources/css/tailwind.css',
                 'resources/js/tailwind-home.js',
+                'resources/js/admin-tailwind.js',
             ],
             refresh: true,
         }),

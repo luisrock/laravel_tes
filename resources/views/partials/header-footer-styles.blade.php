@@ -35,9 +35,4 @@ html, body {
     margin-right: -50vw;
 }
 
-/* Esconde o Hero antigo (h1 redundante) */
-.bg-body-light:has(.flex-sm-fill.h3) {
-    display: none !important;
-}
-
 </style>

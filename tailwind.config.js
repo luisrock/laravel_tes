@@ -3,10 +3,11 @@ module.exports = {
     content: [
         './resources/views/**/*.blade.php',
         './resources/js/**/*.js',
+        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
     ],
     prefix: 'tw-',
     corePlugins: {
-        preflight: false,
+        preflight: true,
     },
     theme: {
         extend: {
@@ -29,5 +30,8 @@ module.exports = {
             },
         },
     },
-    plugins: [],
+    plugins: [
+        require('@tailwindcss/typography'),
+        require('@tailwindcss/forms'),
+    ],
 };

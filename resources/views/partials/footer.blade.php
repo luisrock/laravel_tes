@@ -39,6 +39,9 @@
                     <h4 class="tw-text-xs tw-font-bold tw-uppercase tw-tracking-wider tw-text-slate-100">Conta</h4>
                     <div class="tw-mt-3 tw-space-y-2.5">
                         @auth
+                            @if(in_array(auth()->user()->email, config('tes_constants.admins')))
+                                <a href="{{ route('admin') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white"><b>Admin Dashboard</b></a>
+                            @endif
                             <a href="{{ route('subscription.show') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white">Minha assinatura</a>
                             <a href="{{ route('subscription.portal') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white">Gerenciar pagamento</a>
                             <a href="{{ route('user-panel.dashboard') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white">Minha conta</a>

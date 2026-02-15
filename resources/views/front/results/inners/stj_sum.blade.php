@@ -1,23 +1,29 @@
 @foreach ($output['sumula']['hits'] as $sum)
     <tr>
-        <td>
-            <h4 class="h5 mt-3 mb-2">
-                <a href="{{ url('/sumula') }}/stj/{{ $sum['trib_sum_id'] }}"> {{ $sum['trib_sum_titulo'] }}</a>
+        <td class="tw-block tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg tw-p-6 hover:tw-border-brand-300 hover:tw-shadow-sm tw-transition-all">
+            <h4 class="tw-text-lg tw-font-semibold tw-text-brand-700 tw-mb-3">
+                <a href="{{ url('/sumula') }}/stj/{{ $sum['trib_sum_id'] }}" class="hover:tw-text-brand-900 hover:tw-underline tw-transition-colors">
+                    {{ $sum['trib_sum_titulo'] }}
+                </a>
             </h4>
-            <p class="d-sm-block" style="font-weight: bold;">
-                {{ $sum['trib_sum_texto'] }}
-            </p>
-            <span class="text-muted" style="display: flex;justify-content: flex-end;font-size: 0.8em;">
-                {{ $sum['trib_sum_dados'] }}</span>
+            
+            <div class="tw-prose tw-prose-slate tw-max-w-none tw-mb-4">
+                <p class="tw-font-medium tw-text-slate-800">
+                    {{ $sum['trib_sum_texto'] }}
+                </p>
+            </div>
 
-            <span class="tes-clear tes-text-to-be-copied" style="display: none"
-                data-spec="trim">{{ $sum['trib_sum_texto'] }}</span>
-            <button class="btn btn-rounded btn-outline-primary btn-sm mr-1 mb-3 btn-copy-text">
-                <span>
-                    <i class="fa fa-copy"></i>
+            <div class="tw-flex tw-items-center tw-justify-between tw-flex-wrap tw-gap-2 tw-mt-4 tw-pt-4 tw-border-t tw-border-slate-100">
+                <button class="btn-copy-text tw-inline-flex tw-items-center tw-justify-center tw-px-3 tw-py-1.5 tw-border tw-border-slate-300 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-600 hover:tw-bg-slate-50 hover:tw-text-brand-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-1 focus:tw-ring-brand-500 tw-transition-colors" title="Copiar texto">
+                   <i class="fa fa-copy tw-mr-1.5"></i> Copiar
+                </button>
+                
+                <span class="tw-text-sm tw-text-slate-500 tw-italic">
+                    {{ $sum['trib_sum_dados'] }}
                 </span>
-            </button>
+            </div>
 
+            <span class="tes-clear tes-text-to-be-copied tw-hidden" data-spec="trim">{{ $sum['trib_sum_texto'] }}</span>
         </td>
     </tr>
 @endforeach

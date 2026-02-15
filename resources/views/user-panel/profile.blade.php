@@ -2,152 +2,140 @@
 
 @section('panel-title', 'Perfil')
 
-@section('panel-styles')
-<style>
-    .profile-card {
-        background: #fff;
-        border-radius: 8px;
-        border: 1px solid #e9ecef;
-        padding: 24px;
-        margin-bottom: 24px;
-    }
-    .profile-card h3 {
-        font-size: 1rem;
-        font-weight: 600;
-        margin: 0 0 20px 0;
-        color: #212529;
-        text-transform: uppercase;
-        letter-spacing: 0.025em;
-    }
-    .profile-card .form-group { margin-bottom: 20px; }
-    .profile-card .form-group label {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: #212529;
-        font-size: 0.9375rem;
-    }
-    .profile-card .form-group input {
-        width: 100%;
-        max-width: 400px;
-        padding: 12px 14px;
-        border: 1px solid #ced4da;
-        border-radius: 6px;
-        font-size: 1rem;
-        transition: border-color 0.15s ease;
-    }
-    .profile-card .form-group input:focus {
-        outline: none;
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-    }
-    .btn-save {
-        padding: 12px 24px;
-        background: #0d6efd;
-        color: #fff;
-        border: none;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 0.9375rem;
-        cursor: pointer;
-        transition: background 0.15s ease;
-    }
-    .btn-save:hover { background: #0b5ed7; }
-    .btn-danger-outline {
-        padding: 12px 24px;
-        background: transparent;
-        color: #dc3545;
-        border: 1px solid #dc3545;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 0.9375rem;
-        cursor: pointer;
-        transition: background 0.15s ease, color 0.15s ease;
-    }
-    .btn-danger-outline:hover {
-        background: #dc3545;
-        color: #fff;
-    }
-    .profile-card .alert { padding: 15px 20px; border-radius: 6px; margin-bottom: 20px; }
-    .profile-card .alert-success { background: #d4edda; color: #155724; }
-    .profile-card p { color: #495057; font-size: 0.9375rem; line-height: 1.5; }
-    .recovery-codes-link {
-        display: inline-block;
-        margin-top: 12px;
-        color: #0d6efd;
-        font-size: 0.9375rem;
-        font-weight: 500;
-        text-decoration: none;
-    }
-    .recovery-codes-link:hover { text-decoration: underline; color: #0a58ca; }
-</style>
-@endsection
-
 @section('panel-content')
+
 @if(session('status') === 'profile-information-updated')
-    <div class="alert alert-success">Perfil atualizado com sucesso.</div>
+    <div class="tw-bg-green-50 tw-border-l-4 tw-border-green-400 tw-p-4 tw-mb-6 tw-rounded-r-md">
+        <div class="tw-flex">
+            <div class="tw-flex-shrink-0">
+                <svg class="tw-h-5 tw-w-5 tw-text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="tw-ml-3">
+                <p class="tw-text-sm tw-text-green-700">
+                    Perfil atualizado com sucesso.
+                </p>
+            </div>
+        </div>
+    </div>
 @endif
+
 @if(session('status') === 'password-updated')
-    <div class="alert alert-success">Senha atualizada com sucesso.</div>
+    <div class="tw-bg-green-50 tw-border-l-4 tw-border-green-400 tw-p-4 tw-mb-6 tw-rounded-r-md">
+        <div class="tw-flex">
+            <div class="tw-flex-shrink-0">
+                <svg class="tw-h-5 tw-w-5 tw-text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="tw-ml-3">
+                <p class="tw-text-sm tw-text-green-700">
+                    Senha atualizada com sucesso.
+                </p>
+            </div>
+        </div>
+    </div>
 @endif
 
-<div class="profile-card" id="profile-info">
-    <h3>Informações do perfil</h3>
-    <form method="POST" action="{{ url('/user/profile-information') }}">
-        @csrf
-        @method('PUT')
-        <div class="form-group">
-            <label for="name">Nome</label>
-            <input type="text" id="name" name="name" value="{{ old('name', auth()->user()->name) }}" required autofocus autocomplete="name">
-        </div>
-        <div class="form-group">
-            <label for="email">E-mail</label>
-            <input type="email" id="email" name="email" value="{{ old('email', auth()->user()->email) }}" required autocomplete="username">
-            @error('email')
-                <span class="text-danger small">{{ $message }}</span>
-            @enderror
-        </div>
-        <button type="submit" class="btn-save">Salvar</button>
-    </form>
+<div class="tw-bg-white tw-shadow-sm tw-rounded-lg tw-border tw-border-slate-200 tw-mb-6" id="profile-info">
+    <div class="tw-px-6 tw-py-4 tw-border-b tw-border-slate-100 tw-bg-slate-50/50">
+        <h3 class="tw-text-base tw-font-semibold tw-text-slate-800 tw-uppercase tw-tracking-wide">Informações do perfil</h3>
+    </div>
+    <div class="tw-p-6">
+        <form method="POST" action="{{ url('/user/profile-information') }}" class="tw-space-y-6">
+            @csrf
+            @method('PUT')
+            <div class="tw-max-w-xl">
+                <label for="name" class="tw-block tw-text-sm tw-font-medium tw-text-slate-700">Nome</label>
+                <div class="tw-mt-1">
+                    <input type="text" id="name" name="name" value="{{ old('name', auth()->user()->name) }}" required autofocus autocomplete="name" class="tw-block tw-w-full tw-rounded-md tw-border-slate-300 tw-shadow-sm focus:tw-border-brand-500 focus:tw-ring-brand-500 sm:tw-text-sm">
+                </div>
+            </div>
+            
+            <div class="tw-max-w-xl">
+                <label for="email" class="tw-block tw-text-sm tw-font-medium tw-text-slate-700">E-mail</label>
+                <div class="tw-mt-1">
+                    <input type="email" id="email" name="email" value="{{ old('email', auth()->user()->email) }}" required autocomplete="username" class="tw-block tw-w-full tw-rounded-md tw-border-slate-300 tw-shadow-sm focus:tw-border-brand-500 focus:tw-ring-brand-500 sm:tw-text-sm">
+                </div>
+                @error('email')
+                    <p class="tw-mt-2 tw-text-sm tw-text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="tw-pt-2">
+                <button type="submit" class="tw-inline-flex tw-justify-center tw-rounded-md tw-border tw-border-transparent tw-bg-brand-600 tw-py-2 tw-px-4 tw-text-sm tw-font-medium tw-text-white tw-shadow-sm hover:tw-bg-brand-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-brand-500 focus:tw-ring-offset-2 tw-transition-colors">
+                    Salvar
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
-<div class="profile-card">
-    <h3>Atualizar senha</h3>
-    <form method="POST" action="{{ url('/user/password') }}">
-        @csrf
-        @method('PUT')
-        <div class="form-group">
-            <label for="current_password">Senha atual</label>
-            <input type="password" id="current_password" name="current_password" required autocomplete="current-password">
-        </div>
-        <div class="form-group">
-            <label for="password">Nova senha</label>
-            <input type="password" id="password" name="password" required autocomplete="new-password">
-        </div>
-        <div class="form-group">
-            <label for="password_confirmation">Confirmar nova senha</label>
-            <input type="password" id="password_confirmation" name="password_confirmation" required autocomplete="new-password">
-        </div>
-        <button type="submit" class="btn-save">Atualizar senha</button>
-    </form>
+<div class="tw-bg-white tw-shadow-sm tw-rounded-lg tw-border tw-border-slate-200 tw-mb-6">
+    <div class="tw-px-6 tw-py-4 tw-border-b tw-border-slate-100 tw-bg-slate-50/50">
+        <h3 class="tw-text-base tw-font-semibold tw-text-slate-800 tw-uppercase tw-tracking-wide">Atualizar senha</h3>
+    </div>
+    <div class="tw-p-6">
+        <form method="POST" action="{{ url('/user/password') }}" class="tw-space-y-6">
+            @csrf
+            @method('PUT')
+            <div class="tw-max-w-xl">
+                <label for="current_password" class="tw-block tw-text-sm tw-font-medium tw-text-slate-700">Senha atual</label>
+                <div class="tw-mt-1">
+                    <input type="password" id="current_password" name="current_password" required autocomplete="current-password" class="tw-block tw-w-full tw-rounded-md tw-border-slate-300 tw-shadow-sm focus:tw-border-brand-500 focus:tw-ring-brand-500 sm:tw-text-sm">
+                </div>
+            </div>
+
+            <div class="tw-max-w-xl">
+                <label for="password" class="tw-block tw-text-sm tw-font-medium tw-text-slate-700">Nova senha</label>
+                <div class="tw-mt-1">
+                    <input type="password" id="password" name="password" required autocomplete="new-password" class="tw-block tw-w-full tw-rounded-md tw-border-slate-300 tw-shadow-sm focus:tw-border-brand-500 focus:tw-ring-brand-500 sm:tw-text-sm">
+                </div>
+            </div>
+
+            <div class="tw-max-w-xl">
+                <label for="password_confirmation" class="tw-block tw-text-sm tw-font-medium tw-text-slate-700">Confirmar nova senha</label>
+                <div class="tw-mt-1">
+                    <input type="password" id="password_confirmation" name="password_confirmation" required autocomplete="new-password" class="tw-block tw-w-full tw-rounded-md tw-border-slate-300 tw-shadow-sm focus:tw-border-brand-500 focus:tw-ring-brand-500 sm:tw-text-sm">
+                </div>
+            </div>
+
+            <div class="tw-pt-2">
+                <button type="submit" class="tw-inline-flex tw-justify-center tw-rounded-md tw-border tw-border-transparent tw-bg-brand-600 tw-py-2 tw-px-4 tw-text-sm tw-font-medium tw-text-white tw-shadow-sm hover:tw-bg-brand-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-brand-500 focus:tw-ring-offset-2 tw-transition-colors">
+                    Atualizar senha
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
-<div class="profile-card" id="2fa">
-    <h3>Autenticação em dois fatores</h3>
-    @if(auth()->user()->two_factor_confirmed_at)
-        <p>2FA está ativo. Para desativar, confirme sua senha e clique em Desativar.</p>
-        <form method="POST" action="{{ url('/user/two-factor-authentication') }}" class="d-inline" onsubmit="return confirm('Tem certeza que deseja desativar a autenticação em dois fatores?');">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="btn-danger-outline">Desativar 2FA</button>
-        </form>
-        <a href="{{ url('/user/two-factor-recovery-codes') }}" class="recovery-codes-link">Ver códigos de recuperação</a>
-    @else
-        <p>Adicione segurança adicional à sua conta usando autenticação em dois fatores.</p>
-        <form method="POST" action="{{ url('/user/two-factor-authentication') }}">
-            @csrf
-            <button type="submit" class="btn-save">Ativar 2FA</button>
-        </form>
-    @endif
+<div class="tw-bg-white tw-shadow-sm tw-rounded-lg tw-border tw-border-slate-200 tw-mb-6" id="2fa">
+    <div class="tw-px-6 tw-py-4 tw-border-b tw-border-slate-100 tw-bg-slate-50/50">
+        <h3 class="tw-text-base tw-font-semibold tw-text-slate-800 tw-uppercase tw-tracking-wide">Autenticação em dois fatores</h3>
+    </div>
+    <div class="tw-p-6">
+        @if(auth()->user()->two_factor_confirmed_at)
+            <p class="tw-text-sm tw-text-slate-600 tw-mb-4">2FA está ativo. Para desativar, confirme sua senha e clique em Desativar.</p>
+            <div class="tw-flex tw-items-center tw-gap-4">
+                <form method="POST" action="{{ url('/user/two-factor-authentication') }}" class="tw-inline" onsubmit="return confirm('Tem certeza que deseja desativar a autenticação em dois fatores?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="tw-inline-flex tw-justify-center tw-rounded-md tw-border tw-border-red-300 tw-bg-white tw-py-2 tw-px-4 tw-text-sm tw-font-medium tw-text-red-700 tw-shadow-sm hover:tw-bg-red-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-red-500 focus:tw-ring-offset-2 tw-transition-colors">
+                        Desativar 2FA
+                    </button>
+                </form>
+                <a href="{{ url('/user/two-factor-recovery-codes') }}" class="tw-text-sm tw-font-medium tw-text-brand-600 hover:tw-text-brand-800 hover:tw-underline">Ver códigos de recuperação</a>
+            </div>
+        @else
+            <p class="tw-text-sm tw-text-slate-600 tw-mb-4">Adicione segurança adicional à sua conta usando autenticação em dois fatores.</p>
+            <form method="POST" action="{{ url('/user/two-factor-authentication') }}">
+                @csrf
+                <button type="submit" class="tw-inline-flex tw-justify-center tw-rounded-md tw-border tw-border-transparent tw-bg-brand-600 tw-py-2 tw-px-4 tw-text-sm tw-font-medium tw-text-white tw-shadow-sm hover:tw-bg-brand-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-brand-500 focus:tw-ring-offset-2 tw-transition-colors">
+                    Ativar 2FA
+                </button>
+            </form>
+        @endif
+    </div>
 </div>
 @endsection

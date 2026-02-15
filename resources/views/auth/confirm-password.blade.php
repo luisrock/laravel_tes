@@ -1,48 +1,46 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Confirmar senha') }}</div>
+<div class="tw-mx-auto tw-max-w-md tw-w-full">
+    <div class="tw-bg-white tw-shadow-sm tw-rounded-lg tw-border tw-border-slate-200 hover:tw-shadow-md tw-transition-shadow tw-duration-200">
+        <div class="tw-px-6 tw-py-4 tw-border-b tw-border-slate-100 tw-bg-slate-50/50">
+            <h2 class="tw-text-lg tw-font-semibold tw-text-slate-800 tw-text-center">{{ __('Confirmar senha') }}</h2>
+        </div>
 
-                <div class="card-body">
-                    {{ __('Por favor, confirme sua senha antes de continuar.') }}
+        <div class="tw-p-6">
+            <p class="tw-mb-6 tw-text-sm tw-text-slate-600 tw-text-center">
+                {{ __('Por favor, confirme sua senha antes de continuar.') }}
+            </p>
 
-                    <form method="POST" action="{{ route('password.confirm.store') }}">
-                        @csrf
+            <form method="POST" action="{{ route('password.confirm.store') }}" class="tw-space-y-6">
+                @csrf
 
-                        <div class="form-group row">
-                            <label for="password" class="col-md-4 col-form-label text-md-right">{{ __('Senha') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="current-password">
-
-                                @error('password')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="form-group row mb-0">
-                            <div class="col-md-8 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    {{ __('Confirmar') }}
-                                </button>
-
-                                @if (Route::has('password.request'))
-                                    <a class="btn btn-link" href="{{ route('password.request') }}">
-                                        {{ __('Esqueceu sua senha?') }}
-                                    </a>
-                                @endif
-                            </div>
-                        </div>
-                    </form>
+                <div>
+                    <label for="password" class="tw-block tw-text-sm tw-font-medium tw-text-slate-700">{{ __('Senha') }}</label>
+                    <div class="tw-mt-1">
+                        <input id="password" type="password" class="tw-block tw-w-full tw-rounded-md tw-border-slate-300 tw-shadow-sm focus:tw-border-brand-500 focus:tw-ring-brand-500 sm:tw-text-sm @error('password') tw-border-red-300 tw-text-red-900 focus:tw-border-red-500 focus:tw-ring-red-500 @enderror" name="password" required autocomplete="current-password">
+                    </div>
+                    @error('password')
+                        <p class="tw-mt-2 tw-text-sm tw-text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
-            </div>
+
+                <div class="tw-flex tw-items-center tw-justify-between">
+                    @if (Route::has('password.request'))
+                        <div class="tw-text-sm">
+                            <a href="{{ route('password.request') }}" class="tw-font-medium tw-text-brand-600 hover:tw-text-brand-500">
+                                {{ __('Esqueceu a senha?') }}
+                            </a>
+                        </div>
+                    @endif
+                </div>
+
+                <div>
+                    <button type="submit" class="tw-flex tw-w-full tw-justify-center tw-rounded-md tw-border tw-border-transparent tw-bg-brand-600 tw-py-2 tw-px-4 tw-text-sm tw-font-medium tw-text-white tw-shadow-sm hover:tw-bg-brand-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-brand-500 focus:tw-ring-offset-2 tw-transition-colors">
+                        {{ __('Confirmar') }}
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

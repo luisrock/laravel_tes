@@ -6,14 +6,16 @@
 
     <!-- Page Content -->
 
-    <div class="home-pilot-shell tw-pt-4">
-        <section class="home-pilot-card tw-p-5 md:tw-p-6 tw-space-y-2">
-            <h1 class="home-pilot-title tw-m-0">{{ $label }}</h1>
-            <p class="home-pilot-subtitle tw-m-0">
-                Faça uma <a href="{{ route('searchpage') }}" class="tw-text-brand-700 hover:tw-text-brand-800">pesquisa</a> ou veja as
-                <a href="{{ route('alltemaspage') }}" class="tw-text-brand-700 hover:tw-text-brand-800">pesquisas prontas</a>.
+    <!-- Page Content -->
+
+    <div class="tw-max-w-5xl tw-mx-auto tw-px-4 tw-pt-6 md:tw-pt-8">
+        <section class="tw-bg-white tw-shadow-sm tw-rounded-xl tw-p-6 md:tw-p-8 tw-space-y-3 tw-border tw-border-slate-200">
+            <h1 class="tw-text-2xl md:tw-text-3xl tw-font-bold tw-text-slate-800 tw-m-0">{{ $label }}</h1>
+            <p class="tw-text-slate-600 tw-text-lg tw-leading-relaxed tw-m-0">
+                Faça uma <a href="{{ route('searchpage') }}" class="tw-text-brand-600 hover:tw-text-brand-800 tw-font-medium hover:tw-underline">pesquisa</a> ou veja as
+                <a href="{{ route('alltemaspage') }}" class="tw-text-brand-600 hover:tw-text-brand-800 tw-font-medium hover:tw-underline">pesquisas prontas</a>.
                 @if ($admin)
-                    <br><a href="{{ route('admin') }}" class="tw-text-brand-700 hover:tw-text-brand-800">Admin</a>
+                    <br><a href="{{ route('admin') }}" class="tw-text-sm tw-text-slate-400 hover:tw-text-slate-600">Admin</a>
                 @endif
             </p>
         </section>
@@ -22,101 +24,151 @@
 
     <!-- Breadcrumb -->
     @if(isset($breadcrumb))
-    <div class="home-pilot-shell tw-pt-2 tw-pb-0">
+    <div class="tw-max-w-5xl tw-mx-auto tw-px-4 tw-pt-4 tw-pb-2">
         <x-breadcrumb :items="$breadcrumb" />
     </div>
     @endif
     <!-- END Breadcrumb -->
 
-    <div class="home-pilot-shell tw-pt-2" id="content-results">
+    <div class="tw-max-w-5xl tw-mx-auto tw-px-4 tw-pb-10" id="content-results">
 
         <!-- Results -->
 
-        <div class="home-pilot-card tw-p-5 md:tw-p-6">
-            <div>
-
-
-                <div class="tab-pane fade fade-up active show" role="tabpanel">
-
-                    <!-- Search Container -->
-                    <div id="search-container" class="tw-hidden tw-mb-3 tw-p-3 tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg tw-shadow-sm">
-                        <div class="tw-flex tw-items-stretch tw-gap-2">
-                            <input type="text" class="home-pilot-input" id="table-search-input" 
-                                placeholder="Pesquisar por número, texto{{ $tribunal == 'STJ' ? ', órgão julgador' : '' }}...">
-                            <div>
-                                <button class="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-slate-300 tw-bg-white tw-px-3 tw-text-slate-600 hover:tw-bg-slate-100" type="button" id="clear-search-btn" style="display:none;">
-                                    <i class="fa fa-times"></i>
-                                </button>
+        <div class="tw-bg-white tw-shadow-sm tw-rounded-xl tw-border tw-border-slate-200 tw-overflow-hidden">
+            <div class="tw-p-6 md:tw-p-8">
+                
+                <!-- Search Container -->
+                <div id="search-container" class="tw-hidden tw-mb-6 tw-p-4 tw-bg-slate-50 tw-border tw-border-slate-200 tw-rounded-xl">
+                    <div class="tw-flex tw-items-stretch tw-gap-3">
+                        <div class="tw-relative tw-flex-grow">
+                            <div class="tw-absolute tw-inset-y-0 tw-left-0 tw-pl-3 tw-flex tw-items-center tw-pointer-events-none">
+                                <i class="fa fa-search tw-text-slate-400"></i>
                             </div>
+                            <input type="text" class="tw-block tw-w-full tw-pl-10 tw-pr-3 tw-py-2.5 tw-border tw-border-slate-300 tw-rounded-lg tw-text-slate-900 placeholder:tw-text-slate-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-brand-500 focus:tw-border-brand-500 sm:tw-text-sm" 
+                                id="table-search-input" 
+                                placeholder="Pesquisar por número, texto{{ $tribunal == 'STJ' ? ', órgão julgador' : '' }}...">
                         </div>
-                        <small class="tw-text-slate-500 tw-ml-1">Digite para filtrar instantaneamente.</small>
-                    </div>
-                    <!-- END Search Container -->
-
-                    <div class="home-results-count trib-texto-quantidade tw-flex tw-justify-between tw-items-center tw-gap-2">
-                        <div>
-                            <code>Súmulas</code> - {{ $tribunal }}
-                            (resultados: <code>{{ $count }}</code>)
-                        </div>
-                        <button class="home-pilot-btn tw-py-2 tw-px-3 tw-text-sm" id="toggle-search-btn">
-                            <i class="fa fa-search tw-mr-1"></i> Buscar
+                        <button class="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-slate-300 tw-bg-white tw-px-4 tw-text-slate-600 hover:tw-bg-slate-50 hover:tw-text-slate-800 tw-transition-colors" type="button" id="clear-search-btn" style="display:none;">
+                            <i class="fa fa-times"></i>
                         </button>
                     </div>
+                    <small class="tw-block tw-mt-2 tw-text-slate-500">Digite para filtrar instantaneamente.</small>
+                </div>
+                <!-- END Search Container -->
 
-                    <table class="home-results-table table-results">
-
-                        <tbody>
-                            @foreach ($sumulas as $sum)
-                                <tr>
-                                    <td>
-                                        <h4 class="tw-text-lg tw-font-semibold tw-mt-0 tw-mb-2">
-                                            <a href="{{ route($sumula_route, ['sumula' => $sum->id]) }}" class="tw-text-brand-700 hover:tw-text-brand-800 tw-underline tw-underline-offset-2">
-                                                {{ $sum->titulo }}</a>
-                                        </h4>
-                                        <p class="tw-font-semibold">
-                                            {{ $sum->texto }}
-                                        </p>
-
-
-
-                                        @if (isset($sum->isCancelada) && $sum->isCancelada)
-                                            <p class="tw-text-slate-500 tw-text-sm">
-                                                SÚMULA CANCELADA
-                                            </p>
-                                        @endif
-
-                                        <span class="tw-text-slate-500 tw-text-sm tw-flex tw-justify-end">
-                                            {{ $sum->tempo }}
-                                        </span>
-
-
-
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-
-                    </table>
+                <div class="tw-flex tw-flex-col sm:tw-flex-row tw-justify-between tw-items-start sm:tw-items-center tw-gap-4 tw-mb-6 tw-pb-4 tw-border-b tw-border-slate-100">
+                    <div class="tw-flex tw-items-center tw-gap-2">
+                        <span class="tw-px-2.5 tw-py-0.5 tw-rounded-full tw-text-xs tw-font-medium tw-bg-brand-100 tw-text-brand-800">Súmulas</span>
+                        <span class="tw-text-slate-600 tw-font-medium">{{ $tribunal }}</span>
+                        <span class="tw-text-slate-400 text-sm">(<span id="results-count">{{ $count }}</span> resultados)</span>
+                    </div>
+                    <button class="tw-inline-flex tw-items-center tw-gap-2 tw-px-4 tw-py-2 tw-bg-white tw-border tw-border-slate-300 tw-rounded-lg tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-50 hover:tw-text-brand-600 tw-transition-colors" id="toggle-search-btn">
+                        <i class="fa fa-search"></i> Buscar na lista
+                    </button>
                 </div>
 
+                <div class="tw-space-y-4" id="sumulas-list">
+                    @foreach ($sumulas as $sum)
+                        <div class="sumula-item tw-block tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg tw-p-6 hover:tw-border-brand-300 hover:tw-shadow-sm tw-transition-all">
+                            <h4 class="tw-text-lg tw-font-semibold tw-text-slate-900 tw-mb-3">
+                                <a href="{{ route($sumula_route, ['sumula' => $sum->id]) }}" class="tw-text-brand-600 hover:tw-text-brand-800 hover:tw-underline tw-underline-offset-2">
+                                    {{ $sum->titulo }}
+                                </a>
+                            </h4>
+                            
+                            <div class="tw-prose tw-prose-slate tw-max-w-none tw-mb-3">
+                                <p class="tw-text-slate-700 tw-font-medium tw-leading-relaxed">
+                                    {{ $sum->texto }}
+                                </p>
+                            </div>
 
+                            @if (isset($sum->isCancelada) && $sum->isCancelada)
+                                <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-px-2.5 tw-py-0.5 tw-rounded-full tw-text-xs tw-font-medium tw-bg-red-100 tw-text-red-800 tw-mb-2">
+                                    <i class="fa fa-ban tw-text-[10px]"></i> SÚMULA CANCELADA
+                                </div>
+                            @endif
 
-
-
-
+                            <div class="tw-flex tw-justify-end tw-items-center tw-mt-4 tw-pt-3 tw-border-t tw-border-slate-50">
+                                <span class="tw-text-xs tw-font-medium tw-text-slate-400 tw-uppercase tw-tracking-wide">
+                                    {{ $sum->tempo }}
+                                </span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                
+                <div id="no-results-message" class="tw-hidden tw-text-center tw-py-12">
+                    <div class="tw-inline-flex tw-items-center tw-justify-center tw-w-12 tw-h-12 tw-rounded-full tw-bg-slate-100 tw-mb-4">
+                        <i class="fa fa-search tw-text-slate-400"></i>
+                    </div>
+                    <h3 class="tw-text-lg tw-font-medium tw-text-slate-900">Nenhum resultado encontrado</h3>
+                    <p class="tw-text-slate-500">Tente ajustar sua busca.</p>
+                </div>
 
             </div>
-
-
         </div>
-
         <!-- END Results -->
 
     </div>
 
-
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('assets/js/tes_search_filter.js') }}"></script>
+    {{-- Inline script for simple filtering to avoid external dependency issues --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('table-search-input');
+        const clearBtn = document.getElementById('clear-search-btn');
+        const toggleBtn = document.getElementById('toggle-search-btn');
+        const searchContainer = document.getElementById('search-container');
+        const items = document.querySelectorAll('.sumula-item');
+        const noResults = document.getElementById('no-results-message');
+        const countSpan = document.getElementById('results-count');
+        const totalItems = items.length;
+
+        // Toggle search visibility
+        toggleBtn.addEventListener('click', function() {
+            searchContainer.classList.toggle('tw-hidden');
+            if (!searchContainer.classList.contains('tw-hidden')) {
+                searchInput.focus();
+            }
+        });
+
+        // Search functionality
+        let timeout = null;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(timeout);
+            const term = this.value.toLowerCase().trim();
+            
+            // Show/hide clear button
+            clearBtn.style.display = term ? 'inline-flex' : 'none';
+
+            timeout = setTimeout(function() {
+                let visibleCount = 0;
+                
+                items.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    if (text.includes(term)) {
+                        item.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                // Update count and show no results message
+                if (countSpan) countSpan.textContent = visibleCount;
+                noResults.classList.toggle('tw-hidden', visibleCount > 0);
+                
+            }, 300);
+        });
+
+        // Clear search
+        clearBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            searchInput.dispatchEvent(new Event('input'));
+            searchInput.focus();
+        });
+    });
+    </script>
 @endsection

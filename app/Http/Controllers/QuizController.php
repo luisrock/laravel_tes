@@ -11,11 +11,25 @@ use Illuminate\Http\Request;
 
 class QuizController extends Controller
 {
+    private function isAdmin()
+    {
+        if (! auth()->check()) {
+            return false;
+        }
+        $admins = config('tes_constants.admins', ['mauluis@gmail.com', 'trator70@gmail.com', 'ivanaredler@gmail.com']);
+
+        return in_array(auth()->user()->email, $admins);
+    }
+
     /**
      * Display a listing of published quizzes.
      */
     public function index(Request $request)
     {
+        if (! $this->isAdmin()) {
+            return redirect()->route('searchpage')->with('error', 'O módulo de Quizzes está em manutenção.');
+        }
+
         $query = Quiz::published()->with(['category'])->withCount('questions');
 
         // Filter by category
@@ -50,6 +64,10 @@ class QuizController extends Controller
      */
     public function show(Request $request, $slug)
     {
+        if (! $this->isAdmin()) {
+            return redirect()->route('searchpage');
+        }
+
         $quiz = Quiz::where('slug', $slug)
             ->published()
             ->with(['category', 'questions.options'])
@@ -89,8 +107,14 @@ class QuizController extends Controller
     /**
      * Submit an answer (AJAX).
      */
-    public function submitAnswer(Request $request, Quiz $quiz)
+    public function submitAnswer(Request $request, $slug)
     {
+        if (! $this->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $quiz = Quiz::where('slug', $slug)->firstOrFail();
+
         $validated = $request->validate([
             'attempt_id' => 'required|exists:quiz_attempts,id',
             'question_id' => 'required|exists:questions,id',
@@ -152,6 +176,10 @@ class QuizController extends Controller
      */
     public function results(Request $request, $slug)
     {
+        if (! $this->isAdmin()) {
+            return redirect()->route('searchpage');
+        }
+
         $quiz = Quiz::where('slug', $slug)
             ->published()
             ->with(['category', 'questions.options'])
@@ -175,6 +203,10 @@ class QuizController extends Controller
      */
     public function restart(Request $request, $slug)
     {
+        if (! $this->isAdmin()) {
+            return redirect()->route('searchpage');
+        }
+
         $quiz = Quiz::where('slug', $slug)->published()->firstOrFail();
 
         $sessionId = $request->session()->getId();
@@ -193,6 +225,10 @@ class QuizController extends Controller
      */
     public function byCategory($categorySlug)
     {
+        if (! $this->isAdmin()) {
+            return redirect()->route('searchpage');
+        }
+
         $category = QuizCategory::where('slug', $categorySlug)->firstOrFail();
 
         $quizzes = Quiz::published()

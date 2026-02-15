@@ -20,6 +20,12 @@
             <span class="tw-h-6 tw-w-px tw-bg-slate-300 tw-mx-2"></span>
 
             @auth
+                @if(in_array(auth()->user()->email, config('tes_constants.admins')))
+                    <a href="{{ route('admin') }}" class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100 hover:tw-text-brand-700 tw-transition">Admin</a>
+                @endif
+            @endauth
+
+            @auth
                 @if(auth()->user()->isSubscriber())
                     <a href="{{ route('subscription.show') }}" class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100 hover:tw-text-brand-700 tw-transition">Minha Assinatura</a>
                 @else
@@ -41,6 +47,12 @@
         <a href="{{ route('newsletterspage') }}" class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100">Atualizações</a>
 
         <div class="tw-my-2 tw-h-px tw-bg-slate-200"></div>
+
+        @auth
+            @if(in_array(auth()->user()->email, config('tes_constants.admins')))
+                <a href="{{ route('admin') }}" class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100">Admin</a>
+            @endif
+        @endauth
 
         @auth
             @if(auth()->user()->isSubscriber())

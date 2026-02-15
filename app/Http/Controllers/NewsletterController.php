@@ -13,7 +13,7 @@ class NewsletterController extends Controller
         $newsletter = Newsletter::where('slug', $slug)->firstOrFail();
 
         return view('front.newsletter', [
-            'newsletter' => $newsletter,
+            'campaign' => $newsletter,
             'newsletterContent' => $this->sanitizeNewsletterContent($newsletter->web_content ?? $newsletter->html_content ?? ''),
             'display_pdf' => false,
             'description' => Str::limit(strip_tags($newsletter->plain_text ?? $newsletter->html_content), 155),

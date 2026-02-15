@@ -57,7 +57,20 @@ class HomeController extends Controller
             'stj' => TeseAcordao::where('tribunal', 'STJ')->count(),
         ];
 
-        return view('admin.dashboard', compact('stats', 'quizStats', 'acordaosStats'));
+        // Estatísticas de Usuários
+        $userStats = [
+            'total' => \App\Models\User::count(),
+            'admins' => \App\Models\User::role('admin')->count() ?? 0,
+            'roles' => \Spatie\Permission\Models\Role::count(),
+            'permissions' => \Spatie\Permission\Models\Permission::count(),
+        ];
+
+        // Fallback simples se não tiver roles configuradas ainda
+        if (! class_exists('Spatie\Permission\Models\Role')) {
+            $userStats['admins'] = '-';
+        }
+
+        return view('admin.dashboard', compact('stats', 'quizStats', 'acordaosStats', 'userStats'));
     }
 
     /**

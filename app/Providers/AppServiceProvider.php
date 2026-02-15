@@ -34,7 +34,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Paginator::useBootstrap();
+        Paginator::defaultView('pagination.custom');
+        Paginator::defaultSimpleView('vendor.pagination.simple-tailwind');
 
         // Validar configuração crítica de assinaturas em produção
         if ($this->app->environment('production')) {

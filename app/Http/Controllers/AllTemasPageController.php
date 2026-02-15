@@ -41,7 +41,17 @@ class AllTemasPageController extends Controller
             $perc_total_concepts = "$total_concepts de $total_temas com resumo ($percentage_concepts%)";
         }
 
-        return view('front.temas', compact('temas', 'display_pdf', 'description', 'perc_total_concepts'));
+        $count = $temas->count();
+        $label = 'Temas e Pesquisas Prontas';
+
+        // Breadcrumb
+        $breadcrumb = [
+            ['name' => 'Início', 'url' => url('/')],
+            ['name' => 'Índice', 'url' => url('/index')],
+            ['name' => 'Temas', 'url' => null],
+        ];
+
+        return view('front.temas', compact('temas', 'count', 'label', 'description', 'perc_total_concepts', 'display_pdf', 'breadcrumb'));
 
     } // end public function
 }

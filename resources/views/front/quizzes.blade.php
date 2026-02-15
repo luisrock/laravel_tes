@@ -2,577 +2,241 @@
 
 @section('page-title', isset($category) ? 'Quizzes de ' . $category->name : 'Quizzes Jurídicos')
 
-@section('styles')
-<style>
-    /* ========================================
-       QUIZ LISTING PAGE - SITE CONSISTENT
-       ======================================== */
-    
-    :root {
-        --primary-color: #5c80d1;
-        --primary-hover: #4a6bb8;
-        --text-color: #575757;
-        --text-muted: #6c757d;
-        --bg-light: #f5f5f5;
-        --border-color: #ebebeb;
-    }
-    
-    /* Breadcrumbs */
-    .quiz-breadcrumb {
-        background: white;
-        border-bottom: 1px solid var(--border-color);
-        padding: 0.75rem 0;
-    }
-    
-    .quiz-breadcrumb-content {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 0 1rem;
-    }
-    
-    .breadcrumb-list {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        font-size: 0.875rem;
-        flex-wrap: wrap;
-    }
-    
-    .breadcrumb-list a {
-        color: var(--primary-color);
-        text-decoration: none;
-        transition: color 0.2s;
-    }
-    
-    .breadcrumb-list a:hover {
-        color: var(--primary-hover);
-        text-decoration: underline;
-    }
-    
-    .breadcrumb-list .separator {
-        color: #adb5bd;
-        font-size: 0.75rem;
-    }
-    
-    .breadcrumb-list .current {
-        color: var(--text-muted);
-    }
-    
-    /* Page Header */
-    .quiz-page-header {
-        background: white;
-        padding: 2rem 0;
-        border-bottom: 1px solid var(--border-color);
-    }
-    
-    .quiz-page-header-content {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 0 1rem;
-    }
-    
-    .quiz-page-title {
-        font-size: 1.75rem;
-        font-weight: 600;
-        color: var(--primary-color);
-        margin: 0 0 0.5rem 0;
-    }
-    
-    .quiz-page-subtitle {
-        font-size: 1rem;
-        color: var(--text-muted);
-        margin: 0;
-        max-width: 700px;
-        line-height: 1.6;
-    }
-    
-    /* Main Content Layout */
-    .quiz-main-content {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 1.5rem 1rem 3rem;
-    }
-    
-    .quiz-layout {
-        display: grid;
-        grid-template-columns: 250px 1fr;
-        gap: 1.5rem;
-    }
-    
-    @media (max-width: 991px) {
-        .quiz-layout {
-            grid-template-columns: 1fr;
-        }
-    }
-    
-    /* Sidebar / Filters */
-    .quiz-sidebar {
-        position: sticky;
-        top: 1rem;
-        height: fit-content;
-    }
-    
-    .filter-card {
-        background: white;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        padding: 1.25rem;
-        margin-bottom: 1rem;
-    }
-    
-    .filter-card-title {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.9375rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        color: var(--text-color);
-    }
-    
-    .filter-card-title i {
-        color: var(--primary-color);
-    }
-    
-    .filter-section-title {
-        font-size: 0.6875rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: var(--text-muted);
-        margin: 1rem 0 0.5rem;
-        padding-bottom: 0.375rem;
-        border-bottom: 1px solid var(--border-color);
-    }
-    
-    .filter-section-title:first-child {
-        margin-top: 0;
-    }
-    
-    .filter-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-    
-    .filter-list li {
-        margin-bottom: 0.125rem;
-    }
-    
-    .filter-list a {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0.5rem 0.625rem;
-        border-radius: 4px;
-        color: var(--text-color);
-        text-decoration: none;
-        font-size: 0.875rem;
-        transition: all 0.15s ease;
-    }
-    
-    .filter-list a:hover {
-        background: var(--bg-light);
-        color: var(--primary-color);
-    }
-    
-    .filter-list a.active {
-        background: var(--primary-color);
-        color: white;
-    }
-    
-    .filter-count {
-        background: var(--border-color);
-        padding: 0.125rem 0.5rem;
-        border-radius: 50px;
-        font-size: 0.6875rem;
-        font-weight: 600;
-        color: var(--text-muted);
-    }
-    
-    .filter-list a.active .filter-count {
-        background: rgba(255,255,255,0.3);
-        color: white;
-    }
-    
-    .difficulty-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        display: inline-block;
-        margin-right: 0.375rem;
-    }
-    
-    .difficulty-dot.easy { background: #10b981; }
-    .difficulty-dot.medium { background: #f59e0b; }
-    .difficulty-dot.hard { background: #ef4444; }
-    
-    /* Quiz Grid */
-    .quiz-grid-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 1rem;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-    
-    .quiz-grid-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--text-color);
-        margin: 0;
-    }
-    
-    .quiz-grid-count {
-        font-size: 0.8125rem;
-        color: var(--text-muted);
-    }
-    
-    .quiz-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1rem;
-    }
-    
-    /* Quiz Cards */
-    .quiz-card {
-        background: white;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        overflow: hidden;
-        transition: all 0.2s ease;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-    }
-    
-    .quiz-card:hover {
-        border-color: var(--primary-color);
-        box-shadow: 0 4px 12px rgba(92, 128, 209, 0.15);
-    }
-    
-    .quiz-card-header {
-        padding: 1.25rem;
-        color: white;
-    }
-    
-    .quiz-card-category {
-        display: inline-block;
-        background: rgba(255,255,255,0.2);
-        padding: 0.25rem 0.625rem;
-        border-radius: 4px;
-        font-size: 0.625rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.5rem;
-    }
-    
-    .quiz-card-title {
-        font-size: 1rem;
-        font-weight: 600;
-        margin: 0;
-        line-height: 1.4;
-    }
-    
-    .quiz-card-body {
-        padding: 1.25rem;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .quiz-card-description {
-        color: var(--text-muted);
-        font-size: 0.875rem;
-        margin-bottom: 1rem;
-        line-height: 1.5;
-        flex: 1;
-    }
-    
-    .quiz-card-meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-        padding-top: 0.75rem;
-        border-top: 1px solid var(--border-color);
-    }
-    
-    .quiz-meta-item {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.25rem;
-        font-size: 0.75rem;
-        color: var(--text-muted);
-    }
-    
-    .quiz-meta-item i {
-        font-size: 0.75rem;
-    }
-    
-    .quiz-meta-item.difficulty-easy { color: #10b981; }
-    .quiz-meta-item.difficulty-medium { color: #f59e0b; }
-    .quiz-meta-item.difficulty-hard { color: #ef4444; }
-    
-    .quiz-card-footer {
-        padding: 0.75rem 1.25rem 1.25rem;
-    }
-    
-    .quiz-start-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.375rem;
-        width: 100%;
-        padding: 0.625rem 1rem;
-        border: none;
-        border-radius: 4px;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: white;
-        text-decoration: none;
-        transition: all 0.2s ease;
-        cursor: pointer;
-    }
-    
-    .quiz-start-btn:hover {
-        filter: brightness(1.1);
-        color: white;
-        text-decoration: none;
-    }
-    
-    .quiz-start-btn i {
-        font-size: 0.75rem;
-    }
-    
-    /* Empty State */
-    .quiz-empty-state {
-        text-align: center;
-        padding: 3rem 2rem;
-        background: white;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-    }
-    
-    .quiz-empty-state i {
-        font-size: 3rem;
-        color: #dee2e6;
-        margin-bottom: 1rem;
-    }
-    
-    .quiz-empty-state h4 {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: var(--text-color);
-        margin-bottom: 0.5rem;
-    }
-    
-    .quiz-empty-state p {
-        color: var(--text-muted);
-        margin-bottom: 1rem;
-    }
-    
-    /* Mobile Adjustments */
-    @media (max-width: 767px) {
-        .quiz-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .quiz-sidebar {
-            position: static;
-        }
-    }
-</style>
-@endsection
-
 @section('content')
-<!-- Breadcrumbs -->
-<nav class="quiz-breadcrumb">
-    <div class="quiz-breadcrumb-content">
-        <ol class="breadcrumb-list">
-            <li><a href="{{ url('/') }}"><i class="fa fa-home"></i> Início</a></li>
-            <li class="separator"><i class="fa fa-chevron-right"></i></li>
-            @if(isset($category))
-                <li><a href="{{ route('quizzes.index') }}">Quizzes</a></li>
-                <li class="separator"><i class="fa fa-chevron-right"></i></li>
-                <li class="current">{{ $category->name }}</li>
-            @else
-                <li class="current">Quizzes Jurídicos</li>
-            @endif
-        </ol>
-    </div>
-</nav>
-
-<!-- Page Header -->
-<div class="quiz-page-header">
-    <div class="quiz-page-header-content">
-        <h1 class="quiz-page-title">
-            @if(isset($category))
-                Quizzes de {{ $category->name }}
-            @else
-                Quizzes Jurídicos
-            @endif
-        </h1>
-        <p class="quiz-page-subtitle">
-            Teste seus conhecimentos sobre jurisprudência vinculante do STF e STJ. 
-            Cada quiz possui questões baseadas em teses de repercussão geral e recursos repetitivos.
-        </p>
-    </div>
-</div>
-
-<!-- Main Content -->
-<div class="quiz-main-content">
-    <div class="quiz-layout">
-        <!-- Sidebar -->
-        <aside class="quiz-sidebar">
-            <div class="filter-card">
-                <h3 class="filter-card-title">
-                    <i class="fa fa-filter"></i> Filtros
-                </h3>
-                
-                <h4 class="filter-section-title">Categoria</h4>
-                <ul class="filter-list">
-                    <li>
-                        <a href="{{ route('quizzes.index') }}" class="{{ !isset($category) && !request('tribunal') && !request('dificuldade') ? 'active' : '' }}">
-                            <span>Todas as categorias</span>
-                        </a>
-                    </li>
-                    @foreach($categories as $cat)
-                        @if($cat->quizzes_count > 0)
-                        <li>
-                            <a href="{{ route('quizzes.category', $cat->slug) }}" class="{{ isset($category) && $category->id == $cat->id ? 'active' : '' }}">
-                                <span>{{ $cat->name }}</span>
-                                <span class="filter-count">{{ $cat->quizzes_count }}</span>
-                            </a>
-                        </li>
-                        @endif
-                    @endforeach
-                </ul>
-                
-                <h4 class="filter-section-title">Tribunal</h4>
-                <ul class="filter-list">
-                    @foreach(['STF', 'STJ', 'TST', 'TNU'] as $tribunal)
-                    <li>
-                        <a href="{{ route('quizzes.index', array_merge(request()->except('tribunal'), ['tribunal' => $tribunal])) }}" 
-                           class="{{ request('tribunal') == $tribunal ? 'active' : '' }}">
-                            <span>{{ $tribunal }}</span>
-                        </a>
-                    </li>
-                    @endforeach
-                </ul>
-                
-                <h4 class="filter-section-title">Dificuldade</h4>
-                <ul class="filter-list">
-                    <li>
-                        <a href="{{ route('quizzes.index', array_merge(request()->except('dificuldade'), ['dificuldade' => 'easy'])) }}" 
-                           class="{{ request('dificuldade') == 'easy' ? 'active' : '' }}">
-                            <span><span class="difficulty-dot easy"></span> Fácil</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('quizzes.index', array_merge(request()->except('dificuldade'), ['dificuldade' => 'medium'])) }}" 
-                           class="{{ request('dificuldade') == 'medium' ? 'active' : '' }}">
-                            <span><span class="difficulty-dot medium"></span> Intermediário</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('quizzes.index', array_merge(request()->except('dificuldade'), ['dificuldade' => 'hard'])) }}" 
-                           class="{{ request('dificuldade') == 'hard' ? 'active' : '' }}">
-                            <span><span class="difficulty-dot hard"></span> Difícil</span>
-                        </a>
-                    </li>
-                </ul>
-                
-                @if(request()->hasAny(['tribunal', 'dificuldade']) || isset($category))
-                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e9ecef;">
-                    <a href="{{ route('quizzes.index') }}" class="btn btn-outline-secondary btn-sm btn-block">
-                        <i class="fa fa-times"></i> Limpar Filtros
-                    </a>
-                </div>
-                @endif
-            </div>
-        </aside>
+    <div class="tw-container tw-mx-auto tw-px-4 tw-py-8 tw-max-w-7xl">
         
-        <!-- Quiz List -->
-        <main class="quiz-content">
-            <div class="quiz-grid-header">
-                <h2 class="quiz-grid-title">
-                    @if(isset($category))
-                        Quizzes de {{ $category->name }}
-                    @elseif(request('tribunal'))
-                        Quizzes do {{ request('tribunal') }}
-                    @elseif(request('dificuldade'))
-                        Quizzes - Nível {{ request('dificuldade') == 'easy' ? 'Fácil' : (request('dificuldade') == 'medium' ? 'Intermediário' : 'Difícil') }}
-                    @else
-                        Todos os Quizzes
-                    @endif
-                </h2>
-                <span class="quiz-grid-count">
-                    {{ $quizzes->total() }} quiz{{ $quizzes->total() != 1 ? 'zes' : '' }} encontrado{{ $quizzes->total() != 1 ? 's' : '' }}
-                </span>
-            </div>
+        <!-- Breadcrumbs -->
+        <nav class="tw-flex tw-text-sm tw-text-slate-500 tw-mb-8" aria-label="Breadcrumb">
+            <ol class="tw-inline-flex tw-items-center tw-space-x-1 md:tw-space-x-3">
+                <li class="tw-inline-flex tw-items-center">
+                    <a href="{{ url('/') }}" class="tw-inline-flex tw-items-center tw-text-slate-500 hover:tw-text-brand-600">
+                        <i class="fa fa-home tw-mr-2"></i> Início
+                    </a>
+                </li>
+                <li>
+                    <div class="tw-flex tw-items-center">
+                        <i class="fa fa-chevron-right tw-text-slate-400 tw-text-xs tw-mx-2"></i>
+                        @if(isset($category))
+                            <a href="{{ route('quizzes.index') }}" class="tw-text-slate-500 hover:tw-text-brand-600">Quizzes</a>
+                            <i class="fa fa-chevron-right tw-text-slate-400 tw-text-xs tw-mx-2"></i>
+                            <span class="tw-text-slate-700 tw-font-medium">{{ $category->name }}</span>
+                        @else
+                            <span class="tw-text-slate-700 tw-font-medium">Quizzes Jurídicos</span>
+                        @endif
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="tw-mb-8">
+            <h1 class="tw-text-3xl tw-font-bold tw-text-slate-900 tw-mb-2">
+                @if(isset($category))
+                    Quizzes de {{ $category->name }}
+                @else
+                    Quizzes Jurídicos
+                @endif
+            </h1>
+            <p class="tw-text-slate-600 tw-text-lg tw-max-w-3xl">
+                Teste seus conhecimentos sobre jurisprudência vinculante do STF e STJ. 
+                Cada quiz possui questões baseadas em teses de repercussão geral e recursos repetitivos.
+            </p>
+        </div>
+
+        <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-4 tw-gap-8">
             
-            @if($quizzes->count() > 0)
-                <div class="quiz-grid">
-                    @foreach($quizzes as $quiz)
-                        <article class="quiz-card">
-                            <div class="quiz-card-header" style="background-color: #5c80d1;">
-                                @if($quiz->category)
-                                    <span class="quiz-card-category">{{ $quiz->category->name }}</span>
-                                @endif
-                                <h3 class="quiz-card-title">{{ $quiz->title }}</h3>
-                            </div>
-                            <div class="quiz-card-body">
-                                <p class="quiz-card-description">
-                                    {{ Str::limit($quiz->description, 120) }}
-                                </p>
-                                <div class="quiz-card-meta">
-                                    @if($quiz->tribunal)
-                                        <span class="quiz-meta-item">
-                                            <i class="fa fa-gavel"></i> {{ $quiz->tribunal }}
+            <!-- Sidebar Filters -->
+            <aside class="tw-space-y-6">
+                <div class="tw-bg-white tw-rounded-xl tw-shadow-sm tw-border tw-border-slate-200 tw-overflow-hidden">
+                    <div class="tw-p-5 tw-border-b tw-border-slate-100">
+                        <h3 class="tw-font-semibold tw-text-slate-800 tw-flex tw-items-center tw-gap-2">
+                            <i class="fa fa-filter tw-text-brand-500"></i> Filtros
+                        </h3>
+                    </div>
+                    
+                    <div class="tw-p-5 tw-space-y-6">
+                        <!-- Category Filter -->
+                        <div>
+                            <h4 class="tw-text-xs tw-font-bold tw-text-slate-400 tw-uppercase tw-tracking-wider tw-mb-3">Categoria</h4>
+                            <ul class="tw-space-y-1">
+                                <li>
+                                    <a href="{{ route('quizzes.index') }}" 
+                                       class="tw-flex tw-items-center tw-justify-between tw-px-3 tw-py-2 tw-rounded-lg tw-text-sm tw-transition-colors {{ !isset($category) && !request('tribunal') && !request('dificuldade') ? 'tw-bg-brand-50 tw-text-brand-700 tw-font-medium' : 'tw-text-slate-600 hover:tw-bg-slate-50 hover:tw-text-brand-600' }}">
+                                        <span>Todas as categorias</span>
+                                    </a>
+                                </li>
+                                @foreach($categories as $cat)
+                                    @if($cat->quizzes_count > 0)
+                                    <li>
+                                        <a href="{{ route('quizzes.category', $cat->slug) }}" 
+                                           class="tw-flex tw-items-center tw-justify-between tw-px-3 tw-py-2 tw-rounded-lg tw-text-sm tw-transition-colors {{ isset($category) && $category->id == $cat->id ? 'tw-bg-brand-50 tw-text-brand-700 tw-font-medium' : 'tw-text-slate-600 hover:tw-bg-slate-50 hover:tw-text-brand-600' }}">
+                                            <span>{{ $cat->name }}</span>
+                                            <span class="tw-bg-slate-100 tw-text-slate-500 tw-px-2 tw-py-0.5 tw-rounded-full tw-text-xs tw-font-medium group-hover:tw-bg-brand-100 group-hover:tw-text-brand-600">{{ $cat->quizzes_count }}</span>
+                                        </a>
+                                    </li>
+                                    @endif
+                                @endforeach
+                            </ul>
+                        </div>
+
+                        <!-- Tribunal Filter -->
+                        <div>
+                            <h4 class="tw-text-xs tw-font-bold tw-text-slate-400 tw-uppercase tw-tracking-wider tw-mb-3">Tribunal</h4>
+                            <ul class="tw-space-y-1">
+                                @foreach(['STF', 'STJ', 'TST', 'TNU'] as $tribunal)
+                                <li>
+                                    <a href="{{ route('quizzes.index', array_merge(request()->except('tribunal'), ['tribunal' => $tribunal])) }}" 
+                                       class="tw-flex tw-items-center tw-justify-between tw-px-3 tw-py-2 tw-rounded-lg tw-text-sm tw-transition-colors {{ request('tribunal') == $tribunal ? 'tw-bg-brand-50 tw-text-brand-700 tw-font-medium' : 'tw-text-slate-600 hover:tw-bg-slate-50 hover:tw-text-brand-600' }}">
+                                        <span>{{ $tribunal }}</span>
+                                    </a>
+                                </li>
+                                @endforeach
+                            </ul>
+                        </div>
+
+                        <!-- Difficulty Filter -->
+                        <div>
+                            <h4 class="tw-text-xs tw-font-bold tw-text-slate-400 tw-uppercase tw-tracking-wider tw-mb-3">Dificuldade</h4>
+                            <ul class="tw-space-y-1">
+                                <li>
+                                    <a href="{{ route('quizzes.index', array_merge(request()->except('dificuldade'), ['dificuldade' => 'easy'])) }}" 
+                                       class="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-rounded-lg tw-text-sm tw-transition-colors {{ request('dificuldade') == 'easy' ? 'tw-bg-brand-50 tw-text-brand-700 tw-font-medium' : 'tw-text-slate-600 hover:tw-bg-slate-50 hover:tw-text-brand-600' }}">
+                                        <span class="tw-w-2 tw-h-2 tw-rounded-full tw-bg-emerald-500"></span>
+                                        <span>Fácil</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('quizzes.index', array_merge(request()->except('dificuldade'), ['dificuldade' => 'medium'])) }}" 
+                                       class="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-rounded-lg tw-text-sm tw-transition-colors {{ request('dificuldade') == 'medium' ? 'tw-bg-brand-50 tw-text-brand-700 tw-font-medium' : 'tw-text-slate-600 hover:tw-bg-slate-50 hover:tw-text-brand-600' }}">
+                                        <span class="tw-w-2 tw-h-2 tw-rounded-full tw-bg-amber-500"></span>
+                                        <span>Intermediário</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('quizzes.index', array_merge(request()->except('dificuldade'), ['dificuldade' => 'hard'])) }}" 
+                                       class="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-rounded-lg tw-text-sm tw-transition-colors {{ request('dificuldade') == 'hard' ? 'tw-bg-brand-50 tw-text-brand-700 tw-font-medium' : 'tw-text-slate-600 hover:tw-bg-slate-50 hover:tw-text-brand-600' }}">
+                                        <span class="tw-w-2 tw-h-2 tw-rounded-full tw-bg-rose-500"></span>
+                                        <span>Difícil</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    @if(request()->hasAny(['tribunal', 'dificuldade']) || isset($category))
+                    <div class="tw-p-4 tw-bg-slate-50 tw-border-t tw-border-slate-100">
+                        <a href="{{ route('quizzes.index') }}" class="tw-block tw-w-full tw-py-2 tw-px-4 tw-bg-white tw-border tw-border-slate-300 tw-rounded-lg tw-text-slate-700 tw-text-sm tw-font-medium tw-text-center hover:tw-bg-slate-50 hover:tw-text-slate-900 tw-transition-colors">
+                            <i class="fa fa-times tw-mr-1"></i> Limpar Filtros
+                        </a>
+                    </div>
+                    @endif
+                </div>
+            </aside>
+
+            <!-- Quiz Grid -->
+            <main class="lg:tw-col-span-3">
+                <div class="tw-flex tw-items-center tw-justify-between tw-mb-6">
+                    <h2 class="tw-text-xl tw-font-bold tw-text-slate-800">
+                        @if(isset($category))
+                            Quizzes de {{ $category->name }}
+                        @elseif(request('tribunal'))
+                            Quizzes do {{ request('tribunal') }}
+                        @elseif(request('dificuldade'))
+                            Quizzes - Nível {{ request('dificuldade') == 'easy' ? 'Fácil' : (request('dificuldade') == 'medium' ? 'Intermediário' : 'Difícil') }}
+                        @else
+                            Todos os Quizzes
+                        @endif
+                    </h2>
+                    <span class="tw-text-sm tw-font-medium tw-text-slate-500 tw-bg-white tw-px-3 tw-py-1 tw-rounded-full tw-border tw-border-slate-200">
+                        {{ $quizzes->total() }} quiz{{ $quizzes->total() != 1 ? 'zes' : '' }}
+                    </span>
+                </div>
+
+                @if($quizzes->count() > 0)
+                    <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-2 xl:tw-grid-cols-3 tw-gap-6">
+                        @foreach($quizzes as $quiz)
+                            <article class="tw-bg-white tw-rounded-xl tw-shadow-sm tw-border tw-border-slate-200 tw-overflow-hidden tw-flex tw-flex-col tw-h-full hover:tw-shadow-md hover:tw-border-brand-200 tw-transition-all tw-duration-300 group">
+                                <div class="tw-px-6 tw-pt-6 tw-pb-4 tw-bg-brand-600 tw-bg-gradient-to-br tw-from-brand-600 tw-to-brand-700 tw-text-white tw-relative tw-overflow-hidden">
+                                    <div class="tw-absolute tw-top-0 tw-right-0 tw-p-8 tw-opacity-10 tw-transform tw-translate-x-1/4 tw--translate-y-1/4">
+                                        <i class="fa fa-graduation-cap tw-text-9xl"></i>
+                                    </div>
+                                    
+                                    @if($quiz->category)
+                                        <span class="tw-inline-block tw-bg-white/20 tw-backdrop-blur-sm tw-px-2.5 tw-py-1 tw-rounded tw-text-xs tw-font-bold tw-uppercase tw-tracking-wide tw-mb-3">
+                                            {{ $quiz->category->name }}
                                         </span>
                                     @endif
-                                    <span class="quiz-meta-item">
-                                        <i class="fa fa-list-ol"></i> {{ $quiz->questions_count }} questões
-                                    </span>
-                                    <span class="quiz-meta-item">
-                                        <i class="fa fa-clock-o"></i> ~{{ $quiz->estimated_time }} min
-                                    </span>
-                                    <span class="quiz-meta-item difficulty-{{ $quiz->difficulty }}">
-                                        <i class="fa fa-signal"></i> {{ $quiz->difficulty_label }}
-                                    </span>
+                                    
+                                    <h3 class="tw-text-lg tw-font-bold tw-leading-snug tw-mb-1 tw-relative tw-z-10 group-hover:tw-underline">
+                                        <a href="{{ route('quiz.show', $quiz->slug) }}" class="focus:tw-outline-none">
+                                            <span class="tw-absolute tw-inset-0"></span>
+                                            {{ $quiz->title }}
+                                        </a>
+                                    </h3>
                                 </div>
-                            </div>
-                            <div class="quiz-card-footer">
-                                <a href="{{ route('quiz.show', $quiz->slug) }}" class="quiz-start-btn" style="background-color: #5c80d1;">
-                                    <i class="fa fa-play"></i> Iniciar Quiz
-                                </a>
-                            </div>
-                        </article>
-                    @endforeach
-                </div>
-                
-                <!-- Pagination -->
-                @if($quizzes->hasPages())
-                <div class="quiz-pagination">
-                    {{ $quizzes->appends(request()->query())->links() }}
-                </div>
+                                
+                                <div class="tw-p-6 tw-flex-1 tw-flex tw-flex-col">
+                                    <p class="tw-text-slate-600 tw-text-sm tw-leading-relaxed tw-mb-6 tw-flex-1">
+                                        {{ Str::limit($quiz->description, 120) }}
+                                    </p>
+                                    
+                                    <div class="tw-flex tw-flex-wrap tw-gap-3 tw-text-xs tw-font-medium tw-text-slate-500 tw-pt-4 tw-border-t tw-border-slate-100">
+                                        @if($quiz->tribunal)
+                                            <span class="tw-flex tw-items-center tw-gap-1">
+                                                <i class="fa fa-gavel tw-text-slate-400"></i> {{ $quiz->tribunal }}
+                                            </span>
+                                        @endif
+                                        <span class="tw-flex tw-items-center tw-gap-1">
+                                            <i class="fa fa-list-ol tw-text-slate-400"></i> {{ $quiz->questions_count }} questões
+                                        </span>
+                                        <span class="tw-flex tw-items-center tw-gap-1">
+                                            <i class="fa fa-clock-o tw-text-slate-400"></i> ~{{ $quiz->estimated_time }} min
+                                        </span>
+                                        
+                                        @php
+                                            $diffColor = match($quiz->difficulty) {
+                                                'easy' => 'tw-text-emerald-600',
+                                                'medium' => 'tw-text-amber-600',
+                                                'hard' => 'tw-text-rose-600',
+                                                default => 'tw-text-slate-600'
+                                            };
+                                        @endphp
+                                        <span class="tw-flex tw-items-center tw-gap-1 {{ $diffColor }}">
+                                            <i class="fa fa-signal"></i> {{ $quiz->difficulty_label }}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="tw-px-6 tw-pb-6">
+                                    <a href="{{ route('quiz.show', $quiz->slug) }}" 
+                                       class="tw-inline-flex tw-items-center tw-justify-center tw-w-full tw-px-4 tw-py-2.5 tw-bg-slate-50 tw-text-brand-700 tw-font-semibold tw-rounded-lg tw-border tw-border-slate-200 hover:tw-bg-brand-600 hover:tw-text-white hover:tw-border-brand-600 tw-transition-colors group-hover:tw-bg-brand-50 group-hover:tw-text-brand-700">
+                                        <i class="fa fa-play tw-mr-2 tw-text-xs"></i> Iniciar Quiz
+                                    </a>
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                    
+                    <!-- Pagination -->
+                    @if($quizzes->hasPages())
+                    <div class="tw-mt-8 tw-flex tw-justify-center">
+                        {{ $quizzes->appends(request()->query())->links() }} 
+                        <!-- Note: Pagination view might need update too, or used standard simple-tailwind -->
+                    </div>
+                    @endif
+                @else
+                    <div class="tw-bg-white tw-rounded-xl tw-shadow-sm tw-border tw-border-slate-200 tw-p-12 tw-text-center">
+                        <div class="tw-inline-flex tw-items-center tw-justify-center tw-w-20 tw-h-20 tw-rounded-full tw-bg-slate-100 tw-mb-6">
+                            <i class="fa fa-search tw-text-3xl tw-text-slate-400"></i>
+                        </div>
+                        <h3 class="tw-text-lg tw-font-bold tw-text-slate-900 tw-mb-2">Nenhum quiz encontrado</h3>
+                        <p class="tw-text-slate-500 tw-mb-8">Não encontramos quizzes com os filtros selecionados. Tente ajustar sua busca.</p>
+                        <a href="{{ route('quizzes.index') }}" class="tw-inline-flex tw-items-center tw-px-6 tw-py-3 tw-bg-brand-600 tw-text-white tw-font-semibold tw-rounded-lg hover:tw-bg-brand-700 tw-transition-colors">
+                            <i class="fa fa-refresh tw-mr-2"></i> Limpar Filtros
+                        </a>
+                    </div>
                 @endif
-            @else
-                <div class="quiz-empty-state">
-                    <i class="fa fa-graduation-cap"></i>
-                    <h4>Nenhum quiz encontrado</h4>
-                    <p>Não encontramos quizzes com os filtros selecionados. Tente ajustar sua busca.</p>
-                    <a href="{{ route('quizzes.index') }}" class="btn btn-primary">
-                        <i class="fa fa-refresh"></i> Ver todos os quizzes
-                    </a>
-                </div>
-            @endif
-        </main>
+            </main>
+        </div>
     </div>
-</div>
 @endsection

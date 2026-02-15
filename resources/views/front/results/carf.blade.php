@@ -2,14 +2,13 @@
 
 @section('sumulas_total_text')
     @if (empty($output['sumula']['total']))
-        <span id="trib-sum-num">Nenhum enunciado encontrado 
+        <span class="tw-text-slate-600">Nenhum enunciado encontrado</span>
     @elseif ($output['sumula']['total'] == 1)
-        <span class="text-primary font-w700" id="trib-sum-num">1</span> enunciado encontrado 
+        <span class="tw-font-bold tw-text-brand-700">1</span> <span class="tw-text-slate-600">enunciado encontrado</span>
     @else
-        <span class="text-primary font-w700" id="trib-sum-num">{{ $output['sumula']['total'] }}</span> enunciados encontrados 
+        <span class="tw-font-bold tw-text-brand-700">{{ $output['sumula']['total'] }}</span> <span class="tw-text-slate-600">enunciados encontrados</span>
     @endif
-        no CARF para <mark class="text-danger trib-keyword">{{ $keyword }}</mark>
-    </span>
+    <span class="tw-text-slate-600">no CARF para</span> <mark class="tw-bg-brand-100 tw-text-brand-800 tw-px-1 tw-rounded tw-font-semibold">{{ $keyword }}</mark>
 @endsection
 
 @section('sumulas_inner_table')

@@ -77,7 +77,61 @@ class TemaPageController extends Controller
         // Gerar meta description dinâmica otimizada para SEO
         $description = $this->generateMetaDescription($label, $output);
 
-        $html = view('front.tema', compact('id', 'keyword', 'label', 'output', 'display_pdf', 'description', 'concept', 'concept_validated_at', 'related_themes'));
+        // Prepare collections for view
+        $sumulas = collect([]);
+        $teses = collect([]);
+
+        foreach ($output as $tribunal => $data) {
+            if (! is_array($data) || $tribunal === 'total_count') {
+                continue;
+            }
+
+            $tribunal_upper = strtoupper($tribunal);
+
+            // Sumulas
+            if (isset($data['sumula']['results']) && is_array($data['sumula']['results'])) {
+                foreach ($data['sumula']['results'] as $item) {
+                    $item->tribunal = $tribunal_upper;
+                    $sumulas->push($item);
+                }
+            }
+
+            // Teses
+            if (isset($data['tese']['results']) && is_array($data['tese']['results'])) {
+                foreach ($data['tese']['results'] as $item) {
+                    $item->tribunal = $tribunal_upper;
+                    $teses->push($item);
+                }
+            }
+            // Repercussao (STF) -> treat as Teses
+            if (isset($data['repercussao']['results']) && is_array($data['repercussao']['results'])) {
+                foreach ($data['repercussao']['results'] as $item) {
+                    $item->tribunal = $tribunal_upper;
+                    $teses->push($item);
+                }
+            }
+            // Repetitivos (STJ) -> treat as Teses
+            if (isset($data['repetitivos']['results']) && is_array($data['repetitivos']['results'])) {
+                foreach ($data['repetitivos']['results'] as $item) {
+                    $item->tribunal = $tribunal_upper;
+                    $teses->push($item);
+                }
+            }
+        }
+
+        $related_temas = $related_themes; // Alias to match view variable name
+
+        $admin = false;
+        if (auth()->check()) {
+            $useremail = auth()->user()->email;
+            if (in_array($useremail, ['mauluis@gmail.com', 'trator70@gmail.com', 'ivanaredler@gmail.com'])) {
+                $admin = true;
+            }
+        }
+
+        $concept_validated = ! empty($concept_validated_at);
+
+        $html = view('front.tema', compact('id', 'keyword', 'label', 'output', 'display_pdf', 'description', 'concept', 'concept_validated_at', 'concept_validated', 'related_themes', 'admin', 'sumulas', 'teses', 'related_temas'));
 
         return $html;
 

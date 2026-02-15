@@ -6,151 +6,112 @@
 
     <!-- Page Content -->
 
-    <div class="home-pilot-shell tw-pt-4">
-        <section class="home-pilot-card tw-p-5 md:tw-p-6 tw-space-y-2">
-            <h1 class="home-pilot-title tw-m-0">{{ $label }}</h1>
-            <p class="home-pilot-subtitle tw-m-0">
-                Faça uma <a href="{{ route('searchpage') }}" class="tw-text-brand-700 hover:tw-text-brand-800">pesquisa</a> ou veja as
-                <a href="{{ route('alltemaspage') }}" class="tw-text-brand-700 hover:tw-text-brand-800">pesquisas prontas</a>.
-                @if ($admin)
-                    <br><a href="{{ route('admin') }}" class="tw-text-brand-700 hover:tw-text-brand-800">Admin</a>
-                @endif
-            </p>
+    <!-- Page Content -->
+
+    <div class="tw-max-w-5xl tw-mx-auto tw-px-4 tw-pt-6 md:tw-pt-8">
+        <section class="tw-bg-white tw-shadow-sm tw-rounded-xl tw-p-6 md:tw-p-8 tw-space-y-3 tw-border tw-border-slate-200">
+            <div class="tw-flex tw-items-center tw-gap-3 tw-mb-2">
+                 <span class="tw-px-2.5 tw-py-0.5 tw-rounded-full tw-text-xs tw-font-medium tw-bg-brand-100 tw-text-brand-800">Súmula</span>
+                 <span class="tw-text-slate-500 tw-text-sm">{{ $tribunal }}</span>
+            </div>
+            <h1 class="tw-text-2xl md:tw-text-3xl tw-font-bold tw-text-slate-800 tw-m-0">{{ $sumula->titulo }}</h1>
+            @if(isset($sumula->isCancelada) && $sumula->isCancelada)
+                <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-px-3 tw-py-1 tw-rounded-full tw-text-sm tw-font-medium tw-bg-red-100 tw-text-red-800">
+                    <i class="fa fa-ban"></i> CANCELADO / REVOGADA
+                </div>
+            @endif
         </section>
     </div>
     <!-- END Hero -->
 
     <!-- Breadcrumb -->
     @if(isset($breadcrumb))
-    <div class="home-pilot-shell tw-pt-2 tw-pb-0">
+    <div class="tw-max-w-5xl tw-mx-auto tw-px-4 tw-pt-4 tw-pb-2">
         <x-breadcrumb :items="$breadcrumb" />
     </div>
     @endif
     <!-- END Breadcrumb -->
 
-    <div class="home-pilot-shell tw-pt-2" id="content-results">
+    <div class="tw-max-w-5xl tw-mx-auto tw-px-4 tw-pb-10" id="content-results">
 
-        <!-- Results -->
-
-        <div class="home-pilot-card tw-p-5 md:tw-p-6">
-            <div>
-
-
-                <div role="tabpanel">
-
-                    <div class="home-results-count trib-texto-quantidade">
-                        {{ $tribunal_nome_completo }} - {{ $tribunal }}
-                    </div>
-
-                    <table class="home-results-table table-results table-sumula">
-
-                        <tbody>
-
-                            <tr>
-                                <td>
-                                    <h4 class="tw-text-lg tw-font-semibold tw-mt-0 tw-mb-2 tw-text-brand-700">
-                                        @if (!empty($sumula->link))
-                                            <a href="{{ $sumula->link }}" target="_blank">
-                                                {{ $sumula->titulo }}
-                                            </a>
-                                        @else
-                                            {{ $sumula->titulo }}
-                                        @endif
-                                    </h4>
-                                    <p class="tw-font-semibold">
-                                        {{ $sumula->texto }}
-                                    </p>
-
-                                    @if (!empty($sumula->obs))
-                                        <p class="tw-text-slate-500 tw-text-sm">
-                                            {{ $sumula->obs }}
-                                        </p>
-                                    @endif
-
-                                    @if (!empty($sumula->isCancelada) && $sumula->isCancelada)
-                                        <p class="tw-text-red-700 tw-text-sm tw-font-medium">
-                                            SÚMULA CANCELADA
-                                        </p>
-                                    @endif
-
-                                    <span class="tw-text-slate-500 tw-text-sm tw-flex tw-justify-end">
-                                        {{ $sumula->tempo }}
-                                    </span>
-
-                                    @if (empty($sumula->isCancelada))
-                                        <button class="btn-copy-text tw-mt-2">
-                                            <span>
-                                                <i class="fa fa-copy"></i>
-                                            </span>
-                                        </button>
-                                        <span class="tes-clear tes-text-to-be-copied" style="display: none"
-                                            data-spec="trim">{{ $sumula->to_be_copied }}
-                                        </span>
-                                    @endif
-
-                                </td>
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                    <div role="tabpanel">
-                        <table class="home-results-table table-results">
-                            <tbody>
-                                @if (!empty($sumula->legis))
-                                    <tr>
-                                        <td>
-                                            <h4 class="tw-text-base tw-font-semibold tw-mt-0 tw-mb-2">
-                                                Referência Legislativa
-                                            </h4>
-                                            <p>
-                                                {{ $sumula->legis }}
-                                            </p>
-                                        </td>
-                                    </tr>
-                                @endif
-                                @if (!empty($sumula->precedentes))
-                                    <tr>
-                                        <td>
-                                            <h4 class="tw-text-base tw-font-semibold tw-mt-0 tw-mb-2">
-                                                Precedentes
-                                            </h4>
-                                            <p>
-                                                {{ $sumula->precedentes }}
-                                            </p>
-                                        </td>
-                                    </tr>
-                                @endif
-                                @if (!empty($sumula->link))
-                                    <tr>
-                                        <td>
-                                            <p>
-                                                Consulte a súmula no site do tribunal:
-                                                <a href="{{ $sumula->link }}" target="_blank" class="tw-text-brand-700 hover:tw-text-brand-800">
-                                                    {{ $sumula->link }}
-                                                </a>
-                                            </p>
-                                        </td>
-                                    </tr>
-                                @endif
-                            </tbody>
-                        </table>
-                    </div>
-
+        <div class="tw-bg-white tw-shadow-sm tw-rounded-xl tw-border tw-border-slate-200 tw-overflow-hidden">
+            <div class="tw-p-6 md:tw-p-8">
+                
+                <!-- Tools -->
+                <div class="tw-flex tw-flex-wrap tw-gap-3 tw-mb-6 tw-justify-end">
+                     <button class="btn-copy-text" data-clipboard-text="{{ $sumula->to_be_copied }}">
+                        <i class="fa fa-copy tw-mr-1.5"></i> <span class="btn-text">Copiar Súmula</span>
+                    </button>
+                    <!-- WhatsApp Share -->
+                    <a href="https://api.whatsapp.com/send?text={{ urlencode($sumula->to_be_copied . ' ' . Request::url()) }}" 
+                       target="_blank"
+                       class="tw-inline-flex tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-green-200 tw-text-green-700 hover:tw-bg-green-50 tw-px-3 tw-py-1.5 tw-text-sm tw-transition">
+                        <i class="fab fa-whatsapp tw-mr-1.5"></i> Compartilhar
+                    </a>
                 </div>
+
+                <!-- Content -->
+                <div class="tw-prose tw-prose-slate tw-max-w-none tw-mb-8">
+                    <p class="tw-text-xl tw-font-serif tw-text-slate-800 tw-leading-relaxed">
+                        {{ $sumula->texto }}
+                    </p>
+                </div>
+
+                <!-- Meta Info Grid -->
+                <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-6 tw-bg-slate-50 tw-rounded-lg tw-p-6 tw-border tw-border-slate-200">
+                    
+                    @if(!empty($sumula->obs))
+                    <div>
+                        <h5 class="tw-text-sm tw-font-semibold tw-text-slate-500 tw-uppercase tw-tracking-wider tw-mb-2">
+                            Referência Legislativa/Observações
+                        </h5>
+                        <div class="tw-text-slate-700 tw-text-sm">
+                            {{ $sumula->obs }}
+                        </div>
+                    </div>
+                    @endif
+
+                    @if(!empty($sumula->precedentes))
+                    <div>
+                        <h5 class="tw-text-sm tw-font-semibold tw-text-slate-500 tw-uppercase tw-tracking-wider tw-mb-2">
+                            Precedentes
+                        </h5>
+                        <div class="tw-text-slate-700 tw-text-sm tw-whitespace-pre-line">
+                            {{ $sumula->precedentes }}
+                        </div>
+                    </div>
+                    @endif
+
+                    @if(!empty($sumula->tempo))
+                    <div class="md:tw-col-span-2">
+                        <h5 class="tw-text-sm tw-font-semibold tw-text-slate-500 tw-uppercase tw-tracking-wider tw-mb-2">
+                            Data
+                        </h5>
+                        <div class="tw-text-slate-700 tw-text-sm">
+                            {{ $sumula->tempo }}
+                        </div>
+                    </div>
+                    @endif
+
+                    @if(!empty($sumula->link))
+                    <div class="md:tw-col-span-2 tw-text-right">
+                        <a href="{{ $sumula->link }}" target="_blank" class="tw-inline-flex tw-items-center tw-gap-1 tw-text-brand-600 hover:tw-text-brand-800 tw-font-medium tw-text-sm">
+                            Ver no site do {{ $tribunal }} <i class="fa fa-external-link-alt tw-text-xs"></i>
+                        </a>
+                    </div>
+                    @endif
+                </div>
+
             </div>
-
-
         </div>
-
-        <!-- END Results -->
-
-        <div class="tw-mt-5 tw-pt-5 tw-border-t tw-border-slate-200 tw-text-center">
-            <a href="{{ route($allsumulasroute) }}" class="tw-inline-flex tw-items-center tw-gap-2 tw-text-brand-700 hover:tw-text-brand-800 tw-font-medium">
-                <i class="fa fa-arrow-left"></i> Súmulas do {{ $tribunal_nome_completo }}
-            </a>
+        
+        <!-- Admin Actions -->
+        @if($admin)
+        <div class="tw-mt-4 tw-text-right">
+            {{-- Add admin actions here if needed, keeping simple for now based on public view requirements --}}
         </div>
+        @endif
 
+    </div>
 
-    @endsection
+@endsection

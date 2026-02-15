@@ -5,142 +5,155 @@
 @section('content')
 
     <!-- Hero -->
-    <div class="bg-body-light" style="{{ $display_pdf }}">
-        <div class="content content-full">
-            <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
-                <h1 class="flex-sm-fill h3 my-2">
-                    <a href="{{ url('/') }}">
+    <div class="tw-bg-slate-50 tw-border-b tw-border-slate-200" style="{{ $display_pdf }}">
+        <div class="tw-max-w-5xl tw-mx-auto tw-px-4 tw-py-8 md:tw-py-12">
+            <div class="tw-flex tw-flex-col sm:tw-flex-row tw-justify-between tw-items-start sm:tw-items-center tw-gap-4 tw-mb-6">
+                <h1 class="tw-text-2xl md:tw-text-3xl tw-font-bold tw-text-slate-900 tw-m-0">
+                    <a href="{{ url('/') }}" class="hover:tw-text-brand-700 tw-transition-colors">
                         Teses & Súmulas
                     </a>
                 </h1>
                 <span>
                     <a href="https://chrome.google.com/webstore/detail/teses-e-s%C3%BAmulas/biigfejcdpcpibfmffgmmndpjhnlcjfb?hl=pt-BR"
-                        class="badge badge-primary">Extensão para o Chrome</a>
+                        class="tw-inline-flex tw-items-center tw-px-3 tw-py-1.5 tw-rounded-full tw-text-sm tw-font-medium tw-bg-brand-100 tw-text-brand-800 hover:tw-bg-brand-200 tw-transition-colors">
+                        Extensão para o Chrome
+                    </a>
                 </span>
             </div>
-            <p>
+            <p class="tw-text-slate-600 tw-text-lg tw-leading-relaxed tw-mb-8">
                 Veja aqui as últimas atualizações de teses e súmulas trazidas para o site.
             </p>
-            <h2>
-                Últimas Atualizações do Site
-            </h2>
-
-            <select id="dateFilter" class="form-control" style="width: auto;" multiple>
-                <option value="all">Todas as datas</option>
-                <!-- As datas serão populadas aqui via jQuery -->
-            </select>
+            
+            <div class="tw-flex tw-flex-col sm:tw-flex-row tw-items-start sm:tw-items-end tw-gap-4">
+                <div>
+                    <h2 class="tw-text-xl tw-font-semibold tw-text-slate-800 tw-mb-2">
+                        Últimas Atualizações do Site
+                    </h2>
+                    <select id="dateFilter" class="tw-form-select tw-rounded-lg tw-border-slate-300 tw-text-slate-700 focus:tw-border-brand-500 focus:tw-ring-brand-500 tw-w-full sm:tw-w-auto" multiple>
+                        <option value="all">Todas as datas</option>
+                        <!-- As datas serão populadas aqui via jQuery -->
+                    </select>
+                </div>
+            </div>
 
         </div>
     </div>
     <!-- END Hero -->
 
-    <div class="content">
-        <div class="block-content">
-            <div class="tab-pane fade fade-up active show" id="tema-stf" role="tabpanel">
+    <div class="tw-max-w-5xl tw-mx-auto tw-px-4 tw-py-8">
+        <div class="tw-space-y-8">
+            <div id="tema-stf">
                 @foreach ($tribunais as $tribunal => $log_types)
                     @php
                         $color = config('tes_constants.lista_tribunais.' . strtoupper($tribunal) . '.color');
+                        // Mapeamento de cores legadas para classes Tailwind aproximadas para manter identidade visual
+                        $bgClass = 'tw-bg-slate-100';
+                        $borderClass = 'tw-border-slate-200';
+                        $textClass = 'tw-text-slate-700';
+                        
+                        // Ajuste fino pode ser feito aqui se necessário, mas usando estilos inline para preservar cores específicas dos tribunais
+                        // caso o config retorne hexadecimais específicos.
                     @endphp
-                    <div class="tribunal-header font-size-h4 font-w600 p-2 mb-4 border-left border-4x bg-body-light trib-texto-quantidade"
+                    
+                    <div class="tribunal-header tw-bg-slate-50 tw-border-l-4 tw-p-4 tw-rounded-r-lg tw-mb-6 tw-flex tw-items-center tw-shadow-sm trib-texto-quantidade"
                         style="border-color: {{ $color }} !important;">
-                        {{ config('tes_constants.lista_tribunais.' . strtoupper($tribunal) . '.name') }} -
-                        {{ strtoupper($tribunal) }}
+                        <span class="tw-text-lg tw-font-bold tw-text-slate-800">
+                            {{ config('tes_constants.lista_tribunais.' . strtoupper($tribunal) . '.name') }} - {{ strtoupper($tribunal) }}
+                        </span>
                     </div>
 
                     @if (!empty($log_types['news']))
-                        <table class="table table-striped table-vcenter table-results"
-                            style="border: 1px solid {{ $color }};">
-                            <tbody>
-                                <tr class="header-row">
-                                    <td style="background: {{ $color }};">
-                                        <h4 class="h5 mt-3 mb-2" style="color: #fff;">
-                                            Novidades ({{ strtoupper($tribunal) }})
-                                        </h4>
-                                    </td>
-                                </tr>
+                        <div class="tw-mb-8 tw-overflow-hidden tw-rounded-xl tw-border tw-border-slate-200 tw-shadow-sm table-results" style="border-top: 4px solid {{ $color }};">
+                            <div class="header-row tw-bg-slate-50 tw-p-4 tw-border-b tw-border-slate-200">
+                                <h4 class="tw-text-lg tw-font-semibold tw-m-0" style="color: {{ $color }};">
+                                    Novidades ({{ strtoupper($tribunal) }})
+                                </h4>
+                            </div>
+                            
+                            <div class="tw-divide-y tw-divide-slate-200">
                                 @foreach ($log_types['news'] as $log)
-                                    <tr>
-                                        <td>
-                                            @if ($log->tipo == 'súmula')
-                                                <h4 class="h5 mt-3 mb-2">
-                                                    <a href="{{ $log->link }}" style="color: {{ $color }}">
-                                                        {{ $log->original->titulo }} - {{ strtoupper($tribunal) }}</a>
-                                                </h4>
-                                            @elseif($log->tipo == 'tese')
-                                                <h4 class="h5 mt-3 mb-2">
-                                                    <a href="{{ $log->link }}" style="color: {{ $color }}">
-                                                        Tema {{ $log->original->numero }} -
-                                                        {{ strtoupper($tribunal) }}</a>
-                                                </h4>
-                                            @endif
-                                            <p class="d-sm-block" style="font-weight: bold;">
-                                                {{ $log->original->texto }}
-                                            </p>
-                                            <div style="display: flex; justify-content: space-between;">
-                                                <span class="text-muted" style="font-size: 0.8em;"
-                                                    data-date="{{ date('d/m/Y', strtotime($log->created_at)) }}">
-                                                    {{ date('d/m/Y', strtotime($log->created_at)) }}
-                                                </span>
-                                                <span class="text-muted" style="font-size: 0.8em;">
-                                                    Acesse&nbsp; <a href="{{ $log->link }}"
-                                                        style="color: {{ $color }}"> aqui</a>.
-                                                </span>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    <div class="tw-p-4 md:tw-p-6 hover:tw-bg-slate-50 tw-transition-colors">
+                                        @if ($log->tipo == 'súmula')
+                                            <h4 class="tw-text-base md:tw-text-lg tw-font-semibold tw-mb-2">
+                                                <a href="{{ $log->link }}" class="hover:tw-underline" style="color: {{ $color }}">
+                                                    {{ $log->original->titulo }} - {{ strtoupper($tribunal) }}
+                                                </a>
+                                            </h4>
+                                        @elseif($log->tipo == 'tese')
+                                            <h4 class="tw-text-base md:tw-text-lg tw-font-semibold tw-mb-2">
+                                                <a href="{{ $log->link }}" class="hover:tw-underline" style="color: {{ $color }}">
+                                                    Tema {{ $log->original->numero }} - {{ strtoupper($tribunal) }}
+                                                </a>
+                                            </h4>
+                                        @endif
+                                        
+                                        <p class="tw-text-slate-700 tw-leading-relaxed tw-mb-3 tw-font-medium">
+                                            {{ $log->original->texto }}
+                                        </p>
+                                        
+                                        <div class="tw-flex tw-justify-between tw-items-center tw-text-sm tw-text-slate-500">
+                                            <span class="tw-shrink-0" data-date="{{ date('d/m/Y', strtotime($log->created_at)) }}">
+                                                <i class="fa fa-calendar-alt tw-mr-1"></i>
+                                                {{ date('d/m/Y', strtotime($log->created_at)) }}
+                                            </span>
+                                            <span class="tw-truncate tw-ml-4">
+                                                Acesse&nbsp; <a href="{{ $log->link }}" class="tw-font-medium hover:tw-underline" style="color: {{ $color }}">aqui</a>.
+                                            </span>
+                                        </div>
+                                    </div>
                                 @endforeach
-                            </tbody>
-                        </table>
+                            </div>
+                        </div>
                     @endif
 
                     @if (!empty($log_types['updates']))
-                        <table class="table table-striped table-vcenter table-results"
-                            style="border: 1px solid {{ $color }};">
-                            <tbody>
-                                <tr class="header-row">
-                                    <td style="background: {{ $color }}">
-                                        <h4 class="h5 mt-3 mb-2" style="color: #fff;">
-                                            Alterações ({{ strtoupper($tribunal) }})
-                                        </h4>
-                                    </td>
-                                </tr>
-                                @foreach ($log_types['updates'] as $log)
-                                    <tr>
-                                        <td>
-                                            <h4 class="h5 mt-3 mb-2">
-                                                <a href="{{ $log->link }}" style="color: {{ $color }}">
-                                                    @if ($log->tipo == 'súmula')
-                                                        Súmula {{ $log->numero }}
-                                                    @elseif($log->tipo == 'tese')
-                                                        Tema {{ $log->numero }}
-                                                    @endif
-                                                    - {{ strtoupper($tribunal) }}
-                                                </a>
-                                            </h4>
-                                            <span class="text-muted">
-                                                Objeto da Atualização: {{ $log->col_altered }}
-                                            </span>
-                                            <p class="d-sm-block" style="font-weight: bold;">
-                                                {{ $log->new_value }}
-                                            </p>
-                                            <div style="display: flex; justify-content: space-between;">
-                                                <span class="text-muted" style="font-size: 0.8em;"
-                                                    data-date="{{ date('d/m/Y', strtotime($log->updated_at)) }}">
-                                                    {{ date('d/m/Y', strtotime($log->updated_at)) }}
-                                                </span>
+                        <div class="tw-mb-8 tw-overflow-hidden tw-rounded-xl tw-border tw-border-slate-200 tw-shadow-sm table-results" style="border-top: 4px solid {{ $color }};">
+                            <div class="header-row tw-bg-slate-50 tw-p-4 tw-border-b tw-border-slate-200">
+                                <h4 class="tw-text-lg tw-font-semibold tw-m-0" style="color: {{ $color }};">
+                                    Alterações ({{ strtoupper($tribunal) }})
+                                </h4>
+                            </div>
 
-                                                <span class="text-muted" style="font-size: 0.8em;">
-                                                    Acesse&nbsp; <a href="{{ $log->link }}"
-                                                        style="color: {{ $color }}"> aqui</a>.
-                                                </span>
-                                            </div>
-                                        </td>
-                                    </tr>
+                            <div class="tw-divide-y tw-divide-slate-200">
+                                @foreach ($log_types['updates'] as $log)
+                                    <div class="tw-p-4 md:tw-p-6 hover:tw-bg-slate-50 tw-transition-colors">
+                                        <h4 class="tw-text-base md:tw-text-lg tw-font-semibold tw-mb-2">
+                                            <a href="{{ $log->link }}" class="hover:tw-underline" style="color: {{ $color }}">
+                                                @if ($log->tipo == 'súmula')
+                                                    Súmula {{ $log->numero }}
+                                                @elseif($log->tipo == 'tese')
+                                                    Tema {{ $log->numero }}
+                                                @endif
+                                                - {{ strtoupper($tribunal) }}
+                                            </a>
+                                        </h4>
+                                        
+                                        <div class="tw-text-sm tw-text-slate-500 tw-mb-2">
+                                            Objeto da Atualização: <span class="tw-font-medium tw-text-slate-700">{{ $log->col_altered }}</span>
+                                        </div>
+                                        
+                                        <p class="tw-text-slate-700 tw-leading-relaxed tw-mb-3 tw-font-medium">
+                                            {{ $log->new_value }}
+                                        </p>
+                                        
+                                        <div class="tw-flex tw-justify-between tw-items-center tw-text-sm tw-text-slate-500">
+                                            <span class="tw-shrink-0" data-date="{{ date('d/m/Y', strtotime($log->updated_at)) }}">
+                                                <i class="fa fa-calendar-alt tw-mr-1"></i>
+                                                {{ date('d/m/Y', strtotime($log->updated_at)) }}
+                                            </span>
+                                            <span class="tw-truncate tw-ml-4">
+                                                Acesse&nbsp; <a href="{{ $log->link }}" class="tw-font-medium hover:tw-underline" style="color: {{ $color }}">aqui</a>.
+                                            </span>
+                                        </div>
+                                    </div>
                                 @endforeach
-                            </tbody>
-                        </table>
+                            </div>
+                        </div>
                     @endif
-                    <hr>
+                    
+                    @if(!empty($log_types['news']) || !empty($log_types['updates']))
+                        <hr class="tw-border-slate-200 tw-my-8">
+                    @endif
                 @endforeach
             </div>
         </div>
@@ -158,7 +171,7 @@
             let dates = [];
 
             // Coletar todas as datas da página
-            $('span.text-muted[data-date]').each(function() {
+            $('span[data-date]').each(function() {
                 let currentDate = $(this).data('date');
                 if (!dates.includes(currentDate)) {
                     dates.push(currentDate);
@@ -182,32 +195,74 @@
                 let selectedDates = $(this).val();
 
                 if (selectedDates.includes("all")) {
-                    $('table.table-results tbody tr').show();
+                    // Mostrar tudo
+                    $('.table-results > div.tw-divide-y > div').show();
+                    $('.table-results').show();
                     $('.tribunal-header').show();
+                    $('hr.tw-border-slate-200').show();
                 } else {
-                    $('table.table-results tbody tr').not('.header-row').hide();
+                    // Esconder todos os itens individuais primeiro
+                    $('.table-results > div.tw-divide-y > div').hide();
 
-                    $('table.table-results tbody tr').each(function() {
-                        let rowDate = $(this).find('span.text-muted[data-date]').data('date');
+                    // Mostrar apenas os itens que correspondem à data
+                    $('.table-results > div.tw-divide-y > div').each(function() {
+                        let rowDate = $(this).find('span[data-date]').data('date');
                         if (selectedDates.includes(rowDate)) {
                             $(this).show();
                         }
                     });
 
-                    // Exibe os cabeçalhos se houver alguma linha visível após eles em cada tabela.
-                    $('table.table-results').each(function() {
-                        let $table = $(this);
-                        let $tribunalHeader = $table.prevAll('.tribunal-header').first();
-                        if ($table.find('tr:not(.header-row):visible').length > 0) {
-                            $table.find('tr.header-row').show();
+                    // Gerenciar visibilidade dos headers de tribunal e containers de resultados
+                    $('.table-results').each(function() {
+                        let $container = $(this);
+                        let $tribunalHeader = $container.prevAll('.tribunal-header').first();
+                        
+                        // Verifica se há itens visíveis dentro deste container
+                        if ($container.find('div.tw-divide-y > div:visible').length > 0) {
+                            $container.show();
                             $tribunalHeader.show();
                         } else {
-                            $table.find('tr.header-row').hide();
-                            if ($table.find('tr:visible').length === 0) {
-                                $tribunalHeader.hide();
-                            }
+                            $container.hide();
+                            // Só esconde o header do tribunal se TODOS os containers associados a ele estiverem vazios/escondidos
+                            // (Simplificação: assume estrutura linear par Header -> Container)
+                            // Na estrutura atual, cada loop cria Header -> (News Container) -> (Updates Container).
+                            // O Header deve sumir se ambos estiverem vazios.
+                            
+                            // Verificar se o container irmão (updates ou news) também está vazio
+                            // Essa lógica pode ser complexa via DOM traversal simples.
+                            // Alternativa: Re-verificar headers baseados na visibilidade dos seus containers próximos.
                         }
                     });
+                    
+                    // Varredura final para esconder headers órfãos e HRs
+                    $('.tribunal-header').each(function() {
+                        let $header = $(this);
+                        // Procura containers de resultado seguintes até o próximo header ou fim
+                        let $nextContainers = $header.nextUntil('.tribunal-header', '.table-results');
+                        
+                        // Se nenhum container visível seguir este header, esconde o header
+                        let hasVisibleContent = false;
+                        $nextContainers.each(function() {
+                            if ($(this).is(':visible')) hasVisibleContent = true;
+                        });
+                        
+                        if (hasVisibleContent) {
+                            $header.show();
+                        } else {
+                            $header.hide();
+                        }
+                    });
+                    
+                    // Esconder HRs se não houver conteúdo visível adjacente
+                     $('hr.tw-border-slate-200').each(function() {
+                        let $hr = $(this);
+                        let $prevContent = $hr.prevUntil('.tribunal-header').filter(':visible');
+                         if ($prevContent.length === 0) {
+                             $hr.hide();
+                         } else {
+                             $hr.show();
+                         }
+                     });
                 }
             });
         });

@@ -1,114 +1,31 @@
-@extends('front.base', ['display_pdf' => false])
+@extends('layouts.app')
 
 @section('page-title', 'Checkout Cancelado')
 
-@section('styles')
-<style>
-    .cancel-container {
-        max-width: 600px;
-        margin: 60px auto;
-        padding: 40px;
-        text-align: center;
-    }
-    
-    .cancel-icon {
-        width: 80px;
-        height: 80px;
-        margin: 0 auto 30px;
-        background: #f0f0f0;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #666;
-        font-size: 40px;
-    }
-    
-    .cancel-card {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        padding: 40px;
-    }
-    
-    .cancel-title {
-        font-size: 1.8rem;
-        color: #333;
-        margin-bottom: 15px;
-    }
-    
-    .cancel-message {
-        color: #666;
-        margin-bottom: 30px;
-        line-height: 1.6;
-    }
-    
-    .btn-primary {
-        display: inline-block;
-        padding: 15px 30px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        text-decoration: none;
-        border-radius: 8px;
-        font-weight: 600;
-        margin: 5px;
-        transition: opacity 0.2s ease;
-    }
-    .btn-primary:hover {
-        opacity: 0.9;
-        color: white;
-        text-decoration: none;
-    }
-    
-    .btn-secondary {
-        display: inline-block;
-        padding: 15px 30px;
-        background: #f0f0f0;
-        color: #333;
-        text-decoration: none;
-        border-radius: 8px;
-        font-weight: 600;
-        margin: 5px;
-        transition: background 0.2s ease;
-    }
-    .btn-secondary:hover {
-        background: #e0e0e0;
-        color: #333;
-        text-decoration: none;
-    }
-</style>
-@endsection
-
 @section('content')
-<!-- Hero -->
-<div class="bg-body-light">
-    <div class="content content-full">
-        <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
-            <h1 class="flex-sm-fill h3 my-2">
-                <a href="{{ url('/') }}">
-                Teses & Súmulas
+<div class="tw-max-w-7xl tw-mx-auto tw-py-16 tw-px-4 sm:tw-px-6 lg:tw-px-8">
+    <div class="tw-max-w-2xl tw-mx-auto tw-bg-white tw-shadow-lg tw-rounded-lg tw-overflow-hidden tw-border tw-border-slate-200">
+        <div class="tw-px-6 tw-py-10 sm:tw-px-10 tw-text-center">
+            <div class="tw-mx-auto tw-h-20 tw-w-20 tw-bg-slate-100 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-mb-8">
+                <svg class="tw-h-12 tw-w-12 tw-text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </div>
+            
+            <h1 class="tw-text-3xl tw-font-extrabold tw-text-slate-900 tw-mb-4">Checkout Cancelado</h1>
+            <p class="tw-text-lg tw-text-slate-600 tw-mb-10">
+                Você cancelou o processo de checkout.<br>
+                Nenhuma cobrança foi realizada.
+            </p>
+            
+            <div class="tw-flex tw-flex-col sm:tw-flex-row tw-justify-center tw-gap-4">
+                <a href="{{ route('subscription.plans') }}" class="tw-inline-flex tw-items-center tw-justify-center tw-px-6 tw-py-3 tw-border tw-border-transparent tw-text-base tw-font-medium tw-rounded-md tw-text-white tw-bg-brand-600 hover:tw-bg-brand-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-brand-500 tw-transition-colors text-decoration-none">
+                    Ver planos novamente
                 </a>
-            </h1>
-        </div>
-    </div>
-</div>
-<!-- END Hero -->
-
-<div class="cancel-container">
-    <div class="cancel-card">
-        <div class="cancel-icon">✕</div>
-        <h1 class="cancel-title">Checkout Cancelado</h1>
-        <p class="cancel-message">
-            Você cancelou o processo de checkout.<br>
-            Nenhuma cobrança foi realizada.
-        </p>
-        <div>
-            <a href="{{ route('subscription.plans') }}" class="btn-primary">
-                Ver planos novamente
-            </a>
-            <a href="{{ route('searchpage') }}" class="btn-secondary">
-                Voltar ao site
-            </a>
+                <a href="{{ route('searchpage') }}" class="tw-inline-flex tw-items-center tw-justify-center tw-px-6 tw-py-3 tw-border tw-border-slate-300 tw-text-base tw-font-medium tw-rounded-md tw-text-slate-700 tw-bg-white hover:tw-bg-slate-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-brand-500 tw-transition-colors text-decoration-none">
+                    Voltar ao site
+                </a>
+            </div>
         </div>
     </div>
 </div>

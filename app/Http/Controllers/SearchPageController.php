@@ -90,6 +90,11 @@ class SearchPageController extends Controller
         $tribunal_upper = strtoupper($tribunal);
         $tribunal_array = $lista_tribunais[$tribunal_upper];
         $results_view = 'front.results.'.$tribunal_lower;
+
+        // Use Tailwind view for STJ (Migration in progress)
+        if (in_array($tribunal_lower, ['stj', 'tnu', 'stf', 'tst', 'tcu', 'carf', 'fonaje', 'cej'])) {
+            $results_view = 'front.results.'.$tribunal_lower;
+        }
         $output = [];
 
         // search in db (not through tribunal API)

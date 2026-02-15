@@ -1,21 +1,34 @@
 @foreach ($output['sumula']['hits'] as $sum)
-        @if(!empty($sum['trib_sum_vigente']) && $sum['trib_sum_vigente'] == 'false')
+    @if(!empty($sum['trib_sum_vigente']) && $sum['trib_sum_vigente'] == 'false')
         @continue
-        @endif     
-        <tr>
-        <td>
-            <h4 class="h5 mt-3 mb-2">
-            <a href="{{ $sum['trib_sum_url'] }}" target="_blank"> Súmula {{ $sum['trib_sum_numero'] }}</a>
+    @endif
+    <tr>
+        <td class="tw-block tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg tw-p-6 hover:tw-border-brand-300 hover:tw-shadow-sm tw-transition-all">
+            <h4 class="tw-text-lg tw-font-semibold tw-text-brand-700 tw-mb-3">
+                <a href="{{ $sum['trib_sum_url'] }}" target="_blank" class="hover:tw-text-brand-900 hover:tw-underline tw-transition-colors">
+                    Súmula {{ $sum['trib_sum_numero'] }} <i class="fa fa-external-link tw-ml-1 tw-text-sm"></i>
+                </a>
             </h4>
-            <p class="d-sm-block" style="font-weight: bold;">
-                {!! $sum['trib_sum_texto'] !!}
-            </p>
-            <span class="text-muted" style="display: flex;justify-content: flex-end;font-size: 0.8em;">Aprovada em {{ $sum['trib_sum_data'] }}</span>
-            <span class="tes-clear tes-text-to-be-copied" style="display: none" data-spec="trim">Súmula {{ $sum['trib_sum_numero'] }}. {!! $sum['trib_sum_texto'] !!} DATA DE APROVAÇÃO: {{ $sum['trib_sum_data'] }}.</span>
-            <button class="btn btn-rounded btn-outline-primary btn-sm mr-1 mb-3 btn-copy-text">
-            <span>
-              <i class="fa fa-copy"></i>
+            
+            <div class="tw-prose tw-prose-slate tw-max-w-none tw-mb-4">
+                <div class="tw-font-medium tw-text-slate-800">
+                    {!! $sum['trib_sum_texto'] !!}
+                </div>
+            </div>
+
+            <div class="tw-flex tw-items-center tw-justify-between tw-flex-wrap tw-gap-2 tw-mt-4 tw-pt-4 tw-border-t tw-border-slate-100">
+                <button class="btn-copy-text tw-inline-flex tw-items-center tw-justify-center tw-px-3 tw-py-1.5 tw-border tw-border-slate-300 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-600 hover:tw-bg-slate-50 hover:tw-text-brand-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-1 focus:tw-ring-brand-500 tw-transition-colors" title="Copiar texto">
+                   <i class="fa fa-copy tw-mr-1.5"></i> Copiar
+                </button>
+                
+                <span class="tw-text-sm tw-text-slate-500 tw-italic">
+                    Aprovada em {{ $sum['trib_sum_data'] }}
+                </span>
+            </div>
+
+            <span class="tes-clear tes-text-to-be-copied tw-hidden" data-spec="trim">
+                Súmula {{ $sum['trib_sum_numero'] }}. {!! $sum['trib_sum_texto'] !!} DATA DE APROVAÇÃO: {{ $sum['trib_sum_data'] }}.
             </span>
-          </button>
         </td>
+    </tr>
 @endforeach

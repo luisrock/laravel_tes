@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EditableContent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -38,18 +39,11 @@ class EditableContentController extends Controller
      */
     public function edit($slug)
     {
-        // Verificar se é admin
-        if (! auth()->check() || ! in_array(auth()->user()->email, config('tes_constants.admins'))) {
-            abort(403, 'Acesso negado');
+        if (! auth()->user()->hasRole('admin')) {
+            abort(403);
         }
 
-        $content = DB::table('editable_contents')
-            ->where('slug', $slug)
-            ->first();
-
-        if (! $content) {
-            abort(404);
-        }
+        $content = EditableContent::where('slug', $slug)->firstOrFail();
 
         return view('admin.edit-content', compact('content'));
     }
