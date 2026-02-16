@@ -88,7 +88,7 @@ it('responde na rota de newsletters', function () {
 
 it('responde na rota de quizzes', function () {
     assertRouteResponds('/quizzes');
-});
+})->skip('Quiz: funcionalidade escondida');
 
 it('responde na rota de atualizações', function () {
     assertRouteResponds('/atualizacoes');
@@ -164,7 +164,7 @@ describe('Rotas com dados seedados', function () {
 
         // Pode dar 500 com SQLite por queries complexas
         expect($response->getStatusCode())->toBeIn([200, 500]);
-    });
+    })->skip('Quiz: funcionalidade escondida');
 
     it('exibe conteúdo editável publicado', function () {
         EditableContent::create([

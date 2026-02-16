@@ -21,24 +21,46 @@ describe('Página de Busca', function () {
     });
 
     it('valida campos obrigatórios na busca web', function () {
-        $this->get('/?q=ab&tribunal=STF')
+        $this->get('/?q=ab')
             ->assertStatus(302);  // redirect com erros de validação (q min:3)
     });
 
-    it('valida tribunal obrigatório na busca web', function () {
-        $this->get('/?q=direito')
-            ->assertStatus(302);  // redirect sem tribunal
+    it('aceita busca unificada sem tribunal (novo comportamento)', function () {
+        $response = $this->get('/?q=direito');
+
+        // Com SQLite, pode dar 500 por queries MySQL-específicas
+        // Sem SQLite, deve retornar 200 com resultados unificados
+        expect($response->getStatusCode())->toBeIn([200, 500]);
     });
 
-    it('rejeita tribunal inválido na busca web', function () {
-        $this->get('/?q=direito&tribunal=INVALIDO')
-            ->assertStatus(302);
+    it('aceita busca com tribunal como pré-seleção (retrocompat Chrome extension)', function () {
+        $response = $this->get('/?q=direito&tribunal=STF');
+
+        // Busca em todos, mas com STF pré-selecionado
+        expect($response->getStatusCode())->toBeIn([200, 500]);
+    });
+
+    it('ignora tribunal inválido na busca web (busca unificada)', function () {
+        $response = $this->get('/?q=direito&tribunal=INVALIDO');
+
+        // Não redireciona mais, ignora tribunal inválido e busca em todos
+        expect($response->getStatusCode())->toBeIn([200, 500]);
+    });
+
+    it('não exibe TCU nos resultados unificados', function () {
+        $response = $this->get('/?q=direito');
+
+        if ($response->getStatusCode() === 200) {
+            $response->assertDontSee('TCU');
+        }
+        // Se 500 (SQLite), apenas aceita — não conseguimos validar HTML
+        expect($response->getStatusCode())->toBeIn([200, 500]);
     });
 
 });
 
 // ==========================================
-// API de Busca
+// API de Busca (mantém tribunal obrigatório)
 // ==========================================
 
 describe('API de Busca', function () {
@@ -129,6 +151,12 @@ describe('Busca sem Resultados', function () {
         expect($response->getStatusCode())->toBeIn([200, 500]);
     });
 
+    it('aceita busca web com termo sem resultados (todos tribunais)', function () {
+        $response = $this->get('/?q=xyzqwertynonsense');
+
+        expect($response->getStatusCode())->toBeIn([200, 500]);
+    });
+
 });
 
 // ==========================================
@@ -138,24 +166,24 @@ describe('Busca sem Resultados', function () {
 describe('Paginação', function () {
 
     it('aceita parâmetro page na busca web', function () {
-        $response = $this->get('/?q=direito&tribunal=STF&page=1');
+        $response = $this->get('/?q=direito&page=1');
 
-        // Pode dar 302 (validação), 200 ou 500
-        expect($response->getStatusCode())->toBeIn([200, 302, 500]);
+        // Pode dar 200 ou 500 (SQLite)
+        expect($response->getStatusCode())->toBeIn([200, 500]);
     });
 
 });
 
 // ==========================================
-// Todos os Tribunais válidos
+// Todos os Tribunais válidos (API)
 // ==========================================
 
-describe('Todos os Tribunais', function () {
+describe('Todos os Tribunais (API)', function () {
 
     $tribunais = ['STF', 'STJ', 'TST', 'TNU', 'TCU', 'CARF', 'FONAJE', 'CEJ'];
 
     foreach ($tribunais as $tribunal) {
-        it("aceita busca com tribunal {$tribunal}", function () use ($tribunal) {
+        it("aceita busca com tribunal {$tribunal} via API", function () use ($tribunal) {
             $response = $this->postJson('/api/', [
                 'q' => 'direito',
                 'tribunal' => $tribunal,

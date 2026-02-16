@@ -7,45 +7,8 @@
 <div class="tw-max-w-5xl tw-mx-auto tw-px-4 tw-py-8 md:tw-py-12 tw-space-y-8">
 
     <!-- Search Section -->
-    @include('partials.search-form', ['keyword' => $keyword ?? '', 'tribunal' => $tribunal ?? '', 'lista_tribunais' => $lista_tribunais])
+    @include('partials.search-form', ['keyword' => $keyword ?? '', 'lista_tribunais' => $lista_tribunais])
     <!-- END Search Section -->
-
-    <!-- Admin/Similar Search Section (kept functionality, updated style) -->
-    @auth
-        @php $toStore = false; @endphp
-        @if(in_array(Auth::user()->email, ['mauluis@gmail.com','trator70@gmail.com','ivanaredler@gmail.com']))
-            @if(!empty($output['total_count']))
-            @php $toStore = true; @endphp
-            <div id="admin-store" class="tw-bg-white tw-rounded-xl tw-shadow-sm tw-border tw-border-slate-200 tw-p-6 tw-space-y-4">
-                <h3 class="tw-text-sm tw-font-bold tw-text-slate-500 tw-uppercase tw-tracking-wider">Admin Tools</h3>
-                <div class="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-                    <input type="text" name="store-label" class="tw-flex-1 tw-min-w-[200px] tw-border-slate-300 tw-rounded-md tw-px-3 tw-py-2 tw-text-sm focus:tw-ring-brand-500 focus:tw-border-brand-500" placeholder="Store Label">
-                    
-                    <button class="tw-px-4 tw-py-2 tw-bg-slate-700 tw-text-white tw-text-sm tw-font-medium tw-rounded-md hover:tw-bg-slate-800 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-slate-500" id="btn-similar-search">
-                        Similares
-                    </button>
-                    
-                    <select name="typeToCompare" class="tw-border-slate-300 tw-rounded-md tw-text-sm focus:tw-ring-brand-500 focus:tw-border-brand-500 tw-py-2 tw-pl-3 tw-pr-8">
-                        <option value="label" selected>by label</option>
-                        <option value="keyword">by keyword</option>
-                    </select>
-                    
-                    <div class="tw-flex tw-items-center tw-gap-2">
-                        <input type="number" name="similarity-percentage" value="80" min="0" max="100" class="tw-w-16 tw-border-slate-300 tw-rounded-md tw-text-sm tw-px-2 tw-py-2 focus:tw-ring-brand-500 focus:tw-border-brand-500">
-                        <span class="tw-text-slate-600">%</span>
-                    </div>
-                </div>
-
-                <div class="similar-block tw-space-y-4" style="display:none;">
-                    <div id="similar-searched" class="tw-space-y-2 tw-max-h-60 tw-overflow-y-auto tw-p-2 tw-bg-slate-50 tw-rounded-md"></div>
-                    <button class="tw-w-full sm:tw-w-auto tw-px-4 tw-py-2 tw-bg-emerald-600 tw-text-white tw-text-sm tw-font-medium tw-rounded-md hover:tw-bg-emerald-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-emerald-500 disabled:tw-opacity-50 disabled:tw-cursor-not-allowed" id="btn-store-search" disabled>
-                        Salvar Pesquisa
-                    </button>
-                </div>
-            </div>
-            @endif
-        @endif        
-    @endauth
 
     <!-- Precedentes Vinculantes CPC -->
     @if(!empty($precedentes_home ?? null))
@@ -137,79 +100,8 @@
     </section>
     @endif
 
-    @yield('content_results')
 
 </div>
 
 @endsection
 
-@section('scripts')
-@if($toStore ?? '')
-    <!-- JQuery and Mark.js for Admin Tools (Legacy support) -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script>
-        // ... (Keep existing admin script logic if needed, adapting selectors to new classes) ...
-        // Since this is specific admin functionality, we can keep using jQuery here if it's already loaded for this block.
-        // For brevity in this artifact, I mostly faithfully copied the functionality but might need to double check the selectors if I changed IDs.
-        // I kept IDs consistent (btn-similar-search, similar-searched, etc), so it should work.
-        
-        // Copied Logic (Simplified for artifact size, but assumes same logic as original)
-        $(document).ready(function() {
-             function titleCase(str, limit = 3) {
-                var splitStr = str.toLowerCase().split(' ');
-                for (var i = 0; i < splitStr.length; i++) {
-                    if(splitStr[i].length < limit) continue;
-                    splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);     
-                }
-                return splitStr.join(' '); 
-            } 
-
-            let keywordSearched = $('input[name="q"]').val().trim();
-            // ... (rest of the logic remains valid if IDs are same)
-            
-            // Re-implementing the core parts to ensure it works with new layout
-             $('#btn-similar-search').click(function() {
-                $('.similar-block').show();
-                $('#similar-searched').empty();
-                $('#btn-store-search').attr('disabled', false);
-
-                let label = $('input[name="store-label"]').val();
-                let typeToCompare = $('select[name="typeToCompare"]').val();
-
-                $.ajax({
-                    url: "{{route('searchByKeywordSimilarity')}}",
-                    type:"POST",
-                    data: {
-                        'keywordSearched': keywordSearched, 
-                        'label': label,
-                        'percentage':$('input[name="similarity-percentage"]').val(),
-                        'typeToCompare': typeToCompare,
-                        '_token':'{{ csrf_token() }}'
-                    },
-                    success:function(response) {
-                        let similar = '';
-                        if(response.success && response.success.length > 0) {
-                             response.success.sort((a, b) => b.percentage - a.percentage);
-                             response.success.forEach(function(item) {
-                                let itemToShow = typeToCompare == 'keyword' ? item.keyword : item.label;
-                                let itemSecondary = typeToCompare == 'keyword' ? item.label : item.keyword;
-                                
-                                similar += '<div class="tw-grid tw-grid-cols-3 tw-gap-2 tw-text-sm tw-p-2 tw-bg-white tw-border tw-border-slate-200 tw-rounded">';
-                                similar += '<div class="tw-text-slate-700 tw-font-medium">' + itemToShow + '</div>';
-                                similar += '<div class="tw-text-slate-500">' + itemSecondary + '</div>';
-                                similar += '<div class="tw-text-slate-900 tw-font-bold tw-text-right">' + item.percentage + '%</div>';
-                                similar += '</div>';
-                            });
-                        }
-                        $('#similar-searched').html(similar);
-                    }
-                });
-             });
-             
-             // ... (saving logic) ...
-        });
-    </script>
-@endif
-
-@endsection

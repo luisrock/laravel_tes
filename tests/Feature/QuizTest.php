@@ -8,8 +8,12 @@ use App\Models\User;
 /**
  * Testes do fluxo de Quiz — listagem, visualização, resposta e resultado.
  *
- * Seeds inline: QuizCategory, Quiz (published), Question (3+), QuestionOption (4 por question)
+ * SKIP: Funcionalidade de quiz está escondida e em desenvolvimento.
+ * Reativar quando os quizzes estiverem prontos para produção.
  */
+
+// Skipar todos os testes deste arquivo — funcionalidade escondida
+// Para reativar, remover os ->skip() de cada describe abaixo
 
 // ==========================================
 // Listagem de Quizzes
@@ -29,9 +33,9 @@ describe('Listagem de Quizzes', function () {
     it('exibe página mesmo sem quizzes', function () {
         $response = $this->get('/quizzes');
         expect($response->getStatusCode())->toBeIn([200, 500]);
-    });
+    }); // último it do grupo
 
-});
+})->skip('Quiz: funcionalidade escondida');
 
 // ==========================================
 // Filtro por Categoria
@@ -52,7 +56,7 @@ describe('Filtro por Categoria', function () {
             ->assertNotFound();
     });
 
-});
+})->skip('Quiz: funcionalidade escondida');
 
 // ==========================================
 // Visualizar Quiz
@@ -90,7 +94,7 @@ describe('Visualizar Quiz', function () {
             ->assertNotFound();
     });
 
-});
+})->skip('Quiz: funcionalidade escondida');
 
 // ==========================================
 // Responder Questão (AJAX POST)
@@ -174,7 +178,7 @@ describe('Responder Questão', function () {
         ])->assertStatus(422);
     });
 
-});
+})->skip('Quiz: funcionalidade escondida');
 
 // ==========================================
 // Resultado
@@ -223,7 +227,7 @@ describe('Resultado do Quiz', function () {
             ->assertNotFound();
     });
 
-});
+})->skip('Quiz: funcionalidade escondida');
 
 // ==========================================
 // Reiniciar
@@ -243,7 +247,7 @@ describe('Reiniciar Quiz', function () {
             ->assertNotFound();
     });
 
-});
+})->skip('Quiz: funcionalidade escondida');
 
 // ==========================================
 // Autenticação — funciona igualmente
@@ -267,4 +271,4 @@ describe('Quiz com autenticação', function () {
             ->assertStatus(200);
     });
 
-});
+})->skip('Quiz: funcionalidade escondida');

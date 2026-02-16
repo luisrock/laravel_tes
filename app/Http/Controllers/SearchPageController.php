@@ -19,10 +19,10 @@ class SearchPageController extends Controller
     {
 
         $lista_tribunais = Config::get('tes_constants.lista_tribunais');
-        $lista_tribunais_string = implode(',', array_keys($lista_tribunais));
         $display_pdf = '';
+
         // Initial view (no search)
-        if (empty($request->query())) {
+        if (empty($request->query()) || (! $request->has('q') && ! $request->has('keyword'))) {
             // Buscar temas mais consultados
             $popular_themes = DB::table('pesquisas')
                 ->select('id', 'keyword', 'label', 'slug', 'views_count')
@@ -65,69 +65,107 @@ class SearchPageController extends Controller
             return view('front.search', compact('lista_tribunais', 'display_pdf', 'popular_themes', 'precedentes_home', 'admin', 'featured_quizzes'));
         }
 
-        // User is searching. Prepare and return results
+        // User is searching. Validate keyword only (tribunal is optional now)
         $query = $request->validate(
             [
-                // compat with extension
                 'q' => 'required_without:keyword|min:3',
                 'keyword' => 'required_without:q|min:3',
-                'tribunal' => 'required|in:'.$lista_tribunais_string,
+                'tribunal' => 'nullable|string', // Optional, used for pre-selecting tab
                 'print' => 'string|nullable',
             ],
             [
                 'q.required' => 'Por favor, defina o(s) termo(s) de busca.',
                 'q.min' => 'O termo de busca deve conter ao menos três caracteres.',
-                'tribunal.required' => 'Por favor, indique o tribunal/órgão para a sua pesquisa.',
-                'tribunal.in' => 'Por favor, indique um tribunal/órgão válido para a sua pesquisa.',
             ]
         );
 
         $keyword = $query['q'] ?? $query['keyword']; // compat with extension
-        $tribunal = $query['tribunal'];
+        $preferredTribunal = ! empty($query['tribunal']) ? strtolower($query['tribunal']) : null;
         $pdf = ! empty($query['print']) && $query['print'] == 'pdf';
         $display_pdf = ($pdf) ? 'display:none;' : '';
-        $tribunal_lower = strtolower($tribunal);
-        $tribunal_upper = strtoupper($tribunal);
-        $tribunal_array = $lista_tribunais[$tribunal_upper];
-        $results_view = 'front.results.'.$tribunal_lower;
 
-        // Use Tailwind view for STJ (Migration in progress)
-        if (in_array($tribunal_lower, ['stj', 'tnu', 'stf', 'tst', 'tcu', 'carf', 'fonaje', 'cej'])) {
-            $results_view = 'front.results.'.$tribunal_lower;
-        }
-        $output = [];
+        // Search all tribunals (unified search)
+        $output = $this->searchAllTribunals($keyword, $lista_tribunais);
 
-        // search in db (not through tribunal API)
-        if ($lista_tribunais[$tribunal]['db']) {
-            // Getting the results by querying tes db
-            $output = tes_search_db($keyword, $tribunal_lower, $tribunal_array);
-        } else {
-            // Getting the results by calling the tribunal API
-            // tratando keyword
-            $keyword = buildFinalSearchStringForApi($keyword, $tribunal_upper);
-            $output = call_request_api($tribunal_lower, $keyword);
+        // Determine first active tab and sub-tab
+        $tribunaisExcluidos = $this->getExcludedTribunals();
+        $sem_tese = config('tes_constants.sem_tese', []);
+        $firstActiveTab = null;
+        $activeSubTab = 'sumulas'; // default
 
+        // If tribunal param provided and valid, use it as preferred tab
+        if ($preferredTribunal && isset($output[$preferredTribunal]) && ! in_array(strtoupper($preferredTribunal), $tribunaisExcluidos)) {
+            $firstActiveTab = $preferredTribunal;
         }
 
-        // dd($output);
+        // If no preferred or preferred has no results, find first with results
+        if (is_null($firstActiveTab)) {
+            foreach ($output as $key => $data) {
+                if (! is_array($data) || in_array(strtoupper($key), $tribunaisExcluidos)) {
+                    continue;
+                }
+                $count = $data['total_count'] ?? 0;
+                if ($count > 0) {
+                    $firstActiveTab = $key;
+                    break;
+                }
+            }
+        }
 
-        // dd($output);
-        $canonical_url = '';
+        // Fallback: first tribunal in list
+        if (is_null($firstActiveTab)) {
+            foreach ($output as $key => $data) {
+                if (is_array($data) && ! in_array(strtoupper($key), $tribunaisExcluidos)) {
+                    $firstActiveTab = $key;
+                    break;
+                }
+            }
+        }
 
-        // If search is fruitful, save it to db in order to generate page (SEO purposes)
-        if (! empty($output['total_count']) && $output['total_count'] > 0) {
+        // Determine sub-tab: if active tribunal has sumulas, show sumulas; else teses
+        if ($firstActiveTab && isset($output[$firstActiveTab])) {
+            $data = $output[$firstActiveTab];
+            $hasSumulas = ($data['sumula']['total'] ?? 0) > 0;
+            if (! $hasSumulas) {
+                $activeSubTab = 'teses';
+            }
+        }
+
+        // Check if any tribunal has results (for global "no results" message)
+        $hasAnyResults = false;
+        foreach ($output as $key => $data) {
+            if (is_array($data) && ! in_array(strtoupper($key), $tribunaisExcluidos) && ($data['total_count'] ?? 0) > 0) {
+                $hasAnyResults = true;
+                break;
+            }
+        }
+
+        // If search is fruitful, save to db for SEO
+        if ($hasAnyResults) {
             SearchToDbPesquisas::dispatch($keyword);
-            $canonical_url = url('/').'/tema/'.slugify($keyword);
         }
 
-        // obs: when searching by calling the tribunal API and getting 500 error, output will be a string...
-        $html = view($results_view, compact('lista_tribunais', 'keyword', 'tribunal', 'output', 'display_pdf', 'canonical_url'));
+        $canonical_url = $hasAnyResults ? url('/').'/tema/'.slugify($keyword) : '';
+
+        // Admin check
+        $admin = false;
+        if (auth()->check()) {
+            if (in_array(auth()->user()->email, config('tes_constants.admins'))) {
+                $admin = true;
+            }
+        }
+
+        $html = view('front.unified-results', compact(
+            'lista_tribunais', 'keyword', 'output', 'display_pdf',
+            'canonical_url', 'firstActiveTab', 'activeSubTab',
+            'hasAnyResults', 'admin', 'sem_tese', 'tribunaisExcluidos'
+        ));
+
         if (! $pdf) {
             return $html;
         }
 
         // render PDF
-
         $url_request = url()->full();
         $mpdf = new Mpdf([
             'mode' => 'utf-8',
@@ -141,7 +179,46 @@ class SearchPageController extends Controller
         $mpdf->SetHeader("$keyword|{DATE d/m/Y}|{PAGENO}");
         $mpdf->SetFooter('|'.url()->current().'|');
         $mpdf->WriteHTML($html->render());
-        $mpdf->Output('tes_'.$tribunal.'_'.$keyword.'.pdf', 'D');
+        $mpdf->Output('tes_todos_'.$keyword.'.pdf', 'D');
 
-    } // end public function
+    }
+
+    /**
+     * Search all tribunals (db-based only, excluding TCU).
+     * Returns output in the same format as TemaPageController.
+     */
+    private function searchAllTribunals(string $keyword, array $lista_tribunais): array
+    {
+        $output = [];
+        $tribunaisExcluidos = $this->getExcludedTribunals();
+        $tribunais = array_keys($lista_tribunais);
+
+        foreach ($tribunais as $tribunal) {
+            // Skip excluded tribunals (e.g. TCU)
+            if (in_array($tribunal, $tribunaisExcluidos)) {
+                continue;
+            }
+
+            // Skip non-db tribunals
+            if ($lista_tribunais[$tribunal]['db'] === false) {
+                continue;
+            }
+
+            $tribunal_lower = strtolower($tribunal);
+            $tribunal_upper = strtoupper($tribunal);
+            $tribunal_array = $lista_tribunais[$tribunal_upper];
+            $output_tribunal = tes_search_db($keyword, $tribunal_lower, $tribunal_array);
+            $output[$tribunal_lower] = $output_tribunal;
+        }
+
+        return $output;
+    }
+
+    /**
+     * Returns list of tribunals to exclude from unified search.
+     */
+    private function getExcludedTribunals(): array
+    {
+        return ['TCU'];
+    }
 }

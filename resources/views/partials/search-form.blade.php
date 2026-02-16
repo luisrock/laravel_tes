@@ -1,11 +1,11 @@
-@props(['keyword' => '', 'tribunal' => '', 'lista_tribunais' => []])
+@props(['keyword' => '', 'lista_tribunais' => []])
 
 <div class="tw-bg-white tw-rounded-xl tw-shadow-sm tw-border tw-border-slate-200 hover:tw-shadow-md tw-transition-shadow tw-duration-300">
     <form method="GET" action="{{ route('searchpage') }}" id="trib-form" class="tw-p-6 md:tw-p-8 tw-space-y-6">
         
         <div class="tw-space-y-2 tw-text-center md:tw-text-left">
             <h1 class="tw-text-2xl md:tw-text-3xl tw-font-bold tw-text-slate-900 tw-tracking-tight">Pesquisa de Teses e Súmulas</h1>
-            <p class="tw-text-slate-600 tw-text-base md:tw-text-lg">Consulta rápida, objetiva e responsiva para jurisprudência dos principais tribunais.</p>
+            <p class="tw-text-slate-600 tw-text-base md:tw-text-lg">Consulta rápida e unificada nos principais tribunais.</p>
         </div>
 
         @if (session('success'))
@@ -47,24 +47,6 @@
             </button>
         </div>
 
-        <div>
-            <label class="tw-block tw-text-sm tw-font-medium tw-text-slate-700 tw-mb-3">Selecione o Tribunal:</label>
-            <div id="radios-tribunais" class="tw-grid tw-grid-cols-2 sm:tw-grid-cols-4 lg:tw-grid-cols-8 tw-gap-3">
-                @foreach ($lista_tribunais as $t => $arr)
-                <label class="home-pilot-radio tw-cursor-pointer tw-relative">
-                    <input class="tw-peer tw-sr-only" type="radio" name="tribunal" value="{{ $t }}"
-                        @if ( !empty($tribunal) && strtolower($tribunal) === strtolower($t) ) checked @endif>
-                    <div class="tw-flex tw-items-center tw-justify-center tw-w-full tw-py-2 tw-px-3 tw-bg-slate-50 tw-border tw-border-slate-200 tw-rounded-full tw-text-slate-600 tw-font-medium tw-transition-all peer-checked:tw-bg-brand-100 peer-checked:tw-border-brand-600 peer-checked:tw-text-brand-800 hover:tw-bg-slate-100 peer-focus:tw-ring-2 peer-focus:tw-ring-brand-500 peer-focus:tw-ring-offset-1">
-                        {{ $t }}
-                    </div>
-                </label>
-                @endforeach
-            </div>
-            <p class="tw-mt-3 tw-text-sm tw-text-slate-500 tw-text-center md:tw-text-left" id="selected-tribunal-status">
-                Tribunal selecionado: <strong id="selected-tribunal-label" class="tw-text-brand-700">nenhum</strong>
-            </p>
-        </div>
-
         <div class="md:tw-hidden">
             <button type="submit" class="tw-w-full tw-flex tw-items-center tw-justify-center tw-px-6 tw-py-3 tw-border tw-border-transparent tw-text-base tw-font-medium tw-rounded-lg tw-text-white tw-bg-brand-600 hover:tw-bg-brand-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-brand-500 tw-shadow-sm">
                 Pesquisar
@@ -86,31 +68,12 @@
     function initSearchForm() {
         const form = document.getElementById('trib-form');
         const loadingOverlay = document.getElementById('loading-overlay');
-        const tribunalRadios = document.querySelectorAll('input[name="tribunal"]');
-        const selectedTribunalLabel = document.getElementById('selected-tribunal-label');
-
-        function updateSelectedTribunal() {
-            const checked = document.querySelector('input[name="tribunal"]:checked');
-            if (checked && selectedTribunalLabel) {
-                selectedTribunalLabel.textContent = checked.value;
-            } else if (selectedTribunalLabel) {
-                 selectedTribunalLabel.textContent = 'nenhum';
-            }
-        }
-
-        tribunalRadios.forEach(radio => {
-            radio.addEventListener('change', updateSelectedTribunal);
-        });
-
-        // Initialize label on load
-        updateSelectedTribunal();
 
         if (form && loadingOverlay) {
             form.addEventListener('submit', function(e) {
                 const keyword = form.querySelector('input[name="q"]').value.trim();
-                const tribunal = form.querySelector('input[name="tribunal"]:checked');
                 
-                if (keyword.length >= 3 && tribunal) {
+                if (keyword.length >= 3) {
                     loadingOverlay.classList.remove('tw-hidden');
                 }
             });
