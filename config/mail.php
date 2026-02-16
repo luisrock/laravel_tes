@@ -87,6 +87,8 @@ return [
         'name' => env('MAIL_FROM_NAME', 'T&S'),
     ],
 
+    'contact_recipient' => env('MAIL_CONTACT_RECIPIENT', 'maurolopes@tesesesumulas.com.br'),
+
     /*
     |--------------------------------------------------------------------------
     | Markdown Mail Settings

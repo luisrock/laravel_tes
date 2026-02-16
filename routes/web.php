@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ConceptController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RefundRequestController;
 use App\Http\Controllers\RoleController;
@@ -42,6 +43,10 @@ Route::get('/atualizacoes', [App\Http\Controllers\AtualizacoesPageController::cl
 
 // Page to thank the user for sending email for newsletter (proofcourse)
 Route::get('/newsletter-obrigado', [App\Http\Controllers\NewsletterPageController::class, 'index'])->name('newsletterobrigadopage');
+
+// Página e envio de contato
+Route::get('/contato', [ContactController::class, 'index'])->name('contact.index');
+Route::post('/contato', [ContactController::class, 'store'])->name('contact.store');
 
 // Pages for sumulas
 Route::get('/index', function () {

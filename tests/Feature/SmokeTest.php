@@ -24,7 +24,10 @@ use App\Models\Newsletter;
 // ==========================================
 
 it('carrega a página inicial', function () {
-    $this->get('/')->assertStatus(200);
+    $this->get('/')
+        ->assertStatus(200)
+        ->assertSee(route('contact.index'), false)
+        ->assertSee('Contato');
 });
 
 it('carrega a página de índice', function () {
@@ -51,6 +54,10 @@ it('carrega a página de reset de senha', function () {
 
 it('carrega a página de obrigado newsletter', function () {
     $this->get('/newsletter-obrigado')->assertStatus(200);
+});
+
+it('carrega a página de contato', function () {
+    $this->get('/contato')->assertStatus(200);
 });
 
 // ==========================================
