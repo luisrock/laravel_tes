@@ -72,7 +72,19 @@ class TemaPageController extends Controller
             $output[$tribunal_lower] = $output_tribunal;
         } // END foreach
 
-        // dd($output);
+        // Redirect 301 para home se nenhum resultado real (SEO)
+        $total_results = 0;
+        foreach ($output as $trib => $data) {
+            if (! is_array($data) || $trib === 'total_count') {
+                continue;
+            }
+            foreach (['sumula', 'tese', 'repercussao', 'repetitivos', 'orientacao_precedente'] as $key) {
+                $total_results += $data[$key]['total'] ?? 0;
+            }
+        }
+        if ($total_results === 0) {
+            return redirect('/', 301);
+        }
 
         // Gerar meta description dinâmica otimizada para SEO
         $description = $this->generateMetaDescription($label, $output);
