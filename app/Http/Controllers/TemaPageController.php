@@ -42,8 +42,7 @@ class TemaPageController extends Controller
             $concept_validated_at = '';
         }
 
-        // Incrementar contador de visualizações
-        DB::table('pesquisas')->where('id', $id)->increment('views_count');
+        // views_count é atualizado exclusivamente pelo cron matomo:sync
 
         // Buscar temas relacionados para internal linking
         $related_themes = $this->getRelatedThemes($id, $keyword);
