@@ -28,7 +28,9 @@ it('carrega a página inicial', function () {
 });
 
 it('carrega a página de índice', function () {
-    $this->get('/index')->assertStatus(200);
+    $this->get('/index')
+        ->assertStatus(200)
+        ->assertSee('/teses/tst', false);
 });
 
 it('carrega a página de temas', function () {
@@ -64,6 +66,10 @@ it('responde na rota de teses STF', function () {
 
 it('responde na rota de teses STJ', function () {
     assertRouteResponds('/teses/stj');
+});
+
+it('responde na rota de teses TST', function () {
+    assertRouteResponds('/teses/tst');
 });
 
 it('responde na rota de súmulas STF', function () {
@@ -116,6 +122,11 @@ it('redireciona rota de tese STF individual sem parâmetro', function () {
 
 it('redireciona rota de tese STJ individual sem parâmetro', function () {
     $response = $this->get('/tese/stj');
+    expect($response->getStatusCode())->toBeIn([200, 302, 500]);
+});
+
+it('redireciona rota de tese TST individual sem parâmetro', function () {
+    $response = $this->get('/tese/tst');
     expect($response->getStatusCode())->toBeIn([200, 302, 500]);
 });
 

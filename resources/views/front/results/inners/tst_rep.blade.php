@@ -1,32 +1,95 @@
-@foreach ($output['tese']['hits'] as $rep)
+@php
+    $hits = collect($output['tese']['hits'] ?? [])->sortByDesc(function (array $rep): int {
+        $numero = (string) ($rep['trib_rep_numero'] ?? '0');
+
+        return (int) preg_replace('/\D+/', '', $numero);
+    });
+@endphp
+
+@foreach ($hits as $rep)
+    @php
+        $numero = trim((string) ($rep['trib_rep_numero'] ?? ''));
+        $titulo = $numero !== '' ? 'Tema '.$numero : 'Tema';
+
+        $teseTexto = trim((string) ($rep['trib_rep_texto'] ?? '[aguarda publicação da tese vinculante]'));
+        if ($teseTexto === '') {
+            $teseTexto = '[aguarda publicação da tese vinculante]';
+        }
+
+        $teseTexto = trim((string) preg_replace('/\s*\|\s*Relator\(a\)?:?.*$/iu', '', $teseTexto));
+        if ($teseTexto === '') {
+            $teseTexto = '[aguarda publicação da tese vinculante]';
+        }
+
+        $metadataRaw = trim((string) ($rep['trib_rep_tema'] ?? ''));
+        $metadataParts = [];
+        $situacao = trim((string) ($rep['trib_rep_situacao'] ?? ''));
+
+        if ($metadataRaw !== '') {
+            foreach (preg_split('/\s*\|\s*/', $metadataRaw) as $part) {
+                $part = trim($part);
+                if ($part === '') {
+                    continue;
+                }
+
+                if (str_starts_with(strtolower($part), 'status:') || str_starts_with(strtolower($part), 'situação:')) {
+                    $situacao = trim((string) preg_replace('/^(status|situação)\s*:\s*/i', '', $part));
+                    continue;
+                }
+
+                $metadataParts[] = $part;
+            }
+        }
+
+        $metadataTexto = implode(' | ', $metadataParts);
+    @endphp
     <tr>
         <td class="tw-block tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg tw-p-6 hover:tw-border-brand-300 hover:tw-shadow-sm tw-transition-all">
-            <h4 class="tw-text-lg tw-font-semibold tw-text-brand-700 tw-mb-3">
-                <a href="{{ $rep['trib_rep_url'] }}" target="_blank" class="hover:tw-text-brand-900 hover:tw-underline tw-transition-colors">
-                    {{ $rep['trib_rep_tipo'] }} nº {{ $rep['trib_rep_numero'] }} <i class="fa fa-external-link tw-ml-1 tw-text-sm"></i>
-                </a>
-            </h4>
-            
-            <div class="tw-mb-4">
-                 <span class="tw-inline-block tw-bg-slate-100 tw-rounded-md tw-px-2 tw-py-1 tw-text-sm tw-text-slate-600 tw-font-medium">
-                    {{ $rep['trib_rep_tema'] }}
+            <div class="tw-flex tw-items-start tw-justify-between tw-gap-4 tw-mb-4">
+                <h4 class="tw-text-lg tw-font-semibold tw-text-brand-700">
+                    <a href="{{ $rep['trib_rep_url'] }}" target="_blank" class="hover:tw-text-brand-900 hover:tw-underline tw-transition-colors">
+                        {{ $titulo }} <i class="fa fa-external-link tw-ml-1 tw-text-sm"></i>
+                    </a>
+                </h4>
+                <span class="tw-inline-flex tw-items-center tw-px-2.5 tw-py-0.5 tw-rounded-full tw-text-xs tw-font-medium tw-bg-slate-100 tw-text-slate-600">
+                    Precedentes Vinculantes
                 </span>
             </div>
 
-            <div class="tw-prose tw-prose-slate tw-max-w-none tw-mb-4">
-                <p class="tw-font-medium tw-text-slate-900">
-                    {{ $rep['trib_rep_texto'] }}
-                </p>
+            <div class="tw-space-y-4">
+                @if ($metadataTexto !== '')
+                    <div class="tw-bg-slate-50 tw-rounded-md tw-p-3 tw-border tw-border-slate-100">
+                        <span class="tw-block tw-text-xs tw-font-bold tw-text-slate-400 tw-uppercase tw-tracking-wider tw-mb-1">Acórdão</span>
+                        <p class="tw-text-slate-700 tw-text-sm md:tw-text-base">
+                            {{ $metadataTexto }}
+                        </p>
+                    </div>
+                @endif
+
+                <div>
+                    <span class="tw-block tw-text-xs tw-font-bold tw-text-slate-400 tw-uppercase tw-tracking-wider tw-mb-1">Tese</span>
+                    <p class="tw-font-medium tw-text-slate-900 tw-text-base md:tw-text-lg tw-leading-relaxed">
+                        {{ $teseTexto }}
+                    </p>
+                </div>
             </div>
 
-            <div class="tw-flex tw-items-center tw-justify-start tw-mt-4 tw-pt-4 tw-border-t tw-border-slate-100">
+            <div class="tw-flex tw-items-center tw-justify-between tw-flex-wrap tw-gap-3 tw-mt-5 tw-pt-4 tw-border-t tw-border-slate-100">
                 <button class="btn-copy-text tw-inline-flex tw-items-center tw-justify-center tw-px-3 tw-py-1.5 tw-border tw-border-slate-300 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-600 hover:tw-bg-slate-50 hover:tw-text-brand-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-1 focus:tw-ring-brand-500 tw-transition-colors" title="Copiar texto">
                    <i class="fa fa-copy tw-mr-1.5"></i> Copiar
                 </button>
+
+                @if ($situacao !== '')
+                    <div class="tw-text-right">
+                        <div class="tw-text-sm tw-font-medium tw-text-slate-700">
+                            Situação: <span class="tw-text-emerald-600">{{ $situacao }}</span>
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <span class="tes-clear tes-text-to-be-copied tw-hidden" data-spec="trim">
-                {{ $rep['trib_rep_tipo'] }} nº {{ $rep['trib_rep_numero'] }}. {{ $rep['trib_rep_tema'] }}. TEXTO: {{ $rep['trib_rep_texto'] }}
+                {{ $titulo }}. {{ $metadataTexto !== '' ? $metadataTexto.'. ' : '' }}TESE: {{ $teseTexto }}{{ $situacao !== '' ? ' SITUAÇÃO: '.$situacao : '' }}
             </span>
         </td>
     </tr>

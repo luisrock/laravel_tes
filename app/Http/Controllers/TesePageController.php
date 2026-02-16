@@ -28,6 +28,11 @@ class TesePageController extends Controller
             $tribunal_nome_completo = 'Superior Tribunal de Justiça';
             $table = 'stj_teses';
             $alltesesroute = 'stjalltesespage';
+        } elseif ($route == 'tsttesepage') {
+            $tribunal = 'TST';
+            $tribunal_nome_completo = 'Tribunal Superior do Trabalho';
+            $table = 'tst_teses';
+            $alltesesroute = 'tstalltesespage';
         } else {
             return redirect()->route('searchpage');
         }
@@ -46,6 +51,12 @@ class TesePageController extends Controller
 
         if (! $tese) {
             return redirect()->route($alltesesroute);
+        }
+
+        if ($tribunal == 'TST') {
+            $tese->tema_texto = isset($tese->tema) ? (string) $tese->tema : '';
+            $tese->tese_texto = isset($tese->texto) ? (string) $tese->texto : '';
+            $tese->tese_texto = trim((string) preg_replace('/\s*\|\s*Relator\(a\)?:?.*$/iu', '', $tese->tese_texto));
         }
 
         $tese_isCancelada = 0;
@@ -68,6 +79,30 @@ class TesePageController extends Controller
             }
         } elseif ($tribunal == 'STJ') {
             $tese->tema_texto = $tese->numero.' - '.$tese->tema;
+        } elseif ($tribunal == 'TST') {
+            $metadataRaw = trim((string) ($tese->tema_texto ?? ''));
+            $metadataParts = [];
+            $situacao = '';
+
+            if ($metadataRaw !== '') {
+                foreach (preg_split('/\s*\|\s*/', $metadataRaw) as $part) {
+                    $part = trim($part);
+                    if ($part === '') {
+                        continue;
+                    }
+
+                    if (str_starts_with(strtolower($part), 'status:') || str_starts_with(strtolower($part), 'situação:')) {
+                        $situacao = trim((string) preg_replace('/^(status|situação)\s*:\s*/i', '', $part));
+
+                        continue;
+                    }
+
+                    $metadataParts[] = $part;
+                }
+            }
+
+            $tese->acordao_info = implode(' | ', $metadataParts);
+            $tese->situacao = $situacao;
         }
 
         $text = "$tribunal, Tema {$tese->tema_texto}";
@@ -129,6 +164,24 @@ class TesePageController extends Controller
             if (empty($tese->link)) {
                 $tese->link = "https://processo.stj.jus.br/repetitivos/temas_repetitivos/pesquisa.jsp?novaConsulta=true&tipo_pesquisa=T&cod_tema_inicial={$tese->numero}&cod_tema_final={$tese->numero}";
             }
+        } elseif ($tribunal == 'TST') {
+            $text = "TST, Tema {$tese->numero}";
+            if (! empty($tese->acordao_info)) {
+                $text .= ". {$tese->acordao_info}";
+            }
+            if (! empty($tese->tese_texto)) {
+                $text .= ". TESE: {$tese->tese_texto}";
+            } else {
+                $text .= '. TESE: [aguarda publicação da tese vinculante]';
+            }
+            if (! empty($tese->situacao)) {
+                $text .= ". SITUAÇÃO: {$tese->situacao}";
+            }
+
+            $tese->questao = '';
+            $tese->tempo = '';
+            $tese->titulo = "TEMA {$tese->numero}";
+            $tese->text_muted = trim((string) ($tese->acordao_info ?? ''));
         }
 
         // if there is no "." at the end of the text, add it
@@ -173,6 +226,10 @@ class TesePageController extends Controller
         $related_quizzes = $this->getRelatedQuizzes($tribunal, $tese->tema_texto ?? $tese->tese_texto ?? '');
 
         // dd($teses);
+        if ($tribunal == 'TST') {
+            return view('front.tese_tst', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes'));
+        }
+
         return view('front.tese', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes'));
     } // end public function
 
