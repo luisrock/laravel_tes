@@ -483,4 +483,54 @@ class ApiController extends Controller
             'min_judgments_required' => $minJudgments,
         ]);
     }
+
+    /**
+     * Busca unificada: retorna contagens de súmulas e teses por tribunal.
+     * Endpoint público (sem autenticação), ideal para a extensão Chrome.
+     * TCU excluído por usar API externa (lento demais para uso síncrono).
+     */
+    public function unifiedSearch(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'keyword' => 'required|string|min:3',
+        ], [
+            'keyword.required' => 'Por favor, defina o(s) termo(s) de busca.',
+            'keyword.min' => 'O termo de busca deve conter ao menos três caracteres.',
+        ]);
+
+        $keyword = $request->input('keyword');
+        $lista_tribunais = Config::get('tes_constants.lista_tribunais');
+
+        $result = [];
+        $total_global = 0;
+
+        foreach ($lista_tribunais as $tribunal_upper => $tribunal_array) {
+            // TCU usa API externa — excluído para manter o endpoint rápido
+            if (! $tribunal_array['db']) {
+                continue;
+            }
+
+            $tribunal_lower = strtolower($tribunal_upper);
+            $output = tes_search_db($keyword, $tribunal_lower, $tribunal_array);
+
+            $sumulas = $output['sumula']['total'] ?? 0;
+            $teses = $output[$tribunal_array['tese_name']]['total'] ?? 0;
+            $total = $sumulas + $teses;
+
+            $result[$tribunal_lower] = [
+                'sumulas' => $sumulas,
+                'teses' => $teses,
+                'total' => $total,
+            ];
+
+            $total_global += $total;
+        }
+
+        $result['meta'] = [
+            'keyword' => $keyword,
+            'total_global' => $total_global,
+        ];
+
+        return response()->json($result);
+    }
 }

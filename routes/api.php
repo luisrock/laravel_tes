@@ -34,6 +34,9 @@ Route::post('/carf.php', [App\Http\Controllers\ApiController::class, 'index']);
 Route::post('/fonaje.php', [App\Http\Controllers\ApiController::class, 'index']);
 Route::post('/cej.php', [App\Http\Controllers\ApiController::class, 'index']);
 
+// Busca unificada (pública, sem token) — retorna contagens por tribunal
+Route::post('/unified-search', [App\Http\Controllers\ApiController::class, 'unifiedSearch']);
+
 // New endpoints for individual sumulas and teses
 Route::middleware('bearer.token')->group(function () {
     Route::get('/sumula/{tribunal}/{numero}', [App\Http\Controllers\ApiController::class, 'getSumula']);

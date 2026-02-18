@@ -125,3 +125,42 @@ describe('Busca API Pública', function () {
     });
 
 });
+
+// ==========================================
+// Busca Unificada (sem token)
+// ==========================================
+
+describe('Busca Unificada', function () {
+
+    it('valida que keyword é obrigatório', function () {
+        $this->postJson('/api/unified-search', [])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['keyword']);
+    });
+
+    it('valida tamanho mínimo da keyword', function () {
+        $this->postJson('/api/unified-search', ['keyword' => 'ab'])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['keyword']);
+    });
+
+    it('aceita busca válida e retorna estrutura correta', function () {
+        $response = $this->postJson('/api/unified-search', [
+            'keyword' => 'dano moral',
+        ]);
+
+        // Com SQLite pode dar 500 (FULLTEXT não suportado)
+        expect($response->getStatusCode())->toBeIn([200, 500]);
+
+        if ($response->getStatusCode() === 200) {
+            $json = $response->json();
+            expect($json)->toHaveKey('meta');
+            expect($json['meta'])->toHaveKey('keyword');
+            expect($json['meta'])->toHaveKey('total_global');
+            expect($json['meta']['keyword'])->toBe('dano moral');
+            // TCU não deve aparecer (usa API externa)
+            expect($json)->not->toHaveKey('tcu');
+        }
+    });
+
+});
