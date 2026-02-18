@@ -33,6 +33,11 @@ class TesePageController extends Controller
             $tribunal_nome_completo = 'Tribunal Superior do Trabalho';
             $table = 'tst_teses';
             $alltesesroute = 'tstalltesespage';
+        } elseif ($route == 'tnutesepage') {
+            $tribunal = 'TNU';
+            $tribunal_nome_completo = 'Turma Nacional de Uniformização';
+            $table = 'tnu_teses';
+            $alltesesroute = 'tnualltesespage';
         } else {
             return redirect()->route('searchpage');
         }
@@ -57,6 +62,9 @@ class TesePageController extends Controller
             $tese->tema_texto = isset($tese->tema) ? (string) $tese->tema : '';
             $tese->tese_texto = isset($tese->texto) ? (string) $tese->texto : '';
             $tese->tese_texto = trim((string) preg_replace('/\s*\|\s*Relator\(a\)?:?.*$/iu', '', $tese->tese_texto));
+        } elseif ($tribunal == 'TNU') {
+            $tese->tema_texto = isset($tese->tema) ? (string) $tese->tema : '';
+            $tese->tese_texto = isset($tese->tese) ? (string) $tese->tese : '';
         }
 
         $tese_isCancelada = 0;
@@ -182,6 +190,39 @@ class TesePageController extends Controller
             $tese->tempo = '';
             $tese->titulo = "TEMA {$tese->numero}";
             $tese->text_muted = trim((string) ($tese->acordao_info ?? ''));
+        } elseif ($tribunal == 'TNU') {
+            $text = "TNU, Tema {$tese->numero}";
+            if (! empty($tese->tese_texto)) {
+                $text .= ". TESE: {$tese->tese_texto}";
+            } else {
+                $text .= '. TESE: [aguarda julgamento]';
+            }
+            if (! empty($tese->relator)) {
+                $text .= ". Rel.: {$tese->relator}";
+            }
+            if (! empty($tese->processo)) {
+                $text .= ". {$tese->processo}";
+            }
+            if (! empty($tese->situacao)) {
+                $text .= ". Situação: {$tese->situacao}";
+            }
+
+            $tese->questao = $tese->tema_texto;
+            $tese->titulo = "TEMA {$tese->numero}";
+            $tese->isCancelada = ! empty($tese->situacao) && Str::contains($tese->situacao, 'ancelad');
+            $tese->tempo = '';
+            if (! empty($tese->julgadoEm)) {
+                $tese->tempo = "Julgado em {$tese->julgadoEm}";
+            }
+            if ($tese->tempo) {
+                $text .= ". {$tese->tempo}";
+            }
+            $tese->text_muted = trim(implode('. ', array_filter([
+                $tese->relator ?? '',
+                $tese->processo ?? '',
+                ! empty($tese->situacao) ? "Situação: {$tese->situacao}" : '',
+                $tese->tempo,
+            ])));
         }
 
         // if there is no "." at the end of the text, add it
@@ -228,6 +269,10 @@ class TesePageController extends Controller
         // dd($teses);
         if ($tribunal == 'TST') {
             return view('front.tese_tst', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes'));
+        }
+
+        if ($tribunal == 'TNU') {
+            return view('front.tese_tnu', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes'));
         }
 
         return view('front.tese', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes'));

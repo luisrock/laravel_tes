@@ -79,6 +79,10 @@ it('responde na rota de teses TST', function () {
     assertRouteResponds('/teses/tst');
 });
 
+it('responde na rota de teses TNU', function () {
+    assertRouteResponds('/teses/tnu');
+});
+
 it('responde na rota de súmulas STF', function () {
     assertRouteResponds('/sumulas/stf');
 });
@@ -134,6 +138,11 @@ it('redireciona rota de tese STJ individual sem parâmetro', function () {
 
 it('redireciona rota de tese TST individual sem parâmetro', function () {
     $response = $this->get('/tese/tst');
+    expect($response->getStatusCode())->toBeIn([200, 302, 500]);
+});
+
+it('redireciona rota de tese TNU individual sem parâmetro', function () {
+    $response = $this->get('/tese/tnu');
     expect($response->getStatusCode())->toBeIn([200, 302, 500]);
 });
 

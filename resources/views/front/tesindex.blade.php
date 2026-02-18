@@ -81,6 +81,10 @@
                         <i class="fa fa-chevron-right tw-text-xs tw-text-slate-400 group-hover:tw-text-brand-500 tw-transition-colors"></i>
                         <span class="tw-font-medium">Teses Vinculantes do TST</span>
                     </a>
+                    <a href="{{ route('tnualltesespage') }}" class="tw-group tw-flex tw-items-center tw-gap-2 tw-p-3 tw-rounded-lg hover:tw-bg-slate-50 tw-transition-colors tw-text-slate-700 hover:tw-text-brand-700">
+                        <i class="fa fa-chevron-right tw-text-xs tw-text-slate-400 group-hover:tw-text-brand-500 tw-transition-colors"></i>
+                        <span class="tw-font-medium">Temas Representativos da TNU</span>
+                    </a>
                 </div>
             </section>
         </div>

@@ -67,11 +67,13 @@ Route::get('/sumula/tnu/{sumula?}', [App\Http\Controllers\SumulaPageController::
 Route::get('/teses/stf', [App\Http\Controllers\AllStfTesesPageController::class, 'index'])->name('stfalltesespage');
 Route::get('/teses/stj', [App\Http\Controllers\AllStjTesesPageController::class, 'index'])->name('stjalltesespage');
 Route::get('/teses/tst', [App\Http\Controllers\AllTstTesesPageController::class, 'index'])->name('tstalltesespage');
+Route::get('/teses/tnu', [App\Http\Controllers\AllTnuTesesPageController::class, 'index'])->name('tnualltesespage');
 
 // Pages for individual tese
 Route::get('/tese/stf/{tese?}', [App\Http\Controllers\TesePageController::class, 'index'])->name('stftesepage');
 Route::get('/tese/stj/{tese?}', [App\Http\Controllers\TesePageController::class, 'index'])->name('stjtesepage');
 Route::get('/tese/tst/{tese?}', [App\Http\Controllers\TesePageController::class, 'index'])->name('tsttesepage');
+Route::get('/tese/tnu/{tese?}', [App\Http\Controllers\TesePageController::class, 'index'])->name('tnutesepage');
 
 // Ajax requests admin
 Route::post('/admin-ajax-request', [App\Http\Controllers\AjaxController::class, 'adminstore'])->name('adminstore');
