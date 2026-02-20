@@ -65,7 +65,9 @@
 
     <!-- Google Adsense -->
     @if(config('app.env') === 'production')
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6476437932373204" crossorigin="anonymous"></script>
+        @if(auth()->guest() || auth()->user()->shouldSeeAds())
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6476437932373204" crossorigin="anonymous"></script>
+        @endif
     @endif
 
     <!-- Matomo -->

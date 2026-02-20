@@ -187,25 +187,7 @@
     </div>
     @endif
 
-    {{-- Admin Store Section --}}
-    @if ($admin && $hasAnyResults)
-    <div id="admin-store" class="tw-bg-white tw-rounded-xl tw-shadow-sm tw-border tw-border-slate-200 tw-p-6">
-        <div class="tw-flex tw-items-center tw-gap-3 tw-mb-4">
-            <span class="tw-px-2.5 tw-py-0.5 tw-rounded-full tw-text-xs tw-font-medium tw-bg-amber-100 tw-text-amber-800">Admin</span>
-            <h3 class="tw-text-lg tw-font-semibold tw-text-slate-800 tw-m-0">Ferramentas</h3>
-        </div>
-        <p class="tw-text-sm tw-text-slate-600 tw-mb-4">
-            Keyword: <code class="tw-font-bold tw-text-slate-700">{{ $keyword }}</code>
-        </p>
-        <div class="tw-flex tw-gap-3">
-            <a href="{{ route('temapage', ['tema' => \Illuminate\Support\Str::slug($keyword)]) }}"
-                class="tw-inline-flex tw-items-center tw-px-4 tw-py-2 tw-border tw-border-slate-300 tw-rounded-lg tw-text-sm tw-font-medium tw-text-slate-700 tw-bg-white hover:tw-bg-slate-50 tw-transition-colors"
-                target="_blank">
-                <i class="fa fa-external-link tw-mr-2"></i> Ver tema
-            </a>
-        </div>
-    </div>
-    @endif
+
 
 </div>
 

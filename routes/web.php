@@ -48,6 +48,15 @@ Route::get('/newsletter-obrigado', [App\Http\Controllers\NewsletterPageControlle
 Route::get('/contato', [ContactController::class, 'index'])->name('contact.index');
 Route::post('/contato', [ContactController::class, 'store'])->name('contact.store');
 
+// Paginas institucionais
+Route::get('/termos', function () {
+    return view('front.termos');
+})->name('termos');
+
+Route::get('/privacidade', function () {
+    return view('front.privacidade');
+})->name('privacidade');
+
 // Pages for sumulas
 Route::get('/index', function () {
     return view('front.tesindex', ['display_pdf' => false]);

@@ -30,9 +30,11 @@
                 </div>
 
                 <div>
-                    <h4 class="tw-text-xs tw-font-bold tw-uppercase tw-tracking-wider tw-text-slate-100">Recursos</h4>
+                    <h4 class="tw-text-xs tw-font-bold tw-uppercase tw-tracking-wider tw-text-slate-100">Recursos e Institucional</h4>
                     <div class="tw-mt-3 tw-space-y-2.5">
                         <a href="https://chrome.google.com/webstore/detail/teses-e-s%C3%BAmulas/biigfejcdpcpibfmffgmmndpjhnlcjfb?hl=pt-BR" target="_blank" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white">Extensão Chrome</a>
+                        <a href="{{ route('termos') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white">Termos de Serviço</a>
+                        <a href="{{ route('privacidade') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white">Política de Privacidade</a>
                     </div>
                 </div>
 

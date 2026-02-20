@@ -1170,22 +1170,17 @@ composer require filament/filament:^4.0
 
 ---
 
-## 18. Status Atual (Jan/2026)
+## 18. Status Atual (Fev/2026)
 
-**Resumo rápido (implementado até agora):**
-- Guard suave em rotas de assinatura (`subscription.configured`).
-- Webhook protegido com `stripe.webhook` + correção no handler de `invoice.payment_succeeded`.
-- UI: link de estorno discreto em "Minha Assinatura".
-- Script de teste automatizado criado: `scripts/test-subscription-flow.sh`.
-- Fluxo validado em modo test via Stripe CLI.
-- Seed de `plan_features` aplicado em produção (feature `no_ads` para PRO/PREMIUM).
-- Filament 2.x instalado com painel em `/painel` (sem conflitar com `/admin`).
-- Acesso ao Filament restrito via `FilamentUser` + lista de admins.
-- Resources e widgets de assinaturas criados (usuarios, estornos, features, métricas).
-
-**Próximos passos imediatos:**
-- Fase 10: validar painel em `/painel` e ajustar conforme uso real.
-- Fase 8/9: otimizações e bateria final de testes ao fim.
+**Resumo rápido:**
+Após completa auditoria, 100% dos componentes especificados neste plano constam como já **desenvolvidos e implementados** no projeto:
+- ✅ **Laravel Cashier:** Migrations e configurações concluídas (incluindo `customer_columns`, `subscriptions`, etc).
+- ✅ **Base de Dados Exclusiva:** Tabelas `stripe_webhook_events`, `refund_requests` e `plan_features` rodadas e em operação.
+- ✅ **Models e Regras:** `RefundRequest`, `StripeWebhookEvent`, `PlanFeature` e trait `Billable` no `User`.
+- ✅ **Controllers e Webhooks:** `SubscriptionController`, `RefundRequestController` e o `WebhookController` estendido protegidos.
+- ✅ **Interface de Usuário (Views):** As páginas integradas ao frontend (`/subscription/plans.blade.php`, `success`, `cancel`, `show`, e `/subscription/refund.blade.php`) existem.
+- ✅ **Filament 2.x:** Painel ativo contendo `PlanFeatureResource`, `UserResource`, `RefundRequestResource` e painéis de dashboard (`Painel`).
+- ✅ **Mecânicas Ativas:** Emails transacionais via Notificações (Boas Vindas, Lembrete, Cancelamento, Estorno), validação de webhooks para idempotência.
 
 **Referência detalhada:** consulte `ASSINATURA_SPECS.md` (seções “STATUS DA IMPLEMENTAÇÃO” e “Testes Realizados”).
 

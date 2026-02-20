@@ -17,6 +17,15 @@ use Laravel\Cashier\Subscription;
  */
 
 // ==========================================
+// Setup
+// ==========================================
+
+beforeEach(function () {
+    app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+    \Spatie\Permission\Models\Permission::findOrCreate('ad_free', 'web');
+});
+
+// ==========================================
 // Planos de Assinatura
 // ==========================================
 

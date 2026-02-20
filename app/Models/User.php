@@ -172,6 +172,10 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
      */
     public function shouldSeeAds(): bool
     {
+        if ($this->hasPermissionTo('ad_free')) {
+            return false;
+        }
+
         return ! $this->hasFeature(config('subscription.features.no_ads', 'no_ads'));
     }
 
