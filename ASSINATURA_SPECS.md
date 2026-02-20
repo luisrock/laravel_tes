@@ -25,7 +25,7 @@
 | 5b - UI Global | ✅ Concluída | 18/01/2026 | Header/Footer novos, layout unificado |
 | 6 - Seed Features | ✅ Concluída | 19/01/2026 | Seeder `no_ads` aplicado em PROD (PRO/PREMIUM) |
 | 7 - Notificações + Job de Renovação | ✅ Concluída | 19/01/2026 | Emails transacionais + job 7 dias antes |
-| 10 - Filament (Admin de Assinaturas) | 🟡 Em andamento | 19/01/2026 | Instalação + resources + widgets |
+| 10 - Filament (Admin de Assinaturas) | ✅ Concluída | 19/02/2026 | Refatoração para v4. Instalação + resources + widgets |
 
 ### Atualizações Recentes (19/01/2026)
 - ✅ **Guard suave**: middleware `subscription.configured` bloqueia apenas rotas de assinatura quando faltar config (sem derrubar o site).
@@ -66,8 +66,6 @@ Layouts atualizados:
 ```
 
 ### Próximos Passos
-- **Fase 10 (Filament)**: validar uso no `/painel` e ajustar UX conforme necessidade.
-- **Escopo do painel**: manter focado em assinaturas (por enquanto).
 - **Fase 8 (Otimizações)**: revisar cache de planos e métricas adicionais (se necessário).
 - **Fase 9 (Qualidade)**: rodar checklist UI + testes completos no final.
 
@@ -223,12 +221,10 @@ CANCEL_SUBSCRIPTION=1 ./scripts/test-subscription-flow.sh
 ```
 
 ### Testes finais (ao final do projeto)
-- Rodar a bateria completa com E2E: `RUN_E2E=1 ./scripts/run-subscription-tests.sh`
-- Adicionar testes de interface web (navegação e páginas de assinatura)
-- Habilitar hook de pre-commit para bloquear commits com falha de testes
-- Checklist UI manual: `scripts/subscription-ui-checklist.md`
-- **Produção:** não rodar `php artisan test` nem `scripts/run-subscription-tests.sh` em PROD.
-- **Produção:** `scripts/send-subscription-test-emails.sh` é seguro (apenas envia emails).
+- Rodar a bateria completa com E2E no ambiente local (`RUN_E2E=1 ./scripts/run-subscription-tests.sh`).
+- Checklist UI manual: `scripts/subscription-ui-checklist.md`.
+- **PRODUÇÃO:** Nunca rodar `php artisan test` nem executar `./scripts/run-subscription-tests.sh` no servidor remoto (Vito), pois configurações e chaves diferem, além de gerar lixo no banco de dados. Testes automatizados são restritos ao ambiente de desenvolvimento.
+- **PRODUÇÃO:** O arquivo `scripts/send-subscription-test-emails.sh` pode ser usado pois é seguro (apenas testa envio de e-mails SES).
 
 ---
 

@@ -13,6 +13,24 @@ function adjustOneQuoteOnly($str)
     return trim($res);
 }
 
+function get_teses_with_ai($tribunal = null)
+{
+    return \Illuminate\Support\Facades\Cache::remember('ai_teses_'.($tribunal ?? 'all'), 3600, function () use ($tribunal) {
+        $query = \Illuminate\Support\Facades\DB::table('tese_analysis_sections')->select('tese_id');
+        if ($tribunal) {
+            $query->where('tribunal', $tribunal);
+        }
+        $ids = $query->pluck('tese_id')->toArray();
+        $final_ids = [];
+        foreach (array_unique($ids) as $id) {
+            $final_ids[] = (int) $id;
+            $final_ids[] = (string) $id;
+        }
+
+        return $final_ids;
+    });
+}
+
 function noSignal($str)
 {
     // se tiver menos de 3 chars e não for operador, ignorar

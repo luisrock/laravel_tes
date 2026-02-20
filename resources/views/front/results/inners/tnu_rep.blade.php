@@ -2,10 +2,13 @@
     <tr>
         <td class="tw-block tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg tw-p-6 hover:tw-border-brand-300 hover:tw-shadow-sm tw-transition-all">
             <div class="tw-flex tw-items-start tw-justify-between tw-gap-4 tw-mb-4">
-                <h4 class="tw-text-lg tw-font-semibold tw-text-brand-700">
+                <h4 class="tw-text-lg tw-font-semibold tw-text-brand-700 tw-flex tw-items-center tw-gap-3 tw-flex-wrap">
                     <a href="javascript:void(0);" class="tw-cursor-default">
                         {{ $rep['trib_rep_titulo'] }}
                     </a>
+                    @if(in_array($rep['trib_rep_id'] ?? null, function_exists('get_teses_with_ai') ? get_teses_with_ai('TNU') : []))
+                        <x-ia-badge size="sm" :url="url('/tese') . '/tnu/' . $rep['trib_rep_id']" />
+                    @endif
                 </h4>
                 <a href="{{ $rep['trib_rep_url'] }}" target="_blank" class="tw-inline-flex tw-items-center tw-px-2.5 tw-py-1 tw-rounded-full tw-text-xs tw-font-medium tw-bg-slate-100 tw-text-slate-600 hover:tw-bg-slate-200 hover:tw-text-brand-700 tw-transition-colors">
                     {{ $rep['trib_rep_processo'] }} <i class="fa fa-external-link tw-ml-1"></i>

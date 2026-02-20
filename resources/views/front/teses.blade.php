@@ -68,14 +68,23 @@
                 </div>
 
                 <div class="tw-space-y-4" id="teses-list">
+                    @php
+                        $ai_teses = function_exists('get_teses_with_ai') ? get_teses_with_ai($tribunal) : [];
+                    @endphp
                     @foreach ($teses as $tes)
+                        @php
+                            $has_ai = in_array($tes->id ?? null, $ai_teses);
+                        @endphp
                         <div class="tese-item tw-block tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg tw-p-6 hover:tw-border-brand-300 hover:tw-shadow-sm tw-transition-all">
                             
                             <div class="tw-flex tw-items-center tw-justify-between tw-mb-3">
-                                <h4 class="tw-text-lg tw-font-semibold tw-m-0">
+                                <h4 class="tw-text-lg tw-font-semibold tw-m-0 tw-flex tw-items-center tw-gap-3 tw-flex-wrap">
                                     <a href="{{ route($tese_route, ['tese' => $tes->id]) }}" class="tw-text-brand-600 hover:tw-text-brand-800 hover:tw-underline tw-underline-offset-2 {{ $tes->isCancelada ? 'tw-text-slate-500 tw-line-through' : '' }}">
                                         TEMA {{ $tes->numero }}
                                     </a>
+                                    @if($has_ai)
+                                        <x-ia-badge size="sm" :url="route($tese_route, ['tese' => $tes->id])" />
+                                    @endif
                                 </h4>
                                 @if(isset($tes->situacao))
                                     <span class="tw-inline-flex tw-items-center tw-px-2.5 tw-py-0.5 tw-rounded-full tw-text-xs tw-font-medium {{ $tes->isCancelada ? 'tw-bg-red-100 tw-text-red-800' : 'tw-bg-slate-100 tw-text-slate-600' }}">

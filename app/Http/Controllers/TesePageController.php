@@ -240,6 +240,15 @@ class TesePageController extends Controller
         $display_pdf = false;
         $label = "TEMA {$tese->numero} do $tribunal_nome_completo - $tribunal";
 
+        // MOCKUP TESTE IA: Busca as análises recém criadas de IA (não usa filter is_active por enquanto pois estão under test)
+        $ai_sections = DB::table('tese_analysis_sections')
+            ->where('tese_id', $tese_id)
+            ->where('tribunal', $tribunal)
+            ->orderBy('generated_at', 'desc')
+            ->get()
+            ->unique('section_type')
+            ->pluck('content', 'section_type');
+
         // Gerar meta description otimizada
         $description = $this->generateMetaDescription($tribunal, $tese->numero, $tese->tema_texto, $tese->tese_texto);
 
@@ -260,6 +269,17 @@ class TesePageController extends Controller
             }
         }
 
+        $has_access = $admin;
+        if (! $has_access && auth()->check()) {
+            $has_access = auth()->user()->isSubscriber();
+        }
+
+        // Buscar Acórdãos PDF via Eloquent Model para utilizar Presigned URL Accessors
+        $acordaos_pdfs = \App\Models\TeseAcordao::where('tese_id', $tese_id)
+            ->where('tribunal', $tribunal)
+            ->whereNotNull('s3_key')
+            ->get();
+
         // Buscar temas relacionados baseados em palavras-chave similares
         $related_themes = $this->getRelatedThemes($tese->tema_texto ?? $tese->tese_texto ?? '', $tese->numero);
 
@@ -268,14 +288,14 @@ class TesePageController extends Controller
 
         // dd($teses);
         if ($tribunal == 'TST') {
-            return view('front.tese_tst', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes'));
+            return view('front.tese_tst', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'acordaos_pdfs'));
         }
 
         if ($tribunal == 'TNU') {
-            return view('front.tese_tnu', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes'));
+            return view('front.tese_tnu', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'acordaos_pdfs'));
         }
 
-        return view('front.tese', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes'));
+        return view('front.tese', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'acordaos_pdfs'));
     } // end public function
 
     /**

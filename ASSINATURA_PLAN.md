@@ -1016,20 +1016,20 @@ O Stripe envia automaticamente:
 
 | Pacote | Versão Requerida | Motivo |
 |--------|------------------|--------|
-| Laravel | 8.x | Versão atual do projeto |
+| Laravel | 12.x | Nova versão atual do projeto (Pós-upgrade de Fev/26) |
 | PHP | 8.3 | Versão em dev e produção |
-| Laravel Cashier | ^13.x | Última versão compatível com Laravel 8 |
-| Filament | ^2.x | Última versão compatível com Laravel 8 |
-| Stripe PHP SDK | ^7.0 ou ^10.0 | Instalado automaticamente pelo Cashier |
+| Laravel Cashier | ^15.x | Atualizado conforme compatibilidade do Laravel 12 |
+| Filament | ^4.x | Atualizado conforme compatibilidade do Laravel 12 |
+| Stripe PHP SDK | ^13.0 ou superior | Instalado automaticamente pelo Cashier v15 |
 
 ### 14.2 Comandos de Instalação
 
 ```bash
 # Cashier
-composer require laravel/cashier:^13.0
+composer require laravel/cashier:^15.0
 
 # Filament
-composer require filament/filament:^2.0
+composer require filament/filament:^4.0
 ```
 
 ---

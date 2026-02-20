@@ -1,10 +1,13 @@
 @foreach ($output['tese']['hits'] as $rep)
     <tr>
         <td class="tw-block tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg tw-p-6 hover:tw-border-brand-300 hover:tw-shadow-sm tw-transition-all">
-            <h4 class="tw-text-lg tw-font-semibold tw-text-brand-700 tw-mb-3">
+            <h4 class="tw-text-lg tw-font-semibold tw-text-brand-700 tw-mb-3 tw-flex tw-items-center tw-gap-3 tw-flex-wrap">
                 <a href="{{ url('/tese') }}/stf/{{ $rep['trib_rep_id'] }}" class="hover:tw-text-brand-900 hover:tw-underline tw-transition-colors">
                     {{ $rep['trib_rep_titulo'] }}
                 </a>
+                @if(in_array($rep['trib_rep_id'] ?? null, function_exists('get_teses_with_ai') ? get_teses_with_ai('STF') : []))
+                    <x-ia-badge size="sm" :url="url('/tese') . '/stf/' . $rep['trib_rep_id']" />
+                @endif
             </h4>
             
             <div class="tw-space-y-4">
