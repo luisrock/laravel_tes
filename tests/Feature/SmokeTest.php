@@ -44,8 +44,8 @@ it('carrega a página de login', function () {
     $this->get('/login')->assertStatus(200);
 });
 
-it('registro retorna 404 (rota desabilitada)', function () {
-    $this->get('/register')->assertStatus(404);
+it('registro retorna 200 (rota habilitada)', function () {
+    $this->get('/register')->assertStatus(200);
 });
 
 it('carrega a página de reset de senha', function () {

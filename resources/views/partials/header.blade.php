@@ -20,17 +20,18 @@
             <span class="tw-h-6 tw-w-px tw-bg-slate-300 tw-mx-2"></span>
 
             @auth
-                @if(in_array(auth()->user()->email, config('tes_constants.admins')))
+                @if(auth()->user()->hasRole('admin'))
                     <a href="{{ route('admin') }}" class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100 hover:tw-text-brand-700 tw-transition">Admin</a>
                 @endif
-            @endauth
 
-            @auth
+                {{-- Assinatura desabilitada por enquanto
                 @if(auth()->user()->isSubscriber())
                     <a href="{{ route('subscription.show') }}" class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100 hover:tw-text-brand-700 tw-transition">Minha Assinatura</a>
                 @else
                     <a href="{{ route('subscription.plans') }}" class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-bg-brand-700 tw-text-white hover:tw-bg-brand-800 tw-transition">Assinar</a>
                 @endif
+                --}}
+
                 <form action="{{ route('logout') }}" method="POST" class="tw-inline">
                     @csrf
                     <button type="submit" class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100 hover:tw-text-brand-700 tw-transition">Sair</button>
@@ -49,17 +50,18 @@
         <div class="tw-my-2 tw-h-px tw-bg-slate-200"></div>
 
         @auth
-            @if(in_array(auth()->user()->email, config('tes_constants.admins')))
+            @if(auth()->user()->hasRole('admin'))
                 <a href="{{ route('admin') }}" class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100">Admin</a>
             @endif
-        @endauth
 
-        @auth
+            {{-- Assinatura desabilitada por enquanto
             @if(auth()->user()->isSubscriber())
                 <a href="{{ route('subscription.show') }}" class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100">Minha Assinatura</a>
             @else
                 <a href="{{ route('subscription.plans') }}" class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-bg-brand-700 tw-text-white">Assinar</a>
             @endif
+            --}}
+
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
                 <button type="submit" class="tw-w-full tw-text-left tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100">Sair</button>

@@ -51,6 +51,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $roleRegistered->syncPermissions([
             'search',
             'ad_free',
+            'view_ai_analysis',
         ]);
 
         // Subscriber (Assinante do plano minimo / Pro / Premium)

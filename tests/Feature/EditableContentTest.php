@@ -2,7 +2,6 @@
 
 use App\Models\EditableContent;
 use App\Models\User;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -57,11 +56,8 @@ describe('Página Pública de Conteúdo', function () {
 
 describe('Edição de Conteúdo (Admin)', function () {
 
-    it('permite edição para admin com email autorizado', function () {
-        Config::set('tes_constants.admins', ['admin@test.com']);
-
+    it('permite edição para admin com role admin', function () {
         $admin = createAdminUser();
-        $admin->update(['email' => 'admin@test.com']);
 
         DB::table('editable_contents')->insert([
             'slug' => 'pagina-teste',
@@ -95,10 +91,7 @@ describe('Edição de Conteúdo (Admin)', function () {
     });
 
     it('valida campos obrigatórios no update', function () {
-        Config::set('tes_constants.admins', ['admin@test.com']);
-
         $admin = createAdminUser();
-        $admin->update(['email' => 'admin@test.com']);
 
         DB::table('editable_contents')->insert([
             'slug' => 'pagina-validacao',
@@ -118,10 +111,7 @@ describe('Edição de Conteúdo (Admin)', function () {
     });
 
     it('atualiza conteúdo com sucesso e redireciona', function () {
-        Config::set('tes_constants.admins', ['admin@test.com']);
-
         $admin = createAdminUser();
-        $admin->update(['email' => 'admin@test.com']);
 
         DB::table('editable_contents')->insert([
             'slug' => 'precedentes-vinculantes-cpc',
@@ -148,10 +138,7 @@ describe('Edição de Conteúdo (Admin)', function () {
     });
 
     it('redireciona para homepage ao atualizar conteúdo precedentes-home', function () {
-        Config::set('tes_constants.admins', ['admin@test.com']);
-
         $admin = createAdminUser();
-        $admin->update(['email' => 'admin@test.com']);
 
         DB::table('editable_contents')->insert([
             'slug' => 'precedentes-home',

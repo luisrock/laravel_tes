@@ -262,16 +262,21 @@ class TesePageController extends Controller
 
         $admin = false;
         if (auth()->check()) {
-            // check the email
-            $useremail = auth()->user()->email;
-            if (in_array($useremail, ['mauluis@gmail.com', 'trator70@gmail.com', 'ivanaredler@gmail.com'])) {
-                $admin = true;
-            }
+            $admin = auth()->user()->hasRole('admin');
         }
 
-        $has_access = $admin;
-        if (! $has_access && auth()->check()) {
-            $has_access = auth()->user()->isSubscriber();
+        // Registerwall vs Paywall: se role "registered" tem view_ai_analysis,
+        // qualquer usuário logado vê (registerwall). Senão, só quem tem a
+        // permissão via subscriber/premium/admin vê (paywall).
+        $registeredRole = \Spatie\Permission\Models\Role::findByName('registered', 'web');
+        $isRegisterwall = $registeredRole->hasPermissionTo('view_ai_analysis');
+
+        if ($admin) {
+            $has_access = true;
+        } elseif (auth()->check()) {
+            $has_access = auth()->user()->hasPermissionTo('view_ai_analysis');
+        } else {
+            $has_access = false;
         }
 
         // Buscar Acórdãos PDF via Eloquent Model para utilizar Presigned URL Accessors
@@ -288,14 +293,14 @@ class TesePageController extends Controller
 
         // dd($teses);
         if ($tribunal == 'TST') {
-            return view('front.tese_tst', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'acordaos_pdfs'));
+            return view('front.tese_tst', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'isRegisterwall', 'acordaos_pdfs'));
         }
 
         if ($tribunal == 'TNU') {
-            return view('front.tese_tnu', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'acordaos_pdfs'));
+            return view('front.tese_tnu', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'isRegisterwall', 'acordaos_pdfs'));
         }
 
-        return view('front.tese', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'acordaos_pdfs'));
+        return view('front.tese', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'isRegisterwall', 'acordaos_pdfs'));
     } // end public function
 
     /**

@@ -149,7 +149,7 @@ return [
     */
 
     'features' => [
-        // Features::registration(), // Desabilitado: só admin pode fazer login (por ora)
+        Features::registration(),
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::updateProfileInformation(),

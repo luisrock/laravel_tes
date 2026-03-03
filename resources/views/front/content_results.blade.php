@@ -38,7 +38,7 @@
 
             {{-- PDF Button Logic (Hidden/Restricted) --}}
             @php
-                $isAdmin = auth()->check() && in_array(auth()->user()->email, config('tes_constants.admins', []));
+                $isAdmin = auth()->check() && auth()->user()->hasRole('admin');
             @endphp
             @if ($isAdmin && (!empty($output['sumula']['total']) || !empty($output['tese']['total'])) && (empty($_GET['print']) || 'pdf' != $_GET['print']))
                 <div id="pdf-button" class="tw-flex tw-justify-end tw-mb-4" style="{{ $display_pdf ?? '' }}">

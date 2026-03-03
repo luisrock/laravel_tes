@@ -183,32 +183,51 @@
                             </div>
 
                             @if(!$has_access)
-                            <!-- OVERLAY: The Blur Hard Paywall Background Gradients so it fades into white at the bottom -->
+                            {{-- OVERLAY: Gradiente para fading visual --}}
                             <div class="tw-absolute tw-inset-0 tw-z-10 tw-bg-gradient-to-b tw-from-white/5 tw-via-white/70 tw-to-white tw-pointer-events-none tw-rounded-b-lg"></div>
 
-                            <!-- O CARD: Fica posicionado encima, com sticky nativo CSS para descer junto com o scroll do usuário -->
+                            {{-- CARD CTA: Registerwall ou Paywall --}}
                             <div class="tw-absolute tw-inset-0 tw-z-20 tw-flex tw-justify-center tw-items-start tw-pt-6 tw-px-6 paywall-sticky-container">
                                 <div class="tw-bg-slate-900 tw-text-white tw-rounded-2xl tw-p-8 tw-shadow-2xl tw-max-w-md tw-w-full tw-text-center tw-relative tw-overflow-hidden paywall-sticky-card">
                                     <div class="tw-absolute -tw-top-12 -tw-right-12 tw-w-32 tw-h-32 tw-bg-brand-500 tw-rounded-full tw-opacity-20 tw-blur-2xl"></div>
                                     <div class="tw-absolute -tw-bottom-12 -tw-left-12 tw-w-32 tw-h-32 tw-bg-blue-500 tw-rounded-full tw-opacity-20 tw-blur-2xl"></div>
                                     
-                                    <i class="fa fa-lock tw-text-3xl tw-text-brand-400 tw-mb-4"></i>
-                                    <h3 class="tw-text-xl tw-font-bold tw-mb-2">Análise Jurídica Exclusiva</h3>
-                                    <p class="tw-text-slate-300 tw-text-sm tw-mb-6 tw-leading-relaxed">
-                                        Acesse agora o <strong>Resumo do Caso Fático</strong> que deu origem à tese, os <strong>Contornos Jurídicos do Acórdão</strong> e mais.
-                                    </p>
-                                    
-                                    <div class="tw-space-y-3">
-                                        <a href="/assinar" class="tw-block tw-w-full tw-bg-brand-600 hover:tw-bg-brand-500 tw-text-white tw-font-semibold tw-py-3 tw-px-4 tw-rounded-xl tw-transition-colors tw-pointer-events-auto">
-                                            Assine o T&S
-                                        </a>
-                                        <p class="tw-text-xs tw-text-slate-400 tw-pointer-events-auto">
-                                            Já possui assinatura? <a href="/login?redirect=/tese/{{ strtolower($tribunal) }}/{{ $tese->numero }}" class="tw-text-brand-400 hover:tw-text-brand-300 tw-underline">Entre na sua conta</a>.
+                                    @if($isRegisterwall)
+                                        {{-- REGISTERWALL --}}
+                                        <i class="fa fa-user-plus tw-text-3xl tw-text-brand-400 tw-mb-4"></i>
+                                        <h3 class="tw-text-xl tw-font-bold tw-mb-2">Análise Jurídica Completa</h3>
+                                        <p class="tw-text-slate-300 tw-text-sm tw-mb-6 tw-leading-relaxed">
+                                            Crie sua conta <strong>gratuita</strong> para acessar o <strong>Resumo do Caso Fático</strong>, os <strong>Contornos Jurídicos do Acórdão</strong> e mais — e ainda navegue <strong>sem anúncios</strong>!
                                         </p>
-                                    </div>
+                                        
+                                        <div class="tw-space-y-3">
+                                            <a href="/register" class="tw-block tw-w-full tw-bg-brand-600 hover:tw-bg-brand-500 tw-text-white tw-font-semibold tw-py-3 tw-px-4 tw-rounded-xl tw-transition-colors tw-pointer-events-auto">
+                                                Criar Conta Grátis
+                                            </a>
+                                            <p class="tw-text-xs tw-text-slate-400 tw-pointer-events-auto">
+                                                Já tem conta? <a href="/login?redirect=/tese/{{ strtolower($tribunal) }}/{{ $tese->numero }}" class="tw-text-brand-400 hover:tw-text-brand-300 tw-underline">Entre na sua conta</a>.
+                                            </p>
+                                        </div>
+                                    @else
+                                        {{-- PAYWALL --}}
+                                        <i class="fa fa-lock tw-text-3xl tw-text-brand-400 tw-mb-4"></i>
+                                        <h3 class="tw-text-xl tw-font-bold tw-mb-2">Análise Jurídica Exclusiva</h3>
+                                        <p class="tw-text-slate-300 tw-text-sm tw-mb-6 tw-leading-relaxed">
+                                            Acesse agora o <strong>Resumo do Caso Fático</strong> que deu origem à tese, os <strong>Contornos Jurídicos do Acórdão</strong> e mais.
+                                        </p>
+                                        
+                                        <div class="tw-space-y-3">
+                                            <a href="/assinar" class="tw-block tw-w-full tw-bg-brand-600 hover:tw-bg-brand-500 tw-text-white tw-font-semibold tw-py-3 tw-px-4 tw-rounded-xl tw-transition-colors tw-pointer-events-auto">
+                                                Assine o T&S
+                                            </a>
+                                            <p class="tw-text-xs tw-text-slate-400 tw-pointer-events-auto">
+                                                Já possui assinatura? <a href="/login?redirect=/tese/{{ strtolower($tribunal) }}/{{ $tese->numero }}" class="tw-text-brand-400 hover:tw-text-brand-300 tw-underline">Entre na sua conta</a>.
+                                            </p>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
-                            <!-- Fim do Overlay Card -->
+                            {{-- Fim do Card CTA --}}
                             @endif
 
                         </div>

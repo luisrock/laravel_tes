@@ -42,7 +42,7 @@
                     <h4 class="tw-text-xs tw-font-bold tw-uppercase tw-tracking-wider tw-text-slate-100">Conta</h4>
                     <div class="tw-mt-3 tw-space-y-2.5">
                         @auth
-                            @if(in_array(auth()->user()->email, config('tes_constants.admins')))
+                            @if(auth()->user()->hasRole('admin'))
                                 <a href="{{ route('admin') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white"><b>Admin Dashboard</b></a>
                             @endif
                             <a href="{{ route('subscription.show') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white">Minha assinatura</a>

@@ -12,7 +12,7 @@
 @endphp
 
 @if($url)
-<a href="{{ $url }}#ai-premium-box" class="{{ $baseStyle }}" title="Ver análise com Inteligência Artificial">
+<a href="{{ $url }}" class="{{ $baseStyle }}" title="Ver análise com Inteligência Artificial">
     <i class="fa fa-robot tw-text-amber-100 tw-mr-1.5 tw-text-[0.9em]"></i>
     Decifrando a tese
 </a>

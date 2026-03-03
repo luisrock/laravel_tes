@@ -62,7 +62,7 @@
     <div class="tw-max-w-5xl tw-mx-auto tw-px-4 tw-py-6">
         <div class="tw-bg-white tw-shadow-sm tw-rounded-xl tw-overflow-hidden tw-border tw-border-slate-200">
             @auth
-                @if(in_array(Auth::user()->email, config('tes_constants.admins')))
+                @if(Auth::user()->hasRole('admin'))
                     <div class="tw-bg-slate-50 tw-border-b tw-border-slate-200 tw-px-6 md:tw-px-8 tw-py-6 tw-flex tw-justify-between tw-items-center">
                         <h1 class="tw-text-3xl tw-font-bold tw-text-slate-800 tw-tracking-tight">{{ $content->title }}</h1>
                         <a href="{{ route('content.edit', $content->slug) }}" class="tw-bg-brand-600 hover:tw-bg-brand-700 tw-text-white tw-font-bold tw-py-2 tw-px-4 tw-rounded-lg tw-text-sm tw-transition tw-shadow-sm" title="Editar conteúdo">

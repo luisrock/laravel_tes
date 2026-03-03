@@ -1,14 +1,13 @@
 <?php
 
 use App\Models\User;
-use Illuminate\Support\Facades\Config;
 
 /**
  * Testes do Painel Filament — acesso, autorização e recursos.
  *
  * O painel está em /painel (configurado no AdminPanelProvider).
  * canAccessPanel() retorna true em ambiente 'local', mas em 'testing'
- * verifica se o email do usuário está em config('tes_constants.admins').
+ * verifica se o usuário tem a role 'admin' via Spatie.
  */
 
 // ==========================================
@@ -31,10 +30,9 @@ describe('Acesso ao Painel Filament', function () {
     });
 
     it('permite acesso ao dashboard para admin autorizado', function () {
-        $user = User::factory()->create(['email' => 'admin-filament@test.com']);
-        Config::set('tes_constants.admins', ['admin-filament@test.com']);
+        $admin = createAdminUser();
 
-        $response = $this->actingAs($user)->get('/painel');
+        $response = $this->actingAs($admin)->get('/painel');
 
         // Filament pode retornar 200 (dashboard) ou redirect para a página interna
         expect($response->getStatusCode())->toBeIn([200, 302]);
@@ -49,8 +47,7 @@ describe('Acesso ao Painel Filament', function () {
 describe('Recursos Filament', function () {
 
     beforeEach(function () {
-        $this->adminUser = User::factory()->create(['email' => 'admin-resources@test.com']);
-        Config::set('tes_constants.admins', ['admin-resources@test.com']);
+        $this->adminUser = createAdminUser();
     });
 
     it('acessa lista de PlanFeatures', function () {

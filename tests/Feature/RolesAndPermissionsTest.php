@@ -2,7 +2,6 @@
 
 use App\Models\User;
 use Filament\Panel;
-use Illuminate\Support\Facades\Config;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -44,7 +43,7 @@ beforeEach(function () {
 
     // 4. Registered
     $registeredRole = Role::findOrCreate('registered', 'web');
-    $registeredRole->givePermissionTo(['search', 'ad_free']);
+    $registeredRole->givePermissionTo(['search', 'ad_free', 'view_ai_analysis']);
 });
 
 describe('User Model Roles and Permissions', function () {
@@ -61,7 +60,7 @@ describe('User Model Roles and Permissions', function () {
 
         // Verifica as permissoes
         expect($user->hasPermissionTo('ad_free'))->toBeTrue();
-        expect($user->hasPermissionTo('view_ai_analysis'))->toBeFalse();
+        expect($user->hasPermissionTo('view_ai_analysis'))->toBeTrue();
 
         // Com ad_free ativado (via Spatie), deve retornar false
         expect($user->shouldSeeAds())->toBeFalse();
@@ -107,21 +106,71 @@ describe('User Model Roles and Permissions', function () {
         // Simulamos ambiente de producao
         app()->detectEnvironment(fn () => 'production');
 
-        Config::set('tes_constants.admins', ['admin@tesesesumulas.com.br']);
-
         expect($user->canAccessPanel($panel))->toBeFalse();
     });
 
-    it('canAccessPanel() retorna true para administradores listados no config', function () {
-        $user = User::factory()->create(['email' => 'admin@tesesesumulas.com.br']);
+    it('canAccessPanel() retorna true para administradores com role admin', function () {
+        $admin = createAdminUser();
         $panel = mock(Panel::class);
 
         // Simulamos ambiente de producao
         app()->detectEnvironment(fn () => 'production');
 
-        Config::set('tes_constants.admins', ['admin@tesesesumulas.com.br']);
+        expect($admin->canAccessPanel($panel))->toBeTrue();
+    });
 
-        expect($user->canAccessPanel($panel))->toBeTrue();
+    it('role registered tem view_ai_analysis (registerwall ativo)', function () {
+        $role = Role::findByName('registered', 'web');
+        expect($role->hasPermissionTo('view_ai_analysis'))->toBeTrue();
+    });
+
+    it('usuario sem role nao tem view_ai_analysis', function () {
+        $user = User::factory()->create();
+        expect($user->hasPermissionTo('view_ai_analysis'))->toBeFalse();
+    });
+
+    it('usuario com role registered tem view_ai_analysis', function () {
+        $user = User::factory()->create();
+        $user->assignRole('registered');
+        expect($user->hasPermissionTo('view_ai_analysis'))->toBeTrue();
+    });
+
+    it('usuario com role subscriber tem view_ai_analysis', function () {
+        $user = User::factory()->create();
+        $user->assignRole('subscriber');
+        expect($user->hasPermissionTo('view_ai_analysis'))->toBeTrue();
+    });
+
+    it('usuario com role premium tem view_ai_analysis', function () {
+        $user = User::factory()->create();
+        $user->assignRole('premium');
+        expect($user->hasPermissionTo('view_ai_analysis'))->toBeTrue();
+    });
+
+    it('remover view_ai_analysis do registered simula paywall', function () {
+        $role = Role::findByName('registered', 'web');
+        $role->revokePermissionTo('view_ai_analysis');
+
+        // Agora registered não tem mais a permissão
+        expect($role->hasPermissionTo('view_ai_analysis'))->toBeFalse();
+
+        // Usuário com role registered não tem acesso
+        $user = User::factory()->create();
+        $user->assignRole('registered');
+        // Limpar cache para pegar estado atualizado
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        $user = $user->fresh();
+        expect($user->hasPermissionTo('view_ai_analysis'))->toBeFalse();
+
+        // Mas subscriber continua com acesso
+        $sub = User::factory()->create();
+        $sub->assignRole('subscriber');
+        expect($sub->hasPermissionTo('view_ai_analysis'))->toBeTrue();
+    });
+
+    it('registro publico esta habilitado no Fortify', function () {
+        $features = config('fortify.features');
+        expect($features)->toContain(\Laravel\Fortify\Features::registration());
     });
 
 });

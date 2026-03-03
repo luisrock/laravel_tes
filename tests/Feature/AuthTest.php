@@ -85,9 +85,8 @@ describe('Logout', function () {
 
 describe('Registro', function () {
 
-    it('retorna 404 pois registro está desabilitado', function () {
-        $this->get('/register')->assertStatus(404);
-        $this->post('/register', [])->assertStatus(404);
+    it('exibe formulário de registro (habilitado)', function () {
+        $this->get('/register')->assertStatus(200);
     });
 
 });

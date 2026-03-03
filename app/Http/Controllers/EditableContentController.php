@@ -54,7 +54,7 @@ class EditableContentController extends Controller
     public function update(Request $request, $slug)
     {
         // Verificar se é admin
-        if (! auth()->check() || ! in_array(auth()->user()->email, config('tes_constants.admins'))) {
+        if (! auth()->check() || ! auth()->user()->hasRole('admin')) {
             abort(403, 'Acesso negado');
         }
 

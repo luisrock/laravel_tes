@@ -13,12 +13,7 @@ class QuizController extends Controller
 {
     private function isAdmin()
     {
-        if (! auth()->check()) {
-            return false;
-        }
-        $admins = config('tes_constants.admins', ['mauluis@gmail.com', 'trator70@gmail.com', 'ivanaredler@gmail.com']);
-
-        return in_array(auth()->user()->email, $admins);
+        return auth()->check() && auth()->user()->hasRole('admin');
     }
 
     /**

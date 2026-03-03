@@ -57,9 +57,7 @@ class SearchPageController extends Controller
             // Verificar se usuário é admin
             $admin = false;
             if (auth()->check()) {
-                if (in_array(auth()->user()->email, config('tes_constants.admins'))) {
-                    $admin = true;
-                }
+                $admin = auth()->user()->hasRole('admin');
             }
 
             return view('front.search', compact('lista_tribunais', 'display_pdf', 'popular_themes', 'precedentes_home', 'admin', 'featured_quizzes'));
@@ -150,9 +148,7 @@ class SearchPageController extends Controller
         // Admin check
         $admin = false;
         if (auth()->check()) {
-            if (in_array(auth()->user()->email, config('tes_constants.admins'))) {
-                $admin = true;
-            }
+            $admin = auth()->user()->hasRole('admin');
         }
 
         $html = view('front.unified-results', compact(

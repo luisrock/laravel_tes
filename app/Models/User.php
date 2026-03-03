@@ -62,9 +62,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             return true;
         }
 
-        $admins = config('tes_constants.admins', []);
-
-        return $this->email && in_array($this->email, $admins, true);
+        return $this->hasRole('admin');
     }
 
     /**
