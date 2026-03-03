@@ -45,6 +45,7 @@
             </span>
         </div>
 
+        @if(config('subscription.enabled'))
         <div class="tw-px-6 tw-py-4 tw-flex tw-items-center tw-justify-between">
             <span class="tw-text-slate-700 tw-font-medium">Assinatura</span>
             <span class="tw-flex tw-items-center tw-gap-2">
@@ -62,6 +63,7 @@
             @endif
             </span>
         </div>
+        @endif
     </div>
 </div>
 
@@ -73,17 +75,19 @@
         <a href="{{ route('user-panel.profile') }}" class="tw-inline-flex tw-items-center tw-px-4 tw-py-2 tw-border tw-border-transparent tw-text-sm tw-font-medium tw-rounded-md tw-shadow-sm tw-text-white tw-bg-brand-600 hover:tw-bg-brand-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-brand-500 tw-transition-colors text-decoration-none">
             Editar perfil
         </a>
-        @if(auth()->user()->isSubscriber())
-            <a href="{{ route('subscription.portal') }}" class="tw-inline-flex tw-items-center tw-px-4 tw-py-2 tw-border tw-border-transparent tw-text-sm tw-font-medium tw-rounded-md tw-shadow-sm tw-text-white tw-bg-brand-600 hover:tw-bg-brand-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-brand-500 tw-transition-colors text-decoration-none">
-                Gerenciar assinatura
-            </a>
-            <a href="{{ route('refund.create') }}" class="tw-inline-flex tw-items-center tw-px-4 tw-py-2 tw-border tw-border-slate-300 tw-text-sm tw-font-medium tw-rounded-md tw-text-slate-700 tw-bg-white hover:tw-bg-slate-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-brand-500 tw-transition-colors text-decoration-none">
-                Solicitar estorno
-            </a>
-        @else
-            <a href="{{ route('subscription.plans') }}" class="tw-inline-flex tw-items-center tw-px-4 tw-py-2 tw-border tw-border-transparent tw-text-sm tw-font-medium tw-rounded-md tw-shadow-sm tw-text-white tw-bg-brand-600 hover:tw-bg-brand-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-brand-500 tw-transition-colors text-decoration-none">
-                Ver planos
-            </a>
+        @if(config('subscription.enabled'))
+            @if(auth()->user()->isSubscriber())
+                <a href="{{ route('subscription.portal') }}" class="tw-inline-flex tw-items-center tw-px-4 tw-py-2 tw-border tw-border-transparent tw-text-sm tw-font-medium tw-rounded-md tw-shadow-sm tw-text-white tw-bg-brand-600 hover:tw-bg-brand-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-brand-500 tw-transition-colors text-decoration-none">
+                    Gerenciar assinatura
+                </a>
+                <a href="{{ route('refund.create') }}" class="tw-inline-flex tw-items-center tw-px-4 tw-py-2 tw-border tw-border-slate-300 tw-text-sm tw-font-medium tw-rounded-md tw-text-slate-700 tw-bg-white hover:tw-bg-slate-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-brand-500 tw-transition-colors text-decoration-none">
+                    Solicitar estorno
+                </a>
+            @else
+                <a href="{{ route('subscription.plans') }}" class="tw-inline-flex tw-items-center tw-px-4 tw-py-2 tw-border tw-border-transparent tw-text-sm tw-font-medium tw-rounded-md tw-shadow-sm tw-text-white tw-bg-brand-600 hover:tw-bg-brand-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-brand-500 tw-transition-colors text-decoration-none">
+                    Ver planos
+                </a>
+            @endif
         @endif
     </div>
 </div>

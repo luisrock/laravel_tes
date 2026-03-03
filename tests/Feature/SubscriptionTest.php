@@ -23,6 +23,7 @@ use Laravel\Cashier\Subscription;
 beforeEach(function () {
     app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
     \Spatie\Permission\Models\Permission::findOrCreate('ad_free', 'web');
+    Config::set('subscription.enabled', true);
 });
 
 // ==========================================

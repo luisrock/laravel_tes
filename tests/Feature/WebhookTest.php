@@ -13,6 +13,14 @@ use Laravel\Cashier\Http\Middleware\VerifyWebhookSignature;
  */
 
 // ==========================================
+// Setup
+// ==========================================
+
+beforeEach(function () {
+    \Illuminate\Support\Facades\Config::set('subscription.enabled', true);
+});
+
+// ==========================================
 // Validacao de Payload
 // ==========================================
 

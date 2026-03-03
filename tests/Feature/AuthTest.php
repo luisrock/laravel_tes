@@ -59,6 +59,36 @@ describe('Login', function () {
             ->assertSessionHasErrors(['email', 'password']);
     });
 
+    it('redireciona para url customizada se redirect for passado no login', function () {
+        $user = User::factory()->create([
+            'password' => bcrypt('password'),
+            'email_verified_at' => now(),
+        ]);
+
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+            'redirect' => '/tese/stf/4',
+        ])->assertRedirect('/tese/stf/4');
+
+        $this->assertAuthenticatedAs($user);
+    });
+
+    it('ignora redirect malicioso com dominio externo no login', function () {
+        $user = User::factory()->create([
+            'password' => bcrypt('password'),
+            'email_verified_at' => now(),
+        ]);
+
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+            'redirect' => 'https://malicious.com/phishing',
+        ])->assertRedirect('/minha-conta');
+
+        $this->assertAuthenticatedAs($user);
+    });
+
 });
 
 // ==========================================

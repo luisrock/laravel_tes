@@ -3,6 +3,16 @@
 return [
     /*
     |--------------------------------------------------------------------------
+    | Enable/Disable Subscriptions
+    |--------------------------------------------------------------------------
+    |
+    | Habilita ou desabilita globalmente todas as rotas e views de assinatura.
+    |
+    */
+    'enabled' => env('ENABLE_SUBSCRIPTIONS', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Stripe Product IDs para Tiers de Assinatura
     |--------------------------------------------------------------------------
     |

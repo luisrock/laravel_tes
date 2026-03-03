@@ -104,7 +104,7 @@ A aplicação possui uma bateria abrangente de testes usando Pest v3 + PHPUnit 1
 | Arquivo | Testes | O que cobre |
 |---------|--------|-------------|
 | ArchTest | 16 | Arquitetura: presets security, namespaces, sufixos |
-| AuthTest | 17 | Login, logout, reset de senha (registro desabilitado) |
+| AuthTest | 17 | Login, logout, reset de senha, registro habilitado |
 | SmokeTest | 27 | Todas as rotas públicas e protegidas |
 | MiddlewareTest | 15 | AdminMiddleware, BearerToken, Subscribed, Feature, Config |
 | QuizTest | 17 | Listagem, filtro, visualização, resposta AJAX, resultado |
@@ -118,12 +118,39 @@ A aplicação possui uma bateria abrangente de testes usando Pest v3 + PHPUnit 1
 | SearchTest | 22 | Validação, acentos, paginação, todos os 8 tribunais |
 | SubscriptionNotifications | 3 | Notificações de boas-vindas, cancelamento, estorno |
 | SubscriptionRenewalReminder | 3 | Job de lembrete de renovação |
+| RolesAndPermissionsTest | 14 | Roles, permissions, ad_free, registerwall, paywall, canAccessPanel |
 
 **Observações:**
 - DB de teste: SQLite in-memory (configurado em `phpunit.xml`)
 - Queries MySQL-específicas (FULLTEXT, etc.) podem retornar 500 no SQLite — testes usam `assertRouteResponds()` que aceita 200 ou 500
 - Helpers reutilizáveis em `tests/Pest.php`: `createAdminUser()`, `createPublishedQuiz()`, `createSubscribedUser()`
 - Plano completo: `TEST_PLAN.md`
+
+### Registerwall e Controle de Acesso
+
+O conteúdo de análise IA ("Decifrando a Tese") usa **registerwall** (registro gratuito) em vez de paywall. A lógica é baseada em permissões Spatie:
+
+- **`view_ai_analysis`** na role `registered` → qualquer usuário logado vê o conteúdo (registerwall).
+- Removendo essa permissão do `registered` → somente `subscriber`/`premium`/`admin` veem (paywall futuro).
+- O CTA na view muda automaticamente entre "Criar Conta Grátis" e "Assine o T&S".
+- Administração de admin agora via `hasRole('admin')` (Spatie) — constante `tes_constants.admins` eliminada.
+- Registro público habilitado via Fortify.
+
+**Próximos passos para deploy:**
+1. Testar no browser local (tese STF com IA: sem login → registerwall; com login → conteúdo completo)
+2. `git push` (deploy automático via Vito Deploy)
+3. Em produção: `php artisan db:seed --class=RolesAndPermissionsSeeder`
+4. Em `/admin/roles`: atribuir role `admin` ao usuário administrador
+5. Detalhes completos: `PAYWALL_IA_PLAN.md`, seção 3
+
+---
+
+### Migrações Concluídas (Q1 2026)
+O projeto passou por extensas modernizações no início de 2026. Os planejamentos originais `.md` foram concluídos e removidos para limpar o repositório, mas as conquistas permanecem ativas na base de código:
+- **Upgrade de Framework**: Migração de Laravel 8/10 para **Laravel 12** com PHP 8.3, incluindo Filament v2 para v3.
+- **Modernização de Frontend**: Transição completa do antigo framework CSS (OneUI/Bootstrap) para **Tailwind CSS** via Vite em todo o site público.
+- **Testes Automatizados**: Suíte de testes migrada e ampliada de 67 testes soltos para >240 testes integrados no ecossistema Pest v3.
+- **Sistema de Assinatura Completo**: Integração robusta via Laravel Cashier na versão 15 com a API do Stripe (Webhooks, Portal de Assinante e proteção de Feature Flags), atualmente com acesso via Toggle global ocultado (`ENABLE_SUBSCRIPTIONS=false`).
 
 ---
 

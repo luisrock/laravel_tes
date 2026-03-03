@@ -265,18 +265,24 @@ class TesePageController extends Controller
             $admin = auth()->user()->hasRole('admin');
         }
 
-        // Registerwall vs Paywall: se role "registered" tem view_ai_analysis,
-        // qualquer usuário logado vê (registerwall). Senão, só quem tem a
-        // permissão via subscriber/premium/admin vê (paywall).
-        $registeredRole = \Spatie\Permission\Models\Role::findByName('registered', 'web');
-        $isRegisterwall = $registeredRole->hasPermissionTo('view_ai_analysis');
-
-        if ($admin) {
-            $has_access = true;
-        } elseif (auth()->check()) {
-            $has_access = auth()->user()->hasPermissionTo('view_ai_analysis');
+        // Configuração de Assinaturas (Toggle Global)
+        if (! config('subscription.enabled')) {
+            $isRegisterwall = true;
+            $has_access = $admin || auth()->check();
         } else {
-            $has_access = false;
+            // Registerwall vs Paywall: se role "registered" tem view_ai_analysis,
+            // qualquer usuário logado vê (registerwall). Senão, só quem tem a
+            // permissão via subscriber/premium/admin vê (paywall).
+            $registeredRole = \Spatie\Permission\Models\Role::findByName('registered', 'web');
+            $isRegisterwall = $registeredRole->hasPermissionTo('view_ai_analysis');
+
+            if ($admin) {
+                $has_access = true;
+            } elseif (auth()->check()) {
+                $has_access = auth()->user()->hasPermissionTo('view_ai_analysis');
+            } else {
+                $has_access = false;
+            }
         }
 
         // Buscar Acórdãos PDF via Eloquent Model para utilizar Presigned URL Accessors

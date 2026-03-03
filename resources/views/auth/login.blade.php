@@ -10,6 +10,10 @@
         <div class="tw-p-6">
             <form method="POST" action="{{ route('login') }}" class="tw-space-y-6">
                 @csrf
+                
+                @if(request()->has('redirect'))
+                    <input type="hidden" name="redirect" value="{{ request('redirect') }}">
+                @endif
 
                 <div>
                     <label for="email" class="tw-block tw-text-sm tw-font-medium tw-text-slate-700">{{ __('E-Mail') }}</label>

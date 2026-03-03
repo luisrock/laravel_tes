@@ -191,7 +191,7 @@ Route::middleware(['admin_access:manage_all'])->group(function () {
 */
 
 // Página de planos (pública)
-Route::middleware('subscription.configured')->group(function () {
+Route::middleware([\App\Http\Middleware\CheckSubscriptionsEnabled::class, 'subscription.configured'])->group(function () {
     Route::get('/assinar', [SubscriptionController::class, 'index'])->name('subscription.plans');
 
     // Checkout (requer auth)
@@ -213,15 +213,17 @@ Route::middleware('subscription.configured')->group(function () {
 
 // Webhook Stripe (sem CSRF - configurado em VerifyCsrfToken.php)
 Route::post('/stripe/webhook', [WebhookController::class, 'handleWebhook'])
-    ->middleware('stripe.webhook')
+    ->middleware([\App\Http\Middleware\CheckSubscriptionsEnabled::class, 'stripe.webhook'])
     ->name('cashier.webhook');
 
-// Rotas autenticadas do painel do usuário (minha-conta)
-Route::middleware(['auth', 'verified', 'subscription.configured'])->prefix('minha-conta')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('minha-conta')->group(function () {
     Route::get('/', [UserPanelController::class, 'dashboard'])->name('user-panel.dashboard');
     Route::get('/perfil', [UserPanelController::class, 'profile'])->name('user-panel.profile');
-    Route::get('/assinatura', [SubscriptionController::class, 'show'])->name('subscription.show');
-    Route::get('/assinatura/portal', [SubscriptionController::class, 'billingPortal'])->name('subscription.portal');
-    Route::get('/estorno', [RefundRequestController::class, 'create'])->name('refund.create');
-    Route::post('/estorno', [RefundRequestController::class, 'store'])->name('refund.store');
+
+    Route::middleware([\App\Http\Middleware\CheckSubscriptionsEnabled::class, 'subscription.configured'])->group(function () {
+        Route::get('/assinatura', [SubscriptionController::class, 'show'])->name('subscription.show');
+        Route::get('/assinatura/portal', [SubscriptionController::class, 'billingPortal'])->name('subscription.portal');
+        Route::get('/estorno', [RefundRequestController::class, 'create'])->name('refund.create');
+        Route::post('/estorno', [RefundRequestController::class, 'store'])->name('refund.store');
+    });
 });
