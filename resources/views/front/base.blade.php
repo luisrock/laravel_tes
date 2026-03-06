@@ -95,6 +95,7 @@
 <body class="tw-bg-slate-50 tw-text-slate-900 tw-flex tw-flex-col tw-min-h-screen">
     
     @include('partials.header')
+    @include('partials.cta-topbar')
 
     <main class="tw-flex-grow">
         @yield('content')
