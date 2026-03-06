@@ -156,7 +156,7 @@ it('redireciona página de assinatura para login', function () {
 });
 
 it('redireciona painel admin para login', function () {
-    $this->get('/painel')->assertRedirect();
+    $this->get('/admin/painel')->assertRedirect();
 });
 
 it('redireciona página de estorno para login', function () {

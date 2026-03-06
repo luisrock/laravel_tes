@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\RefundRequestStatus;
 use App\Models\RefundRequest;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -22,7 +23,7 @@ class SubscriptionStats extends StatsOverviewWidget
             ->count();
 
         $pendingRefunds = RefundRequest::query()
-            ->where('status', RefundRequest::STATUS_PENDING)
+            ->where('status', RefundRequestStatus::Pending)
             ->count();
 
         return [

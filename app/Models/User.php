@@ -191,6 +191,15 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     }
 
     /**
+     * Verifica se usuario possui assinatura paga ativa (inclui grace period).
+     * Usado para obstar a remoção de usuários com acesso vigente.
+     */
+    public function hasActiveSubscription(): bool
+    {
+        return $this->isSubscriber() || $this->isOnGracePeriod();
+    }
+
+    /**
      * Retorna a data de termino do acesso (se em grace period).
      */
     public function getAccessEndsAt(): ?Carbon

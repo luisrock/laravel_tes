@@ -212,6 +212,22 @@
                 </div>
             </a>
 
+            <!-- Painel Filament (Assinaturas) -->
+            <a href="{{ url('/admin/painel') }}" target="_blank" class="tw-block tw-bg-white tw-rounded-xl tw-p-6 tw-shadow-sm tw-border tw-border-slate-200 hover:tw-shadow-md hover:tw-border-violet-500 tw-transition-all tw-duration-200 text-decoration-none hover:tw-translate-y-[-2px]">
+                <div class="tw-w-12 tw-h-12 tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-mb-4 tw-bg-violet-50 tw-text-violet-600">
+                    <i class="fas fa-credit-card tw-text-xl"></i>
+                </div>
+                <div class="tw-text-lg tw-font-semibold tw-text-slate-900 tw-mb-2">
+                    Assinaturas
+                    <span class="tw-ml-2 tw-text-xs tw-font-normal tw-text-slate-400 tw-align-middle">
+                        <i class="fas fa-external-link-alt"></i>
+                    </span>
+                </div>
+                <div class="tw-text-sm tw-text-slate-500 tw-leading-relaxed">
+                    Usuários, planos, estornos e features de assinatura (Painel Filament).
+                </div>
+            </a>
+
         </div>
     </div>
 

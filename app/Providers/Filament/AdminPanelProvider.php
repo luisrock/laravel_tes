@@ -28,7 +28,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('painel')
+            ->path('admin/painel')
             ->login()
             ->brandName(config('app.name'))
             ->homeUrl('/')

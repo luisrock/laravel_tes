@@ -230,7 +230,7 @@ describe('Proteção de Rotas', function () {
         $user = User::factory()->create();
 
         $this->actingAs($user)
-            ->get('/painel')
+            ->get('/admin/painel')
             ->assertForbidden();
     });
 

@@ -6,6 +6,7 @@ use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Models\User;
 use App\Support\SubscriptionUi;
 use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -131,6 +132,32 @@ class UserResource extends Resource
                     ->url(fn (User $record): ?string => static::getStripeCustomerUrl($record))
                     ->openUrlInNewTab()
                     ->visible(fn (User $record): bool => ! empty($record->stripe_id)),
+                Action::make('delete')
+                    ->label('Remover')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Remover usuário')
+                    ->modalDescription(fn (User $record): string => "Tem certeza que deseja remover o usuário {$record->name}? Esta ação não pode ser desfeita.")
+                    ->modalSubmitActionLabel('Sim, remover')
+                    ->action(function (User $record): void {
+                        if ($record->hasActiveSubscription()) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Remoção bloqueada')
+                                ->body('Este usuário possui uma assinatura paga ativa. Cancele a assinatura antes de remover a conta.')
+                                ->send();
+
+                            return;
+                        }
+
+                        $record->delete();
+
+                        Notification::make()
+                            ->success()
+                            ->title('Usuário removido com sucesso.')
+                            ->send();
+                    }),
             ])
             ->toolbarActions([]);
     }
