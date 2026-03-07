@@ -8,17 +8,23 @@ namespace App\Http\Controllers;
 use App\Jobs\SearchToDbPesquisas;
 use App\Models\EditableContent;
 use App\Models\Quiz;
+use App\Services\SearchDatabaseService;
+use App\Services\SearchTribunalRegistry;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Mpdf\Mpdf;
 
 class SearchPageController extends Controller
 {
+    public function __construct(
+        private SearchDatabaseService $searchDatabaseService,
+        private SearchTribunalRegistry $searchTribunalRegistry,
+    ) {}
+
     public function index(Request $request)
     {
 
-        $lista_tribunais = Config::get('tes_constants.lista_tribunais');
+        $lista_tribunais = $this->searchTribunalRegistry->allRaw();
         $display_pdf = '';
 
         // Initial view (no search)
@@ -88,55 +94,9 @@ class SearchPageController extends Controller
         // Determine first active tab and sub-tab
         $tribunaisExcluidos = $this->getExcludedTribunals();
         $sem_tese = config('tes_constants.sem_tese', []);
-        $firstActiveTab = null;
-        $activeSubTab = 'sumulas'; // default
-
-        // If tribunal param provided and valid, use it as preferred tab
-        if ($preferredTribunal && isset($output[$preferredTribunal]) && ! in_array(strtoupper($preferredTribunal), $tribunaisExcluidos)) {
-            $firstActiveTab = $preferredTribunal;
-        }
-
-        // If no preferred or preferred has no results, find first with results
-        if (is_null($firstActiveTab)) {
-            foreach ($output as $key => $data) {
-                if (! is_array($data) || in_array(strtoupper($key), $tribunaisExcluidos)) {
-                    continue;
-                }
-                $count = $data['total_count'] ?? 0;
-                if ($count > 0) {
-                    $firstActiveTab = $key;
-                    break;
-                }
-            }
-        }
-
-        // Fallback: first tribunal in list
-        if (is_null($firstActiveTab)) {
-            foreach ($output as $key => $data) {
-                if (is_array($data) && ! in_array(strtoupper($key), $tribunaisExcluidos)) {
-                    $firstActiveTab = $key;
-                    break;
-                }
-            }
-        }
-
-        // Determine sub-tab: if active tribunal has sumulas, show sumulas; else teses
-        if ($firstActiveTab && isset($output[$firstActiveTab])) {
-            $data = $output[$firstActiveTab];
-            $hasSumulas = ($data['sumula']['total'] ?? 0) > 0;
-            if (! $hasSumulas) {
-                $activeSubTab = 'teses';
-            }
-        }
-
-        // Check if any tribunal has results (for global "no results" message)
-        $hasAnyResults = false;
-        foreach ($output as $key => $data) {
-            if (is_array($data) && ! in_array(strtoupper($key), $tribunaisExcluidos) && ($data['total_count'] ?? 0) > 0) {
-                $hasAnyResults = true;
-                break;
-            }
-        }
+        $firstActiveTab = $this->firstActiveTab($output, $tribunaisExcluidos, $preferredTribunal);
+        $activeSubTab = $this->activeSubTab($output, $firstActiveTab);
+        $hasAnyResults = $this->hasAnyResults($output, $tribunaisExcluidos);
 
         // If search is fruitful, save to db for SEO
         if ($hasAnyResults) {
@@ -162,7 +122,7 @@ class SearchPageController extends Controller
         }
 
         // render PDF
-        $url_request = url()->full();
+        $url_request = request()->fullUrl();
         $mpdf = new Mpdf([
             'mode' => 'utf-8',
             'CSSselectMedia' => 'screen',
@@ -196,14 +156,13 @@ class SearchPageController extends Controller
             }
 
             // Skip non-db tribunals
-            if ($lista_tribunais[$tribunal]['db'] === false) {
+            if (! $this->searchTribunalRegistry->get($tribunal)->usesDatabase()) {
                 continue;
             }
 
             $tribunal_lower = strtolower($tribunal);
-            $tribunal_upper = strtoupper($tribunal);
-            $tribunal_array = $lista_tribunais[$tribunal_upper];
-            $output_tribunal = tes_search_db($keyword, $tribunal_lower, $tribunal_array);
+            $tribunal_array = $this->searchTribunalRegistry->get($tribunal);
+            $output_tribunal = $this->searchDatabaseService->search($keyword, $tribunal_lower, $tribunal_array);
             $output[$tribunal_lower] = $output_tribunal;
         }
 
@@ -216,5 +175,56 @@ class SearchPageController extends Controller
     private function getExcludedTribunals(): array
     {
         return ['TCU'];
+    }
+
+    private function firstActiveTab(array $output, array $excludedTribunals = [], ?string $preferred = null): ?string
+    {
+        if ($preferred && isset($output[$preferred]) && is_array($output[$preferred])) {
+            if (! in_array(strtoupper($preferred), $excludedTribunals, true)) {
+                return $preferred;
+            }
+        }
+
+        foreach ($output as $tribunalLower => $data) {
+            if (! is_array($data) || in_array(strtoupper($tribunalLower), $excludedTribunals, true)) {
+                continue;
+            }
+
+            if (($data['total_count'] ?? 0) > 0) {
+                return $tribunalLower;
+            }
+        }
+
+        foreach ($output as $tribunalLower => $data) {
+            if (is_array($data) && ! in_array(strtoupper($tribunalLower), $excludedTribunals, true)) {
+                return $tribunalLower;
+            }
+        }
+
+        return null;
+    }
+
+    private function activeSubTab(array $output, ?string $activeTab): string
+    {
+        if (! $activeTab || ! isset($output[$activeTab]) || ! is_array($output[$activeTab])) {
+            return 'sumulas';
+        }
+
+        return ($output[$activeTab]['sumula']['total'] ?? 0) > 0 ? 'sumulas' : 'teses';
+    }
+
+    private function hasAnyResults(array $output, array $excludedTribunals = []): bool
+    {
+        foreach ($output as $tribunalLower => $data) {
+            if (! is_array($data) || in_array(strtoupper($tribunalLower), $excludedTribunals, true)) {
+                continue;
+            }
+
+            if (($data['total_count'] ?? 0) > 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

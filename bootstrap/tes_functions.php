@@ -2,15 +2,31 @@
 
 // TODO: ordenar resultados STF via db e excluir canceladas e revogadas
 
-function adjustOneQuoteOnly($str)
+function search_query_parser()
 {
-    $r = $str;
-    $res = Str::replaceFirst('"', '', $r);
-    if (Str::contains($res, '"')) {
-        return $str;
+    static $parser;
+
+    if (! $parser) {
+        $parser = new \App\Services\SearchQueryParser;
     }
 
-    return trim($res);
+    return $parser;
+}
+
+function search_database_service()
+{
+    static $service;
+
+    if (! $service) {
+        $service = app(\App\Services\SearchDatabaseService::class);
+    }
+
+    return $service;
+}
+
+function adjustOneQuoteOnly($str)
+{
+    return search_query_parser()->adjustOneQuoteOnly((string) $str);
 }
 
 function get_teses_with_ai($tribunal = null)
@@ -33,134 +49,22 @@ function get_teses_with_ai($tribunal = null)
 
 function noSignal($str)
 {
-    // se tiver menos de 3 chars e não for operador, ignorar
-    $operadores = config('tes_constants.options.operadores');
-    if (mb_strlen($str, 'utf8') < 3 && ! in_array($str, $operadores)) {
-        return true;
-    }
-
-    return false;
+    return search_query_parser()->noSignal((string) $str);
 }
 
 function adjustOperators($keyword)
 {
-
-    if (in_array($keyword, ['OU', 'ou'])) {
-        return 'OR';
-    }
-    if (in_array($keyword, ['E', 'e', 'MESMO', 'Mesmo', 'mesmo'])) {
-        return 'AND';
-    }
-    if (in_array($keyword, ['NÃO', 'não', 'NAO', 'nao', 'Não', 'Nao'])) {
-        return 'NOT';
-    }
-
-    return $keyword;
+    return search_query_parser()->adjustOperators((string) $keyword);
 }
 
 function signalString($array, $i)
 {
-
-    // não sinalizar palavras com menos de 3 caracteres e que não sejam operadores
-    if (noSignal($array[$i])) {
-        return '';
-    }
-
-    if (empty($array[$i - 1])) {
-        if (empty($array[$i + 1]) || $array[$i + 1] === 'OR') {
-            return '';
-        } else {
-            return '+';
-        }
-    }
-    if ($array[$i - 1] === 'NOT') {
-        return '-';
-    }
-    if ($array[$i - 1] === 'OR') {
-        return '';
-    }
-    if ($array[$i - 1] === 'AND') {
-        return '+';
-    }
+    return search_query_parser()->signalString($array, (int) $i);
 }
 
 function keyword_to_array($keyword)
 {
-
-    $keyword = adjustOneQuoteOnly($keyword); // se só houver uma aspa, será eliminada (erro do usuário)
-    $word = $keyword;
-    $isFrase = false;
-    $hasFrase = (Str::contains($word, '"')) ? true : false;
-    $str_arr = explode(' ', $word);
-    $frase = '';
-    $array_final = [];
-
-    $i = 0;
-    foreach ($str_arr as $str) {
-        $i++;
-        if (trim($str) == '') {
-            // eliminando strings vazias (que são apenas espaços)
-            continue;
-        }
-        if (! $hasFrase) {
-            // sem frase no termo de busca
-            $array_final[] = adjustOperators(trim($str));
-
-            continue;
-        }
-        // com frase no temos de busca
-        if (Str::startsWith($str, '"')) {
-            if ($isFrase) {
-                // se já era frase, estas são as aspas finais...
-                // exemplo: "sequestro de menores "convenção
-                $frase .= '"';
-                $isFrase = false;
-                $array_final[] = trim($frase);
-                $frase = ''; // resetando a frase
-                // verificar se há algo além das aspas e lançar como termo simples
-                if (strlen(Str::of($str)->trim('"')) > 0) {
-                    $array_final[] = adjustOperators(Str::of($str)->trim('"'));
-                }
-            } else {
-                // início de frase. São aspas iniciais...
-                $isFrase = true;
-                $frase .= Str::of($str)->trim().' ';
-                if (Str::endsWith($str, '"')) {
-                    // apenas uma palavra, entre aspas...aff
-                    $isFrase = false;
-                    $array_final[] = trim($frase);
-                    $frase = ''; // resetando a frase
-                }
-            }
-        } else {
-            // não começa com aspas...
-            if ($isFrase) {
-                // ainda estamos na frase
-                $frase .= Str::of($str)->trim().' ';
-                if (Str::endsWith($str, '"')) {
-                    // fim da frase
-                    $isFrase = false;
-                    $array_final[] = trim($frase);
-                    $frase = ''; // resetando a frase
-                }
-            } else {
-                if (Str::endsWith($str, '"')) {
-                    // aspas mal colocadas, mas devem ser consideradas como iniciando a frase
-                    $isFrase = true;
-                    $frase = '"';
-                    // verificar se há algo além das aspas e lançar como termo simples
-                    if (strlen(Str::of($str)->trim('"')) > 0) {
-                        $array_final[] = adjustOperators(Str::of($str)->trim('"'));
-                    }
-                } else {
-                    // estamos fora da frase
-                    $array_final[] = adjustOperators(Str::of($str)->trim());
-                }
-            } // end if/else isFrase
-        } // end if/else startsWith "
-    } // end foreach
-
-    return array_filter($array_final);
+    return search_query_parser()->keywordToArray((string) $keyword);
 } // end function
 // END functions for mysql search (STJ, TNU)
 
@@ -229,7 +133,6 @@ function stf_request($keyword)
 
     // bases de buscas (repercussão, só com mérito julgado)
     // TODO: acrescer outras, a gosto (mas providenciar o arquivo json correlato para o request)
-
     $com_resultados = false;
 
     foreach (['sumula', 'tese'] as $s) {
@@ -660,72 +563,17 @@ function adjustingRep($res, $tribunal)
 
 function insertOperator($arr)
 {
-    // inserindo AND quando não houver conector
-    $operadores = config('tes_constants.options.operadores');
-    $new_arr = [];
-    for ($i = 0; $i < count($arr); $i++) {
-        if ($i === 0) {
-            // primeira palavra. Não pode ser um operador
-            $new_arr[] = $arr[$i];
-
-            continue;
-        }
-        if (! in_array($arr[$i], $operadores) && ! in_array($arr[$i - 1], $operadores)) {
-            // a palavra não é um operador e a palavra anterior também não é um operador
-            // inserir o operador 'AND' entre elas
-            $new_arr[] = 'AND';
-        }
-        $new_arr[] = $arr[$i];
-    }
-
-    return $new_arr;
+    return search_query_parser()->insertOperator($arr);
 }
 
 function buildFinalSearchString($new_arr)
 {
-    // Construindo a string final (sem parentesis)
-    $operadores = config('tes_constants.options.operadores');
-    $i = 0;
-    $final_str = '';
-    $parOpen = false;
-    foreach ($new_arr as $na) {
-        if (! in_array($new_arr[$i], $operadores)) {
-            $signal = signalString($new_arr, $i);
-            if (! isset($lastOp)) {
-                // primeira rodada
-                $final_str .= "$signal{$new_arr[$i]}";
-                $parOpen = true;
-            } else {
-                if ($parOpen && $signal != $lastOp) {
-                    $final_str .= " $signal{$new_arr[$i]}";
-                    //         $parOpen = false;
-                } else {
-                    $final_str .= " $signal{$new_arr[$i]}";
-                }
-            }
-            $lastOp = $signal;
-        }
-        $i++;
-    } // end foreach
-
-    return $final_str;
+    return search_query_parser()->buildFinalSearchString($new_arr);
 }
 
 function buildFinalSearchStringForApi($keyword, $tribunal)
 {
-    if (in_array($tribunal, ['STF', 'TST'])) {
-        $keyword = str_replace(' OU ', ' OR ', $keyword);
-        $keyword = str_replace(' ou ', ' OR ', $keyword);
-        $keyword = str_replace(' e ', ' AND ', $keyword);
-        $keyword = str_replace(' E ', ' AND ', $keyword);
-        $keyword = str_replace(' não ', ' NOT ', $keyword);
-        $keyword = str_replace(' NÃO ', ' NOT ', $keyword);
-        $keyword = str_replace(' nao ', ' NOT ', $keyword);
-        $keyword = str_replace(' NAO ', ' NOT ', $keyword);
-        $keyword = str_replace('/', "\/", $keyword);
-    }
-
-    return $keyword;
+    return search_query_parser()->buildFinalSearchStringForApi((string) $keyword, (string) $tribunal);
 }
 
 // Adjust STF queries
@@ -987,84 +835,13 @@ function call_request_api($tribunal_lower, $param)
 // Searching db (main function)
 function tes_search_db($keyword, $tribunal_lower, $tribunal_array)
 {
-    // Criar chave única para o cache baseada na busca
-    $cache_key = 'search_'.$tribunal_lower.'_'.md5($keyword);
-
-    // Tentar usar cache, com fallback seguro se der erro
-    try {
-        return Cache::remember($cache_key, 3600, function () use ($keyword, $tribunal_lower, $tribunal_array) {
-            return tes_search_db_execute($keyword, $tribunal_lower, $tribunal_array);
-        });
-    } catch (\Exception $e) {
-        // Se cache falhar, executar busca normalmente
-        \Log::warning('Cache de busca falhou, executando sem cache: '.$e->getMessage());
-
-        return tes_search_db_execute($keyword, $tribunal_lower, $tribunal_array);
-    }
+    return search_database_service()->search((string) $keyword, (string) $tribunal_lower, $tribunal_array);
 }
 
 // Função auxiliar que executa a busca (extraída para ser usada com ou sem cache)
 function tes_search_db_execute($keyword, $tribunal_lower, $tribunal_array)
 {
-
-    $tese_name = $tribunal_array['tese_name'];
-
-    // preparing results array
-    $output = [];
-    $output['sumula'] = [];
-    $output['sumula']['total'] = 0;
-    $output['sumula']['hits'] = [];
-    $output[$tese_name] = [];
-    $output[$tese_name]['total'] = 0;
-    $output[$tese_name]['hits'] = [];
-    $output['total_count'] = 0;
-
-    // preparing keyword for the full text search
-    $arr = insertOperator(keyword_to_array($keyword));
-    $final_str = buildFinalSearchString($arr);
-
-    // getting the tables for the chosen tribunal
-    $tables = $tribunal_array['tables'];
-
-    foreach ($tables as $table => $tab) {
-
-        if (empty($tab)) {
-            continue;
-        }
-        $key = '';
-        $it = '';
-        if ($table === 'sumulas') {
-            $key = 'sumula';
-            $it = 'sum';
-        } elseif ($table === 'teses') {
-            $key = $tese_name;
-            $it = 'rep';
-        }
-
-        foreach ($tab as $t) {
-
-            $table_name = $tribunal_lower.'_'.$t;
-            $to_match = $tribunal_array["to_match_$it"]; // para TNU QO, usar $to_match_sum
-            $query = "MATCH ($to_match) AGAINST (? IN BOOLEAN MODE)";
-            $results = DB::table($table_name)
-                ->whereRaw($query, [$final_str])
-                ->orderBy('numero', 'desc')
-                ->get();
-
-            // Laravel returns a stdClass. Converting to array
-            $results = json_decode(json_encode($results), true);
-
-            if ($results) {
-                $array_sum = call_adjust_query_function($tribunal_lower, $it, $results);
-                $output[$key]['hits'] = array_merge($output[$key]['hits'], $array_sum);
-            }
-            $output[$key]['total'] = count($output[$key]['hits']);
-        } // end inner foreach
-    } // end outter foreach
-
-    $output['total_count'] = $output['sumula']['total'] + $output['tese']['total'];
-
-    return $output;
+    return search_database_service()->execute((string) $keyword, (string) $tribunal_lower, $tribunal_array);
 }
 
 function slugify($text)

@@ -2,12 +2,13 @@
 
 namespace App\Jobs;
 
+use App\Services\SearchDatabaseService;
+use App\Services\SearchTribunalRegistry;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 
 class SearchToDbPesquisas implements ShouldQueue
@@ -28,51 +29,31 @@ class SearchToDbPesquisas implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle()
+    public function handle(SearchDatabaseService $searchDatabaseService, SearchTribunalRegistry $searchTribunalRegistry): void
     {
         $tema = $this->keyword;
+        $normalizedKeyword = mb_strtolower(trim($tema), 'UTF-8');
 
-        // Don't store keyword with only numbers
-        if (is_numeric($tema)) {
+        if (
+            is_numeric(trim($tema))
+            || str_contains($normalizedKeyword, 'súmula')
+            || str_contains($normalizedKeyword, 'sumula')
+            || mb_strlen(trim($tema), 'UTF-8') < 3
+        ) {
             return;
         }
 
-        // Don't store keyword with súmula
-        if (strpos(strtolower($tema), 'súmula') !== false || strpos(strtolower($tema), 'sumula ') !== false) {
-            return;
-        }
+        $total_count = 0;
 
-        // 1. Search in all dbs for keyword
-
-        $lista_tribunais = Config::get('tes_constants.lista_tribunais');
-        $tribunais = array_keys($lista_tribunais);
-        $output = [];
-
-        // Getting the results by querying tes db for all tribunais (except the ones with API, excluding STF)
-        // TODO: db for all tribunais
-        foreach ($tribunais as $tribunal) {
-            if ($lista_tribunais[$tribunal]['db'] === false && $tribunal !== 'STF') {
+        foreach ($searchTribunalRegistry->all() as $tribunal => $tribunalConfig) {
+            if (! $tribunalConfig->usesDatabase()) {
                 continue;
             }
 
-            $output_tribunal = [];
             $tribunal_lower = strtolower($tribunal);
-            $tribunal_upper = strtoupper($tribunal);
-            $tribunal_array = $lista_tribunais[$tribunal_upper];
-            $output_tribunal = tes_search_db($tema, $tribunal_lower, $tribunal_array);
-            $output[$tribunal_lower] = $output_tribunal;
-
-        } // END foreach
-
-        $total_count = 0;
-        foreach ($output as $trib) {
-            $total_count += $trib['total_count'];
+            $total_count += $searchDatabaseService->searchResult($tema, $tribunal_lower, $tribunalConfig)->totalCount();
         }
-
-        // 3. Insert to table 'pesquisas' keyword and results (#)
 
         if ($total_count > 0) {
             DB::table('pesquisas')->insertOrIgnore([

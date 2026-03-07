@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\SearchDatabaseService;
+use App\Services\SearchTribunalRegistry;
+use App\Services\SearchTribunalResult;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 
 // Atenção: headers para o request devem conter:
@@ -12,12 +14,17 @@ use Illuminate\Support\Facades\DB;
 
 class ApiController extends Controller
 {
+    public function __construct(
+        private SearchDatabaseService $searchDatabaseService,
+        private SearchTribunalRegistry $searchTribunalRegistry,
+    ) {}
+
     public function index(Request $request)
     {
         // return $request;
 
-        $lista_tribunais = config('tes_constants.lista_tribunais');
-        $lista_tribunais_string = implode(',', array_keys($lista_tribunais));
+        $lista_tribunais = $this->searchTribunalRegistry->allRaw();
+        $lista_tribunais_string = implode(',', $this->searchTribunalRegistry->keys());
 
         // User is searching. Prepare and return results
         $query = $request->validate([
@@ -39,26 +46,20 @@ class ApiController extends Controller
         $tribunal = $query['tribunal'];
         $tribunal_lower = strtolower($tribunal);
         $tribunal_upper = strtoupper($tribunal);
-        $tribunal_array = $lista_tribunais[$tribunal_upper];
-        $tese_name = $tribunal_array['tese_name'];
+        $tribunal_array = $this->searchTribunalRegistry->get($tribunal_upper);
+        $tese_name = $tribunal_array->teseName();
 
-        // search in db (not through tribunal API)
-        if ($lista_tribunais[$tribunal]['db']) {
-            $output = tes_search_db($keyword, $tribunal_lower, $tribunal_array);
+        if ($tribunal_array->usesDatabase()) {
+            $rawOutput = $this->searchDatabaseService->search($keyword, $tribunal_lower, $tribunal_array);
         } else {
-            // Getting the results by calling the tribunal API
-            // tratando keyword
-            $keyword = buildFinalSearchStringForApi($keyword, $tribunal_upper);
-            $output = call_request_api($tribunal_lower, $keyword);
+            $normalizedKeyword = buildFinalSearchStringForApi($keyword, $tribunal_upper);
+            $rawOutput = call_request_api($tribunal_lower, $normalizedKeyword);
         }
 
-        if (is_array($output)) {
-            $final_result['total_sum'] = $output['sumula']['total'];
-            $final_result['total_rep'] = $output[$tese_name]['total'];
-            $final_result['hits_sum'] = $output['sumula']['hits'];
-            $final_result['hits_rep'] = $output[$tese_name]['hits'];
-        } elseif (is_string($output)) {
-            $final_result['error'] = $output;
+        if (is_array($rawOutput)) {
+            $final_result = SearchTribunalResult::fromArray($tese_name, $rawOutput)->toPublicApiArray();
+        } elseif (is_string($rawOutput)) {
+            $final_result['error'] = $rawOutput;
         }
 
         return $final_result;
@@ -374,43 +375,7 @@ class ApiController extends Controller
         // Embaralha os temas para garantir aleatoriedade
         shuffle($temas);
 
-        $lista_tribunais = Config::get('tes_constants.lista_tribunais');
-        $selectedThemes = [];
-        $themesChecked = 0;
-
-        foreach ($temas as $tema) {
-            $keyword = $tema->keyword;
-            $stfCount = 0;
-            $stjCount = 0;
-
-            // Check STF results
-            if ($lista_tribunais['STF']['db']) {
-                $stf_output = tes_search_db($keyword, 'stf', $lista_tribunais['STF']);
-                $stfCount = $stf_output['sumula']['total'] + $stf_output['tese']['total'];
-            }
-
-            // Check STJ results
-            if ($lista_tribunais['STJ']['db']) {
-                $stj_output = tes_search_db($keyword, 'stj', $lista_tribunais['STJ']);
-                $stjCount = $stj_output['sumula']['total'] + $stj_output['tese']['total'];
-            }
-
-            // Check if total STF + STJ judgments meet the minimum requirement
-            if (($stfCount + $stjCount) >= $minJudgments) {
-                $selectedThemes[] = $tema;
-
-                if (count($selectedThemes) >= $limit) {
-                    break;
-                }
-            }
-
-            $themesChecked++;
-
-            // Prevent infinite loop - if we've checked all themes and don't have enough
-            if ($themesChecked >= count($temas)) {
-                break;
-            }
-        }
+        $selectedThemes = $this->selectThemes($temas, (int) $limit, (int) $minJudgments);
 
         if (empty($selectedThemes)) {
             return response()->json([
@@ -419,54 +384,20 @@ class ApiController extends Controller
             ], 404);
         }
 
-        // Sort selected themes alphabetically by label (or keyword if label is empty)
-        usort($selectedThemes, function ($a, $b) {
-            $labelA = $a->label ?? $a->keyword;
-            $labelB = $b->label ?? $b->keyword;
-
-            return strcasecmp($labelA, $labelB);
-        });
-
         // Build response with full theme data
         $response = [];
         foreach ($selectedThemes as $tema) {
-            $keyword = $tema->keyword;
-            $label = $tema->label ?? $keyword;
+            $allResults = $this->searchDatabaseService->searchAllDatabaseTribunals($tema->keyword);
 
-            // Get all tribunal results for this theme
-            $tribunais = array_keys($lista_tribunais);
             $themeOutput = [];
-
-            foreach ($tribunais as $tribunal) {
-                if ($lista_tribunais[$tribunal]['db'] === false && $tribunal !== 'STF') {
-                    continue;
-                }
-
-                $tribunal_lower = strtolower($tribunal);
-                $tribunal_upper = strtoupper($tribunal);
-                $tribunal_array = $lista_tribunais[$tribunal_upper];
-                $output_tribunal = tes_search_db($keyword, $tribunal_lower, $tribunal_array);
-
-                // Tratar trib_rep_tema para teses do STF
-                if ($tribunal === 'STF' && isset($output_tribunal['tese']['hits'])) {
-                    foreach ($output_tribunal['tese']['hits'] as &$hit) {
-                        if (isset($hit['trib_rep_tema']) && ! empty($hit['trib_rep_tema'])) {
-                            // Extrair número do início (antes do hífen)
-                            if (preg_match('/^(\d+)\s*-\s*(.+)$/', $hit['trib_rep_tema'], $matches)) {
-                                $hit['trib_rep_numero'] = $matches[1];
-                                $hit['trib_rep_tema'] = trim($matches[2]);
-                            }
-                        }
-                    }
-                }
-
-                $themeOutput[$tribunal_lower] = $output_tribunal;
+            foreach ($allResults as $tribunalLower => $tribunalResult) {
+                $themeOutput[$tribunalLower] = $this->normalizeTribunalOutput(strtoupper($tribunalLower), $tribunalResult);
             }
 
             $response[] = [
                 'id' => $tema->id,
                 'keyword' => $tema->keyword,
-                'label' => $label,
+                'label' => $tema->label ?? $tema->keyword,
                 'slug' => $tema->slug,
                 'concept' => $tema->concept,
                 'concept_validated_at' => $tema->concept_validated_at,
@@ -499,38 +430,75 @@ class ApiController extends Controller
         ]);
 
         $keyword = $request->input('keyword');
-        $lista_tribunais = Config::get('tes_constants.lista_tribunais');
+
+        $allResults = $this->searchDatabaseService->searchAllDatabaseTribunals($keyword);
 
         $result = [];
         $total_global = 0;
 
-        foreach ($lista_tribunais as $tribunal_upper => $tribunal_array) {
-            // TCU usa API externa — excluído para manter o endpoint rápido
-            if (! $tribunal_array['db']) {
+        foreach ($allResults as $tribunalLower => $output) {
+            $result[$tribunalLower] = $output->toUnifiedSummaryArray();
+            $total_global += $result[$tribunalLower]['total'];
+        }
+
+        $result['meta'] = ['keyword' => $keyword, 'total_global' => $total_global];
+
+        return response()->json($result);
+    }
+
+    private function selectThemes(array $themes, int $limit, int $minJudgments): array
+    {
+        $selected = [];
+
+        foreach ($themes as $theme) {
+            if ($this->countJudgmentsFor('STF', $theme->keyword) + $this->countJudgmentsFor('STJ', $theme->keyword) >= $minJudgments) {
+                $selected[] = $theme;
+
+                if (count($selected) >= $limit) {
+                    break;
+                }
+            }
+        }
+
+        usort($selected, function ($a, $b) {
+            return strcasecmp($a->label ?? $a->keyword, $b->label ?? $b->keyword);
+        });
+
+        return $selected;
+    }
+
+    private function countJudgmentsFor(string $tribunalUpper, string $keyword): int
+    {
+        $config = $this->searchTribunalRegistry->get($tribunalUpper);
+
+        if (! $config->usesDatabase()) {
+            return 0;
+        }
+
+        return $this->searchDatabaseService
+            ->searchResult($keyword, strtolower($tribunalUpper), $config)
+            ->totalCount();
+    }
+
+    private function normalizeTribunalOutput(string $tribunalUpper, SearchTribunalResult $result): array
+    {
+        $output = $result->toArray();
+
+        if ($tribunalUpper !== 'STF' || ! isset($output['tese']['hits']) || ! is_array($output['tese']['hits'])) {
+            return $output;
+        }
+
+        foreach ($output['tese']['hits'] as &$hit) {
+            if (! is_array($hit) || empty($hit['trib_rep_tema']) || ! is_string($hit['trib_rep_tema'])) {
                 continue;
             }
 
-            $tribunal_lower = strtolower($tribunal_upper);
-            $output = tes_search_db($keyword, $tribunal_lower, $tribunal_array);
-
-            $sumulas = $output['sumula']['total'] ?? 0;
-            $teses = $output[$tribunal_array['tese_name']]['total'] ?? 0;
-            $total = $sumulas + $teses;
-
-            $result[$tribunal_lower] = [
-                'sumulas' => $sumulas,
-                'teses' => $teses,
-                'total' => $total,
-            ];
-
-            $total_global += $total;
+            if (preg_match('/^(\d+)\s*-\s*(.+)$/', $hit['trib_rep_tema'], $matches)) {
+                $hit['trib_rep_numero'] = $matches[1];
+                $hit['trib_rep_tema'] = trim($matches[2]);
+            }
         }
 
-        $result['meta'] = [
-            'keyword' => $keyword,
-            'total_global' => $total_global,
-        ];
-
-        return response()->json($result);
+        return $output;
     }
 }

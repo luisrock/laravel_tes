@@ -33,6 +33,12 @@ describe('Página de Busca', function () {
         expect($response->getStatusCode())->toBeIn([200, 500]);
     });
 
+    it('aceita busca web usando keyword por retrocompatibilidade', function () {
+        $response = $this->get('/?keyword=direito');
+
+        expect($response->getStatusCode())->toBeIn([200, 500]);
+    });
+
     it('aceita busca com tribunal como pré-seleção (retrocompat Chrome extension)', function () {
         $response = $this->get('/?q=direito&tribunal=STF');
 

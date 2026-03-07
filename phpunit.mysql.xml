@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Suite de integracao MySQL para o motor de busca.
+    Requer o banco forge_tes_test com tabelas e indices FULLTEXT criados.
+    As credenciais (DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD) sao herdadas do
+    ambiente do processo (lidas do .env pela variavel de ambiente ja exportada).
+
+    Execucao:
+        php artisan test -c phpunit.mysql.xml
+        php artisan test -c phpunit.mysql.xml -filter SearchMysql
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+>
+    <testsuites>
+        <testsuite name="MySQL">
+            <directory>tests/MySQL</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>app</directory>
+        </include>
+    </source>
+    <php>
+        <server name="APP_ENV" value="testing"/>
+        <server name="BCRYPT_ROUNDS" value="4"/>
+        <server name="CACHE_DRIVER" value="array"/>
+        <server name="DB_CONNECTION" value="mysql"/>
+        <server name="DB_DATABASE" value="forge_tes_test"/>
+        <server name="MAIL_MAILER" value="array"/>
+        <server name="QUEUE_CONNECTION" value="sync"/>
+        <server name="SESSION_DRIVER" value="array"/>
+        <server name="TELESCOPE_ENABLED" value="false"/>
+    </php>
+</phpunit>

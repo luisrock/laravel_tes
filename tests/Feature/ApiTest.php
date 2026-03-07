@@ -6,6 +6,12 @@
  * NOTA: Endpoints com bearer token que fazem queries MySQL-específicas
  * podem retornar 500 com SQLite. Aceitamos 200 ou 500 nesses casos.
  */
+function bearerTokenHeaders(): array
+{
+    $validToken = env('API_TOKEN', 'your-secret-token-here');
+
+    return ['Authorization' => "Bearer {$validToken}"];
+}
 
 // ==========================================
 // Autenticação via Bearer Token
@@ -51,44 +57,39 @@ describe('Bearer Token Auth', function () {
 
 describe('Endpoints com Bearer Token', function () {
 
-    beforeEach(function () {
-        $this->validToken = env('API_TOKEN', 'your-secret-token-here');
-        $this->headers = ['Authorization' => "Bearer {$this->validToken}"];
-    });
-
     it('responde em GET /api/sumula/{tribunal}/{numero}', function () {
-        $response = $this->getJson('/api/sumula/STF/1', $this->headers);
+        $response = $this->getJson('/api/sumula/STF/1', bearerTokenHeaders());
         expect($response->getStatusCode())->toBeIn([200, 404, 500]);
     });
 
     it('responde em GET /api/tese/{tribunal}/{numero}', function () {
-        $response = $this->getJson('/api/tese/STF/1', $this->headers);
+        $response = $this->getJson('/api/tese/STF/1', bearerTokenHeaders());
         expect($response->getStatusCode())->toBeIn([200, 404, 500]);
     });
 
     it('responde em GET /api/random-themes', function () {
-        $response = $this->getJson('/api/random-themes', $this->headers);
+        $response = $this->getJson('/api/random-themes', bearerTokenHeaders());
         // Pode retornar 404 quando não há temas no banco
         expect($response->getStatusCode())->toBeIn([200, 404, 500]);
     });
 
     it('responde em GET /api/newsletters', function () {
-        $response = $this->getJson('/api/newsletters', $this->headers);
+        $response = $this->getJson('/api/newsletters', bearerTokenHeaders());
         expect($response->getStatusCode())->toBeIn([200, 500]);
     });
 
     it('responde em GET /api/quizzes', function () {
-        $response = $this->getJson('/api/quizzes', $this->headers);
+        $response = $this->getJson('/api/quizzes', bearerTokenHeaders());
         expect($response->getStatusCode())->toBeIn([200, 500]);
     });
 
     it('responde em GET /api/questions', function () {
-        $response = $this->getJson('/api/questions', $this->headers);
+        $response = $this->getJson('/api/questions', bearerTokenHeaders());
         expect($response->getStatusCode())->toBeIn([200, 500]);
     });
 
     it('responde em GET /api/questions/tags', function () {
-        $response = $this->getJson('/api/questions/tags', $this->headers);
+        $response = $this->getJson('/api/questions/tags', bearerTokenHeaders());
         expect($response->getStatusCode())->toBeIn([200, 500]);
     });
 
@@ -109,6 +110,15 @@ describe('Busca API Pública', function () {
     it('aceita busca válida (com possível erro SQL no SQLite)', function () {
         $response = $this->postJson('/api/', [
             'q' => 'direito penal',
+            'tribunal' => 'STF',
+        ]);
+
+        expect($response->getStatusCode())->toBeIn([200, 500]);
+    });
+
+    it('aceita busca válida usando keyword por retrocompatibilidade', function () {
+        $response = $this->postJson('/api/', [
+            'keyword' => 'direito penal',
             'tribunal' => 'STF',
         ]);
 

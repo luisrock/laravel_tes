@@ -2,13 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\SearchDatabaseService;
+use App\Services\SearchTribunalRegistry;
 use Exception;
-use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Log;
 
 class TemaPageController extends Controller
 {
+    public function __construct(
+        private SearchDatabaseService $searchDatabaseService,
+        private SearchTribunalRegistry $searchTribunalRegistry,
+    ) {}
+
     public function index($slug = null)
     {
 
@@ -47,7 +54,7 @@ class TemaPageController extends Controller
         // Buscar temas relacionados para internal linking
         $related_themes = $this->getRelatedThemes($id, $keyword);
 
-        $lista_tribunais = Config::get('tes_constants.lista_tribunais');
+        $lista_tribunais = $this->searchTribunalRegistry->allRaw();
         $tribunais = array_keys($lista_tribunais);
         $display_pdf = '';
 
@@ -58,29 +65,22 @@ class TemaPageController extends Controller
         // Getting the results by querying tes db for all tribunais (except the ones with API, excluding STF)
         // TODO: db for all tribunais
         foreach ($tribunais as $tribunal) {
-            if ($lista_tribunais[$tribunal]['db'] === false && $tribunal !== 'STF') {
+            if (! $this->searchTribunalRegistry->get($tribunal)->usesDatabase()) {
                 continue;
             }
 
             $output_tribunal = [];
 
             $tribunal_lower = strtolower($tribunal);
-            $tribunal_upper = strtoupper($tribunal);
-            $tribunal_array = $lista_tribunais[$tribunal_upper];
-            $output_tribunal = tes_search_db($keyword, $tribunal_lower, $tribunal_array);
+            $tribunal_array = $this->searchTribunalRegistry->get($tribunal);
+            $output_tribunal = $this->searchDatabaseService->search($keyword, $tribunal_lower, $tribunal_array);
             $output[$tribunal_lower] = $output_tribunal;
         } // END foreach
 
+        $output = $this->withLegacyResultsAliases($output);
+
         // Redirect 301 para home se nenhum resultado real (SEO)
-        $total_results = 0;
-        foreach ($output as $trib => $data) {
-            if (! is_array($data) || $trib === 'total_count') {
-                continue;
-            }
-            foreach (['sumula', 'tese', 'repercussao', 'repetitivos', 'orientacao_precedente'] as $key) {
-                $total_results += $data[$key]['total'] ?? 0;
-            }
-        }
+        $total_results = $this->totalResults($output, ['sumula', 'tese', 'repercussao', 'repetitivos', 'orientacao_precedente']);
         if ($total_results === 0) {
             return redirect('/', 301);
         }
@@ -89,46 +89,8 @@ class TemaPageController extends Controller
         $description = $this->generateMetaDescription($label, $output);
 
         // Prepare collections for view
-        $sumulas = collect([]);
-        $teses = collect([]);
-
-        foreach ($output as $tribunal => $data) {
-            if (! is_array($data) || $tribunal === 'total_count') {
-                continue;
-            }
-
-            $tribunal_upper = strtoupper($tribunal);
-
-            // Sumulas
-            if (isset($data['sumula']['results']) && is_array($data['sumula']['results'])) {
-                foreach ($data['sumula']['results'] as $item) {
-                    $item->tribunal = $tribunal_upper;
-                    $sumulas->push($item);
-                }
-            }
-
-            // Teses
-            if (isset($data['tese']['results']) && is_array($data['tese']['results'])) {
-                foreach ($data['tese']['results'] as $item) {
-                    $item->tribunal = $tribunal_upper;
-                    $teses->push($item);
-                }
-            }
-            // Repercussao (STF) -> treat as Teses
-            if (isset($data['repercussao']['results']) && is_array($data['repercussao']['results'])) {
-                foreach ($data['repercussao']['results'] as $item) {
-                    $item->tribunal = $tribunal_upper;
-                    $teses->push($item);
-                }
-            }
-            // Repetitivos (STJ) -> treat as Teses
-            if (isset($data['repetitivos']['results']) && is_array($data['repetitivos']['results'])) {
-                foreach ($data['repetitivos']['results'] as $item) {
-                    $item->tribunal = $tribunal_upper;
-                    $teses->push($item);
-                }
-            }
-        }
+        $sumulas = $this->collectLegacyItems($output, ['sumula']);
+        $teses = $this->collectLegacyItems($output, ['tese', 'repercussao', 'repetitivos']);
 
         $related_temas = $related_themes; // Alias to match view variable name
 
@@ -295,6 +257,70 @@ class TemaPageController extends Controller
             return $label.' - Teses e Súmulas dos tribunais superiores. Atualizado em '.date('d/m/Y').'.';
         }
     }
-}
 
-// TODO: criar colunas concept e conccpet_validated_at na tabela pesquisas, usando o tableplus, exatamente como feito na db local
+    private function withLegacyResultsAliases(array $output): array
+    {
+        foreach ($output as $tribunalLower => &$data) {
+            if (! is_array($data)) {
+                continue;
+            }
+
+            foreach ($data as $sectionName => &$section) {
+                if ($sectionName === 'total_count' || ! is_array($section)) {
+                    continue;
+                }
+
+                if (! array_key_exists('results', $section)) {
+                    $section['results'] = $section['hits'] ?? [];
+                }
+            }
+            unset($section);
+        }
+        unset($data);
+
+        return $output;
+    }
+
+    private function totalResults(array $output, array $sectionNames): int
+    {
+        $total = 0;
+
+        foreach ($output as $data) {
+            if (! is_array($data)) {
+                continue;
+            }
+
+            foreach ($sectionNames as $sectionName) {
+                $total += $data[$sectionName]['total'] ?? 0;
+            }
+        }
+
+        return $total;
+    }
+
+    private function collectLegacyItems(array $output, array $sectionNames): Collection
+    {
+        $items = collect();
+
+        foreach ($output as $tribunalLower => $data) {
+            if (! is_array($data)) {
+                continue;
+            }
+
+            $tribunalUpper = strtoupper($tribunalLower);
+
+            foreach ($sectionNames as $sectionName) {
+                $section = $data[$sectionName] ?? null;
+                $hits = is_array($section) ? ($section['hits'] ?? $section['results'] ?? []) : [];
+
+                foreach ($hits as $item) {
+                    $legacyItem = is_array($item) ? (object) $item : $item;
+                    $legacyItem->tribunal = $tribunalUpper;
+                    $items->push($legacyItem);
+                }
+            }
+        }
+
+        return $items;
+    }
+}

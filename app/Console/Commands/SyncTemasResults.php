@@ -2,8 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Services\SearchDatabaseService;
+use App\Services\SearchTribunalRegistry;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 
 class SyncTemasResults extends Command
@@ -12,7 +13,7 @@ class SyncTemasResults extends Command
 
     protected $description = 'Recalcula a coluna results de todos os temas via FULLTEXT real e deleta temas com 0 resultados';
 
-    public function handle(): int
+    public function handle(SearchDatabaseService $searchDatabaseService, SearchTribunalRegistry $searchTribunalRegistry): int
     {
         $dryRun = $this->option('dry-run');
 
@@ -27,13 +28,13 @@ class SyncTemasResults extends Command
         $bar = $this->output->createProgressBar($total);
         $bar->start();
 
-        $lista_tribunais = Config::get('tes_constants.lista_tribunais');
+        $lista_tribunais = $searchTribunalRegistry->all();
         $updated = 0;
         $deleted = 0;
         $deletedList = [];
 
         foreach ($temas as $tema) {
-            $realResults = $this->countRealResults($tema->keyword, $lista_tribunais);
+            $realResults = $this->countRealResults($tema->keyword, $lista_tribunais, $searchDatabaseService);
 
             if ($realResults === 0) {
                 $deleted++;
@@ -81,17 +82,17 @@ class SyncTemasResults extends Command
     /**
      * Conta os resultados reais via FULLTEXT para uma keyword em todos os tribunais.
      */
-    private function countRealResults(string $keyword, array $lista_tribunais): int
+    private function countRealResults(string $keyword, array $lista_tribunais, SearchDatabaseService $searchDatabaseService): int
     {
         $total = 0;
 
         foreach ($lista_tribunais as $tribunal => $config) {
-            if ($config['db'] === false) {
+            if (! $config->usesDatabase()) {
                 continue;
             }
 
             $trib_lower = strtolower($tribunal);
-            $tables = $config['tables'];
+            $tables = $config->tables();
 
             foreach ($tables as $table => $tab) {
                 if (empty($tab)) {
@@ -99,7 +100,7 @@ class SyncTemasResults extends Command
                 }
 
                 $it = ($table === 'sumulas') ? 'sum' : 'rep';
-                $to_match = $config["to_match_{$it}"];
+                $to_match = $config->matchColumnsFor($it);
 
                 if (empty($to_match)) {
                     continue;
@@ -109,12 +110,7 @@ class SyncTemasResults extends Command
                     $table_name = $trib_lower.'_'.$t;
 
                     try {
-                        $arr = insertOperator(keyword_to_array($keyword));
-                        $final_str = buildFinalSearchString($arr);
-                        $query = "MATCH ({$to_match}) AGAINST (? IN BOOLEAN MODE)";
-                        $count = DB::table($table_name)
-                            ->whereRaw($query, [$final_str])
-                            ->count();
+                        $count = $searchDatabaseService->countBooleanModeMatches($keyword, $table_name, $to_match);
                         $total += $count;
                     } catch (\Exception $e) {
                         // Tabela pode não existir ou coluna inválida, ignorar

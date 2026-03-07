@@ -34,8 +34,9 @@ arch('providers estão no namespace correto')
 
 arch()->preset()->security()
     ->ignoring([
-        'App\Console\Commands',                      // comandos artisan de diagnóstico
-        'App\Http\Controllers\ApiController',        // usa shuffle() para aleatoriedade de temas
+        'App\Console\Commands',                       // comandos artisan de diagnóstico
+        'App\Http\Controllers\ApiController',         // usa shuffle() para aleatoriedade de temas
+        'App\Services\SearchCacheManager',            // usa md5() apenas para gerar chave de cache (não criptografia)
     ]);
 
 // ==========================================
