@@ -119,6 +119,15 @@ A aplicação possui uma bateria abrangente de testes usando Pest v3 + PHPUnit 1
 | SubscriptionNotifications | 3 | Notificações de boas-vindas, cancelamento, estorno |
 | SubscriptionRenewalReminder | 3 | Job de lembrete de renovação |
 | RolesAndPermissionsTest | 14 | Roles, permissions, ad_free, registerwall, paywall, canAccessPanel |
+| SearchParserCharacterizationTest | 20+ | Comportamento do parser de busca |
+| SearchDatabaseServiceTest | 12 | Cache, FULLTEXT, shape do resultado |
+| SearchCacheManagerTest | 8 | Estratégia de cache por tribunal |
+| SearchToDbPesquisasTest | 4 | Job de persistência de termos SEO |
+| SearchResultObjectsTest | 6 | DTOs de resultado tipado |
+| SearchTribunalRegistryTest | 4 | Registry de configuração de tribunais |
+| SearchTribunalConfigTest | 4 | DTO de configuração por tribunal |
+| SyncTemasResultsTest | 3 | Comando recálculo de resultados |
+| ClearSearchCacheTest | 3 | Invalidação de cache de busca |
 
 **Observações:**
 - DB de teste: SQLite in-memory (configurado em `phpunit.xml`)
@@ -142,6 +151,53 @@ O conteúdo de análise IA ("Decifrando a Tese") usa **registerwall** (registro 
 3. Em produção: `php artisan db:seed --class=RolesAndPermissionsSeeder`
 4. Em `/admin/roles`: atribuir role `admin` ao usuário administrador
 5. Detalhes completos: `PAYWALL_IA_PLAN.md`, seção 3
+
+---
+
+### Refatoração do Motor de Busca (Mar/2026)
+
+O motor de busca foi reorganizado internamente sem alterar nenhum contrato HTTP nem comportamento observável. Todo o trabalho foi incremental, coberto por testes antes de ser commitado.
+
+**O que havia antes:** toda a lógica de busca vivia em `bootstrap/tes_functions.php` como um conjunto de funções globais sem tipo, sem testes e sem separação de responsabilidades. Os controllers chamavam essas funções diretamente e manipulavam arrays mágicos sem forma definida.
+
+**O que existe agora:**
+
+| Classe | Responsabilidade |
+|---|---|
+| `App\Services\SearchQueryParser` | Parser de conectores: AND/OR/NOT, aspas, termos curtos, normalização para API |
+| `App\Services\SearchDatabaseService` | Execução de busca MySQL FULLTEXT, contagem, iteração por tribunal |
+| `App\Services\SearchCacheManager` | Chave, TTL (1h) e invalidação granular por tribunal via cache tags |
+| `App\Services\SearchTribunalRegistry` | Ponto único de acesso à `lista_tribunais` de `tes_constants.php` |
+| `App\Services\SearchTribunalConfig` | DTO por tribunal: `usesDatabase()`, `fulltextColumns()`, `teseName()` etc. |
+| `App\Services\SearchTribunalResult` | Shape tipado de resultado por tribunal, com `toArray()`, `toPublicApiArray()`, `toUnifiedSummaryArray()` |
+| `App\Services\SearchResultSection` | Shape de uma seção de resultado (súmulas ou teses) com `hits` e contagens |
+
+`bootstrap/tes_functions.php` foi mantido como **fachada de compatibilidade**: as funções globais existem, mas apenas delegam para as classes acima. Nenhum código externo precisou ser alterado.
+
+**O que foi removido (over-engineering revertido):** em uma iteração intermediária foram criadas 7 classes a mais (`SearchResultsAnalyzer`, `SearchThemeApiNormalizer`, `SearchThemeApiResponseBuilder`, `SearchThemeSelectionService`, `SearchTribunalService`, `SearchPersistencePolicy`, `SearchUnifiedMeta`) que foram identificadas como desnecessárias e eliminadas antes do commit final. A lógica simples voltou para métodos privados nos controllers.
+
+**Cobertura de testes adicionada:**
+
+| Arquivo | Testes | O que cobre |
+|---|---|---|
+| `SearchParserCharacterizationTest` | 20+ | Comportamento do parser: AND/OR/NOT, aspas, termos curtos, MESMO |
+| `SearchDatabaseServiceTest` | 12 | Cache, query FULLTEXT preparada, shape do resultado |
+| `SearchCacheManagerTest` | 8 | Chave, TTL, invalidação por tribunal, fallback sem tags |
+| `SearchTribunalRegistryTest` | 4 | Acesso ao registry, método `get()`, `keys()` |
+| `SearchTribunalConfigTest` | 4 | API mínima do DTO de configuração |
+| `SearchResultObjectsTest` | 6 | `SearchTribunalResult` e `SearchResultSection` |
+| `SearchToDbPesquisasTest` | 4 | Job SEO: grava, ignora numérico, ignores "súmula", ignora curto |
+| `SyncTemasResultsTest` | 3 | Comando de recálculo em dry-run |
+| `ClearSearchCacheTest` | 3 | Invalidação global e por tribunal |
+| `tests/MySQL/SearchMysqlIntegrationTest` | 16 | FULLTEXT real contra `forge_tes_test` |
+
+Os testes MySQL ficam em `tests/MySQL/` e rodam via configuração separada:
+```bash
+php artisan test -c phpunit.mysql.xml
+```
+Requerem o banco `forge_tes_test` com tabelas e índices FULLTEXT criados. O pre-commit hook roda essa suite automaticamente.
+
+**Documentação técnica detalhada:** `REFATORACAO_BUSCA_ESTADO_ATUAL.md`
 
 ---
 
