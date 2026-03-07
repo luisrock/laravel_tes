@@ -25,11 +25,11 @@ class SearchQueryParser
 
     public function adjustOperators(string $keyword): string
     {
-        if (in_array($keyword, ['OU', 'ou'])) {
+        if (in_array($keyword, ['OU', 'Ou', 'ou'])) {
             return 'OR';
         }
 
-        if (in_array($keyword, ['E', 'e', 'MESMO', 'Mesmo', 'mesmo'])) {
+        if (in_array($keyword, ['E', 'e'])) {
             return 'AND';
         }
 
@@ -162,29 +162,15 @@ class SearchQueryParser
     public function buildFinalSearchString(array $tokens): string
     {
         $operators = config('tes_constants.options.operadores');
-        $index = 0;
         $finalString = '';
-        $parOpen = false;
 
-        foreach ($tokens as $token) {
-            if (! in_array($tokens[$index], $operators)) {
-                $signal = $this->signalString($tokens, $index);
-
-                if (! isset($lastOp)) {
-                    $finalString .= "$signal{$tokens[$index]}";
-                    $parOpen = true;
-                } else {
-                    if ($parOpen && $signal != $lastOp) {
-                        $finalString .= " $signal{$tokens[$index]}";
-                    } else {
-                        $finalString .= " $signal{$tokens[$index]}";
-                    }
-                }
-
-                $lastOp = $signal;
+        for ($index = 0; $index < count($tokens); $index++) {
+            if (in_array($tokens[$index], $operators)) {
+                continue;
             }
 
-            $index++;
+            $signal = $this->signalString($tokens, $index);
+            $finalString .= ($finalString === '' ? '' : ' ')."$signal{$tokens[$index]}";
         }
 
         return $finalString;

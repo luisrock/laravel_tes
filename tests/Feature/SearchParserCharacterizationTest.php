@@ -30,7 +30,8 @@ dataset('parser final strings', [
     'quoted phrase' => ['"dano moral" responsabilidade', ['"dano moral"', 'responsabilidade'], ['"dano moral"', 'AND', 'responsabilidade'], '+"dano moral" +responsabilidade'],
     'uppercase acronym with and' => ['ICMS e PIS', ['ICMS', 'AND', 'PIS'], ['ICMS', 'AND', 'PIS'], '+ICMS +PIS'],
     'short terms remain unsignaled' => ['a b dano', ['a', 'b', 'dano'], ['a', 'AND', 'b', 'AND', 'dano'], 'a b +dano'],
-    'mesmo becomes and' => ['mesmo tema', ['AND', 'tema'], ['AND', 'tema'], '+tema'],
+    'mesmo is a regular search term' => ['mesmo tema', ['mesmo', 'tema'], ['mesmo', 'AND', 'tema'], '+mesmo +tema'],
+    'Ou titlecase becomes OR' => ['ICMS Ou PIS', ['ICMS', 'OR', 'PIS'], ['ICMS', 'OR', 'PIS'], 'ICMS PIS'],
     'number token remains searchable' => ['sumula 123', ['sumula', '123'], ['sumula', 'AND', '123'], '+sumula +123'],
 ]);
 
