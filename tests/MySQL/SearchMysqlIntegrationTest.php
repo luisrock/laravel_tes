@@ -61,6 +61,14 @@ beforeEach(function () use ($FIXTURE_NUMEROS) {
             'situacao' => 'Ativo',
         ],
     ]);
+
+    // InnoDB FULLTEXT mantém novos registros em cache de inserção até que o
+    // índice seja reconstruído. OPTIMIZE TABLE força o flush imediato do cache,
+    // garantindo que os fixtures sejam encontrados por MATCH AGAINST.
+    // DB::select() faz fetchAll() internamente, consumindo o result set do OPTIMIZE TABLE
+    // e evitando "Cannot execute queries while other unbuffered queries are active"
+    DB::select('OPTIMIZE TABLE stj_sumulas');
+    DB::select('OPTIMIZE TABLE stj_teses');
 });
 
 afterEach(function () use ($FIXTURE_NUMEROS) {
