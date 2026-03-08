@@ -26,7 +26,7 @@ class BearerTokenMiddleware
         // Aqui você pode implementar a validação do token
         // Por enquanto, vou usar uma validação simples
         // Você pode configurar o token no .env
-        $validToken = env('API_TOKEN', 'your-secret-token-here');
+        $validToken = config('services.api.token');
 
         if ($token !== $validToken) {
             return response()->json([

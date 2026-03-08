@@ -30,4 +30,8 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'sa-east-1'),
     ],
 
+    'api' => [
+        'token' => env('API_TOKEN'),
+    ],
+
 ];

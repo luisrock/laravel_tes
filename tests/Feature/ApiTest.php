@@ -8,7 +8,7 @@
  */
 function bearerTokenHeaders(): array
 {
-    $validToken = env('API_TOKEN', 'your-secret-token-here');
+    $validToken = config('services.api.token');
 
     return ['Authorization' => "Bearer {$validToken}"];
 }
@@ -39,7 +39,7 @@ describe('Bearer Token Auth', function () {
     });
 
     it('permite acesso com token válido', function () {
-        $validToken = env('API_TOKEN', 'your-secret-token-here');
+        $validToken = config('services.api.token');
 
         $response = $this->getJson('/api/newsletters', [
             'Authorization' => "Bearer {$validToken}",

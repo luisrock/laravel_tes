@@ -72,7 +72,7 @@ describe('BearerTokenMiddleware', function () {
     });
 
     it('permite acesso com token válido', function () {
-        $validToken = env('API_TOKEN', 'your-secret-token-here');
+        $validToken = config('services.api.token');
 
         $this->getJson('/__test/api', ['Authorization' => "Bearer {$validToken}"])
             ->assertOk()
