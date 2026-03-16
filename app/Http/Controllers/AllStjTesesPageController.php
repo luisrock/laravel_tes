@@ -35,13 +35,39 @@ class AllStjTesesPageController extends Controller
             ['name' => 'Teses STJ', 'url' => null],
         ];
 
-        $admin = false;
-        if (auth()->check()) {
-            // check the email
-            $useremail = auth()->user()->email;
-            if (in_array($useremail, ['mauluis@gmail.com', 'trator70@gmail.com', 'ivanaredler@gmail.com'])) {
-                $admin = true;
-            }
+        $admin = auth()->check() && auth()->user()->hasRole('admin');
+
+        if ($admin) {
+            $teses_with_ai = DB::table('tese_analysis_sections')
+                ->where('tribunal', $tribunal)
+                ->pluck('tese_id')
+                ->unique()
+                ->map(fn ($id) => (int) $id)
+                ->values()
+                ->toArray();
+
+            $pending_job_ids = DB::table('tese_analysis_jobs')
+                ->where('tribunal', $tribunal)
+                ->whereIn('status', ['queued', 'running'])
+                ->pluck('tese_id')
+                ->unique()
+                ->map(fn ($id) => (int) $id)
+                ->values()
+                ->toArray();
+
+            $teses_with_acordaos_ids = DB::table('tese_acordaos')
+                ->where('tribunal', $tribunal)
+                ->whereNotNull('s3_key')
+                ->whereNull('deleted_at')
+                ->pluck('tese_id')
+                ->unique()
+                ->map(fn ($id) => (int) $id)
+                ->values()
+                ->toArray();
+        } else {
+            $teses_with_ai = get_teses_with_ai($tribunal);
+            $pending_job_ids = [];
+            $teses_with_acordaos_ids = [];
         }
 
         foreach ($teses as $tese) {
@@ -56,7 +82,6 @@ class AllStjTesesPageController extends Controller
             }
         }
 
-        // dd($teses);
-        return view('front.teses', compact('tribunal', 'teses', 'count', 'label', 'description', 'admin', 'display_pdf', 'tese_route', 'breadcrumb'));
+        return view('front.teses', compact('tribunal', 'teses', 'count', 'label', 'description', 'admin', 'display_pdf', 'tese_route', 'breadcrumb', 'teses_with_ai', 'pending_job_ids', 'teses_with_acordaos_ids'));
     } // end public function
 }

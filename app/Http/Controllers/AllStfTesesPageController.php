@@ -9,11 +9,8 @@ class AllStfTesesPageController extends Controller
     public function index()
     {
         $teses = DB::table('stf_teses')
-            // select all fields
             ->select('*')
-            // order by numero DESC
             ->orderBy('numero', 'DESC')
-            // get all from the DB (no items limit)
             ->get();
 
         $tribunal = 'STF';
@@ -23,24 +20,50 @@ class AllStfTesesPageController extends Controller
         $label = 'Teses Vinculantes do Supremo Tribunal Federal - STF';
         $tese_route = 'stftesepage';
 
-        // Meta description dinâmica para melhor CTR
         $dataAtual = now()->format('m/Y');
         $description = "Consulte {$count} teses de repercussão geral do STF. Pesquisa por número de tema ou assunto. Atualizado em {$dataAtual}.";
 
-        // Breadcrumb
         $breadcrumb = [
             ['name' => 'Início', 'url' => url('/')],
             ['name' => 'Índice', 'url' => url('/index')],
             ['name' => 'Teses STF', 'url' => null],
         ];
 
-        $admin = false;
-        if (auth()->check()) {
-            // check the email
-            $useremail = auth()->user()->email;
-            if (in_array($useremail, ['mauluis@gmail.com', 'trator70@gmail.com', 'ivanaredler@gmail.com'])) {
-                $admin = true;
-            }
+        $admin = auth()->check() && auth()->user()->hasRole('admin');
+
+        // Admin busca ao vivo (bypass do cache) para ver badges atualizados imediatamente.
+        // Usuários comuns usam cache de 1h.
+        if ($admin) {
+            $teses_with_ai = DB::table('tese_analysis_sections')
+                ->where('tribunal', $tribunal)
+                ->pluck('tese_id')
+                ->unique()
+                ->map(fn ($id) => (int) $id)
+                ->values()
+                ->toArray();
+
+            $pending_job_ids = DB::table('tese_analysis_jobs')
+                ->where('tribunal', $tribunal)
+                ->whereIn('status', ['queued', 'running'])
+                ->pluck('tese_id')
+                ->unique()
+                ->map(fn ($id) => (int) $id)
+                ->values()
+                ->toArray();
+
+            $teses_with_acordaos_ids = DB::table('tese_acordaos')
+                ->where('tribunal', $tribunal)
+                ->whereNotNull('s3_key')
+                ->whereNull('deleted_at')
+                ->pluck('tese_id')
+                ->unique()
+                ->map(fn ($id) => (int) $id)
+                ->values()
+                ->toArray();
+        } else {
+            $teses_with_ai = get_teses_with_ai($tribunal);
+            $pending_job_ids = [];
+            $teses_with_acordaos_ids = [];
         }
 
         foreach ($teses as $tese) {
@@ -53,7 +76,6 @@ class AllStfTesesPageController extends Controller
             $tese->tema_pure_text = preg_replace('/^\d+ - /', '', $tese->tema_texto);
         }
 
-        // dd($teses);
-        return view('front.teses', compact('tribunal', 'teses', 'count', 'label', 'description', 'admin', 'display_pdf', 'tese_route', 'breadcrumb'));
-    } // end public function
+        return view('front.teses', compact('tribunal', 'teses', 'count', 'label', 'description', 'admin', 'display_pdf', 'tese_route', 'breadcrumb', 'teses_with_ai', 'pending_job_ids', 'teses_with_acordaos_ids'));
+    }
 }

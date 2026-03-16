@@ -68,12 +68,10 @@
                 </div>
 
                 <div class="tw-space-y-4" id="teses-list">
-                    @php
-                        $ai_teses = function_exists('get_teses_with_ai') ? get_teses_with_ai($tribunal) : [];
-                    @endphp
                     @foreach ($teses as $tes)
                         @php
-                            $has_ai = in_array($tes->id ?? null, $ai_teses);
+                            $has_ai = in_array((int) ($tes->id ?? 0), $teses_with_ai);
+                            $has_pending = $admin && in_array((int) ($tes->id ?? 0), $pending_job_ids);
                         @endphp
                         <div class="tese-item tw-block tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg tw-p-6 hover:tw-border-brand-300 hover:tw-shadow-sm tw-transition-all">
                             
@@ -84,6 +82,26 @@
                                     </a>
                                     @if($has_ai)
                                         <x-ia-badge size="sm" :url="route($tese_route, ['tese' => $tes->id])" />
+                                    @endif
+                                    @if($admin && !$has_ai && in_array($tribunal, ['STF', 'STJ']))
+                                        @php
+                                            $canEnqueue = !empty($tes->tese_texto)
+                                                && in_array((int) ($tes->id ?? 0), $teses_with_acordaos_ids);
+                                        @endphp
+                                        @if($canEnqueue)
+                                            @if($has_pending)
+                                                <span class="tw-inline-flex tw-items-center tw-px-2 tw-py-0.5 tw-rounded-lg tw-text-xs tw-font-medium tw-bg-slate-100 tw-text-slate-400 tw-border tw-border-slate-200 tw-opacity-60 tw-cursor-not-allowed">
+                                                    <i class="fas fa-clock tw-mr-1"></i> Solicitado
+                                                </span>
+                                            @else
+                                                <button type="button"
+                                                    class="js-enqueue-ai tw-inline-flex tw-items-center tw-px-2 tw-py-0.5 tw-rounded-lg tw-text-xs tw-font-medium tw-bg-violet-100 tw-text-violet-800 tw-border tw-border-violet-200 hover:tw-bg-violet-200 tw-transition-colors tw-cursor-pointer"
+                                                    data-enqueue-url="{{ route('tese.enqueue_ai', ['tribunal' => $tribunal, 'tese_id' => $tes->id]) }}"
+                                                    data-csrf="{{ csrf_token() }}">
+                                                    <i class="fas fa-robot tw-mr-1"></i> Resumir com IA
+                                                </button>
+                                            @endif
+                                        @endif
                                     @endif
                                 </h4>
                                 @if(isset($tes->situacao))
@@ -188,6 +206,37 @@
             searchInput.value = '';
             searchInput.dispatchEvent(new Event('input'));
             searchInput.focus();
+        });
+
+        // Enqueue IA via AJAX (sem recarregar a página)
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.js-enqueue-ai');
+            if (!btn) return;
+
+            btn.disabled = true;
+            btn.classList.add('tw-opacity-50', 'tw-cursor-not-allowed');
+            btn.classList.remove('hover:tw-bg-violet-200', 'tw-cursor-pointer');
+
+            fetch(btn.dataset.enqueueUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': btn.dataset.csrf,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+            }).then(function(response) {
+                if (response.ok) {
+                    btn.outerHTML = '<span class="tw-inline-flex tw-items-center tw-px-2 tw-py-0.5 tw-rounded-lg tw-text-xs tw-font-medium tw-bg-slate-100 tw-text-slate-400 tw-border tw-border-slate-200 tw-opacity-60 tw-cursor-not-allowed"><i class="fas fa-clock tw-mr-1"></i> Solicitado</span>';
+                } else {
+                    btn.disabled = false;
+                    btn.classList.remove('tw-opacity-50', 'tw-cursor-not-allowed');
+                    btn.classList.add('hover:tw-bg-violet-200', 'tw-cursor-pointer');
+                }
+            }).catch(function() {
+                btn.disabled = false;
+                btn.classList.remove('tw-opacity-50', 'tw-cursor-not-allowed');
+                btn.classList.add('hover:tw-bg-violet-200', 'tw-cursor-pointer');
+            });
         });
     });
     </script>

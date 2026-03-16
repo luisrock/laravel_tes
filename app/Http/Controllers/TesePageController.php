@@ -312,20 +312,20 @@ class TesePageController extends Controller
 
         // dd($teses);
         if ($tribunal == 'TST') {
-            return view('front.tese_tst', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'isRegisterwall', 'acordaos_pdfs', 'pending_ai_job', 'has_acordaos_access'));
+            return view('front.tese_tst', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'isRegisterwall', 'acordaos_pdfs', 'pending_ai_job', 'has_acordaos_access', 'have_tese'));
         }
 
         if ($tribunal == 'TNU') {
-            return view('front.tese_tnu', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'isRegisterwall', 'acordaos_pdfs', 'pending_ai_job', 'has_acordaos_access'));
+            return view('front.tese_tnu', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'isRegisterwall', 'acordaos_pdfs', 'pending_ai_job', 'has_acordaos_access', 'have_tese'));
         }
 
-        return view('front.tese', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'isRegisterwall', 'acordaos_pdfs', 'pending_ai_job', 'has_acordaos_access'));
+        return view('front.tese', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'isRegisterwall', 'acordaos_pdfs', 'pending_ai_job', 'has_acordaos_access', 'have_tese'));
     } // end public function
 
     /**
      * Enfileira a geração de resumos de IA para uma tese (apenas admin).
      */
-    public function enqueueAi(Request $request, string $tribunal, int $tese_id): RedirectResponse
+    public function enqueueAi(Request $request, string $tribunal, int $tese_id): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         abort_unless(auth()->check() && auth()->user()->hasRole('admin'), 403);
 
@@ -343,6 +343,10 @@ class TesePageController extends Controller
                 ['tese_id' => $tese_id, 'tribunal' => $tribunalUpper, 'section_type' => 'all'],
                 ['status' => 'queued', 'ai_model_id' => $model->id, 'attempts' => 0, 'last_error' => null]
             );
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['status' => 'queued']);
         }
 
         return redirect()->back();
