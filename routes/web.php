@@ -83,6 +83,7 @@ Route::get('/tese/stf/{tese?}', [App\Http\Controllers\TesePageController::class,
 Route::get('/tese/stj/{tese?}', [App\Http\Controllers\TesePageController::class, 'index'])->name('stjtesepage');
 Route::get('/tese/tst/{tese?}', [App\Http\Controllers\TesePageController::class, 'index'])->name('tsttesepage');
 Route::get('/tese/tnu/{tese?}', [App\Http\Controllers\TesePageController::class, 'index'])->name('tnutesepage');
+Route::post('/tese/{tribunal}/{tese_id}/resumir-ia', [App\Http\Controllers\TesePageController::class, 'enqueueAi'])->name('tese.enqueue_ai')->middleware('auth');
 
 // Ajax requests admin
 Route::post('/admin-ajax-request', [App\Http\Controllers\AjaxController::class, 'adminstore'])->name('adminstore');

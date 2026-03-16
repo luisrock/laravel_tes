@@ -23,8 +23,8 @@
                     <h4 class="tw-text-xs tw-font-bold tw-uppercase tw-tracking-wider tw-text-slate-100">Navegação</h4>
                     <div class="tw-mt-3 tw-space-y-2.5">
                         <a href="{{ route('searchpage') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white">Pesquisar</a>
-                        <a href="{{ route('alltemaspage') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white">Temas</a>
-                        <a href="{{ route('newsletterspage') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white">Atualizações</a>
+                        <a href="{{ route('alltemaspage') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white">Prontas</a>
+                        <a href="{{ route('newsletterspage') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white">Newsletters</a>
                         <a href="{{ route('contact.index') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white">Contato</a>
                     </div>
                 </div>

@@ -14,8 +14,9 @@
 
         <nav class="tw-hidden md:tw-flex tw-items-center tw-gap-1" id="site-nav-desktop">
             <a href="{{ route('searchpage') }}" class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100 hover:tw-text-brand-700 tw-transition">Pesquisar</a>
-            <a href="{{ route('alltemaspage') }}" class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100 hover:tw-text-brand-700 tw-transition">Temas</a>
-            <a href="{{ route('newsletterspage') }}" class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100 hover:tw-text-brand-700 tw-transition">Atualizações</a>
+            <a href="{{ route('alltemaspage') }}" class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100 hover:tw-text-brand-700 tw-transition">Prontas</a>
+            <a href="/index" class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100 hover:tw-text-brand-700 tw-transition">Índice</a>
+            <a href="{{ route('newsletterspage') }}" class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100 hover:tw-text-brand-700 tw-transition">Newsletters</a>
 
             <span class="tw-h-6 tw-w-px tw-bg-slate-300 tw-mx-2"></span>
 
@@ -48,8 +49,9 @@
 
     <nav id="site-nav-menu" class="md:tw-hidden tw-hidden tw-border-t tw-border-slate-200 tw-bg-white tw-p-3 tw-space-y-1">
         <a href="{{ route('searchpage') }}" class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100">Pesquisar</a>
-        <a href="{{ route('alltemaspage') }}" class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100">Temas</a>
-        <a href="{{ route('newsletterspage') }}" class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100">Atualizações</a>
+        <a href="{{ route('alltemaspage') }}" class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100">Prontas</a>
+        <a href="/index" class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100">Índice</a>
+        <a href="{{ route('newsletterspage') }}" class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100">Newsletters</a>
 
         <div class="tw-my-2 tw-h-px tw-bg-slate-200"></div>
 

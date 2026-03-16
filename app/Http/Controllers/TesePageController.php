@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AiModel;
 use App\Models\Quiz;
+use App\Models\TeseAnalysisJob;
 use Exception;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Log;
@@ -249,6 +253,11 @@ class TesePageController extends Controller
             ->unique('section_type')
             ->pluck('content', 'section_type');
 
+        $pending_ai_job = TeseAnalysisJob::where('tese_id', $tese_id)
+            ->where('tribunal', strtoupper($tribunal))
+            ->whereIn('status', ['queued', 'running'])
+            ->exists();
+
         // Gerar meta description otimizada
         $description = $this->generateMetaDescription($tribunal, $tese->numero, $tese->tema_texto, $tese->tese_texto);
 
@@ -264,6 +273,10 @@ class TesePageController extends Controller
         if (auth()->check()) {
             $admin = auth()->user()->hasRole('admin');
         }
+
+        // Acesso aos acórdãos PDF controlado pela permission 'download_acordaos'.
+        // Para restringir a assinantes: remover 'download_acordaos' do role 'registered' no admin.
+        $has_acordaos_access = $admin || (auth()->check() && auth()->user()->hasPermissionTo('download_acordaos'));
 
         // Configuração de Assinaturas (Toggle Global)
         if (! config('subscription.enabled')) {
@@ -299,15 +312,41 @@ class TesePageController extends Controller
 
         // dd($teses);
         if ($tribunal == 'TST') {
-            return view('front.tese_tst', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'isRegisterwall', 'acordaos_pdfs'));
+            return view('front.tese_tst', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'isRegisterwall', 'acordaos_pdfs', 'pending_ai_job', 'has_acordaos_access'));
         }
 
         if ($tribunal == 'TNU') {
-            return view('front.tese_tnu', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'isRegisterwall', 'acordaos_pdfs'));
+            return view('front.tese_tnu', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'isRegisterwall', 'acordaos_pdfs', 'pending_ai_job', 'has_acordaos_access'));
         }
 
-        return view('front.tese', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'isRegisterwall', 'acordaos_pdfs'));
+        return view('front.tese', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'has_access', 'isRegisterwall', 'acordaos_pdfs', 'pending_ai_job', 'has_acordaos_access'));
     } // end public function
+
+    /**
+     * Enfileira a geração de resumos de IA para uma tese (apenas admin).
+     */
+    public function enqueueAi(Request $request, string $tribunal, int $tese_id): RedirectResponse
+    {
+        abort_unless(auth()->check() && auth()->user()->hasRole('admin'), 403);
+
+        $tribunalUpper = strtoupper($tribunal);
+        $activeJob = TeseAnalysisJob::where('tese_id', $tese_id)
+            ->where('tribunal', $tribunalUpper)
+            ->whereIn('status', ['queued', 'running'])
+            ->exists();
+
+        if (! $activeJob) {
+            $model = AiModel::active()->first();
+            abort_if(! $model, 422, 'Nenhum modelo de IA ativo.');
+
+            TeseAnalysisJob::updateOrCreate(
+                ['tese_id' => $tese_id, 'tribunal' => $tribunalUpper, 'section_type' => 'all'],
+                ['status' => 'queued', 'ai_model_id' => $model->id, 'attempts' => 0, 'last_error' => null]
+            );
+        }
+
+        return redirect()->back();
+    }
 
     /**
      * Gera meta description otimizada para teses específicas

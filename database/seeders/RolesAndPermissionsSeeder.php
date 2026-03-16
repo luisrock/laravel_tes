@@ -52,6 +52,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'search',
             'ad_free',
             'view_ai_analysis',
+            'download_acordaos',
         ]);
 
         // Subscriber (Assinante do plano minimo / Pro / Premium)

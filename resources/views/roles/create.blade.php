@@ -30,7 +30,7 @@
                     <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-3 tw-max-h-96 tw-overflow-y-auto tw-p-4 tw-bg-slate-50 tw-rounded-md tw-border tw-border-slate-200">
                         @foreach($permissions as $permission)
                             <div class="tw-flex tw-items-center">
-                                <input type="checkbox" name="permissions[]" id="perm_{{ $permission->id }}" value="{{ $permission->id }}" class="tw-h-4 tw-w-4 tw-text-indigo-600 tw-focus:ring-indigo-500 tw-border-gray-300 tw-rounded">
+                                <input type="checkbox" name="permissions[]" id="perm_{{ $permission->id }}" value="{{ $permission->name }}" class="tw-h-4 tw-w-4 tw-text-indigo-600 tw-focus:ring-indigo-500 tw-border-gray-300 tw-rounded">
                                 <label for="perm_{{ $permission->id }}" class="tw-ml-2 tw-block tw-text-sm tw-text-slate-700 cursor-pointer">
                                     {{ $permission->name }}
                                 </label>

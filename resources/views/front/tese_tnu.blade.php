@@ -28,6 +28,20 @@
                         Situação: {{ $tese->situacao }}
                     </span>
                 @endif
+                @if($admin && $ai_sections->isEmpty() && in_array($tribunal, ['STF', 'STJ']))
+                    @if($pending_ai_job)
+                        <span class="tw-inline-flex tw-items-center tw-px-2.5 tw-py-0.5 tw-rounded-lg tw-text-xs tw-font-medium tw-bg-slate-100 tw-text-slate-400 tw-border tw-border-slate-200 tw-opacity-60 tw-cursor-not-allowed">
+                            <i class="fas fa-clock tw-mr-1"></i> Solicitado
+                        </span>
+                    @else
+                        <form method="POST" action="{{ route('tese.enqueue_ai', ['tribunal' => $tribunal, 'tese_id' => $tese->id]) }}">
+                            @csrf
+                            <button type="submit" class="tw-inline-flex tw-items-center tw-px-2.5 tw-py-0.5 tw-rounded-lg tw-text-xs tw-font-medium tw-bg-violet-100 tw-text-violet-800 tw-border tw-border-violet-200 hover:tw-bg-violet-200 tw-transition-colors tw-cursor-pointer">
+                                <i class="fas fa-robot tw-mr-1"></i> Resumir com IA
+                            </button>
+                        </form>
+                    @endif
+                @endif
             </div>
         </section>
     </div>

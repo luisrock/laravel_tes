@@ -55,6 +55,20 @@
                          Situação: {{ $tese->situacao }}
                      </span>
                 @endif
+                @if($admin && $ai_sections->isEmpty() && in_array($tribunal, ['STF', 'STJ']))
+                    @if($pending_ai_job)
+                        <span class="tw-inline-flex tw-items-center tw-px-2.5 tw-py-0.5 tw-rounded-lg tw-text-xs tw-font-medium tw-bg-slate-100 tw-text-slate-400 tw-border tw-border-slate-200 tw-opacity-60 tw-cursor-not-allowed">
+                            <i class="fas fa-clock tw-mr-1"></i> Solicitado
+                        </span>
+                    @else
+                        <form method="POST" action="{{ route('tese.enqueue_ai', ['tribunal' => $tribunal, 'tese_id' => $tese->id]) }}">
+                            @csrf
+                            <button type="submit" class="tw-inline-flex tw-items-center tw-px-2.5 tw-py-0.5 tw-rounded-lg tw-text-xs tw-font-medium tw-bg-violet-100 tw-text-violet-800 tw-border tw-border-violet-200 hover:tw-bg-violet-200 tw-transition-colors tw-cursor-pointer">
+                                <i class="fas fa-robot tw-mr-1"></i> Resumir com IA
+                            </button>
+                        </form>
+                    @endif
+                @endif
             </div>
 
         </section>
@@ -249,39 +263,43 @@
                             </div>
                         </div>
 
-                        <!-- Downloads Originais (Acórdãos PDF vinculados) Exibidos no fim do box da IA -->
-                        @if($has_access && isset($acordaos_pdfs) && $acordaos_pdfs->isNotEmpty())
-                        <div class="tw-pt-8 tw-mt-6">
-                            <h4 class="tw-text-sm tw-font-bold tw-text-slate-500 tw-uppercase tw-tracking-wider tw-mb-4 tw-flex tw-items-center">
-                                <i class="fa fa-file-pdf tw-mr-2 tw-text-red-500"></i> Acórdãos Originais para Download
-                            </h4>
-                            <div class="tw-flex tw-flex-col tw-gap-3">
-                                @foreach($acordaos_pdfs as $pdf)
-                                <a href="{{ $pdf->presigned_url ?? '#' }}" target="_blank" class="tw-inline-flex tw-items-center tw-justify-between tw-w-full tw-max-w-md tw-px-4 tw-py-3 tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg hover:tw-bg-slate-50 hover:tw-border-slate-300 tw-transition-colors tw-group">
-                                    <div class="tw-flex tw-items-center">
-                                        <div class="tw-w-8 tw-h-8 tw-rounded-md tw-bg-red-50 tw-text-red-600 tw-flex tw-items-center tw-justify-center tw-mr-3 group-hover:tw-bg-red-100 tw-transition-colors">
-                                            <i class="fa fa-download tw-text-sm"></i>
-                                        </div>
-                                        <div class="tw-flex tw-flex-col">
-                                            <span class="tw-text-sm tw-font-medium tw-text-slate-700 group-hover:tw-text-slate-900">
-                                                {{ $pdf->numero_acordao ?: 'Baixar Acórdão' }}
-                                            </span>
-                                            <span class="tw-text-xs tw-text-slate-500">
-                                                Acórdão {{ $pdf->tipo ?: 'Original' }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <i class="fa fa-chevron-right tw-text-slate-300 tw-text-xs group-hover:tw-text-slate-400 tw-transition-colors"></i>
-                                </a>
-                                @endforeach
-                            </div>
-                        </div>
-                        @endif
-
                     </div>
                 </div>
                 @endif
                 <!-- FIM MOCKUP V1 -->
+
+                @if($has_acordaos_access && isset($acordaos_pdfs) && $acordaos_pdfs->isNotEmpty())
+                <!-- Acórdãos Originais para Download -->
+                <div class="tw-bg-white tw-shadow-sm tw-rounded-xl tw-border tw-border-slate-200 tw-mt-6">
+                    <div class="tw-px-6 tw-py-4 tw-rounded-t-xl tw-bg-slate-50 tw-border-b tw-border-slate-200">
+                        <h3 class="tw-text-base tw-font-semibold tw-text-slate-800 tw-m-0 tw-flex tw-items-center">
+                            <i class="fa fa-file-pdf tw-text-red-500 tw-mr-2"></i> Acórdãos Originais para Download
+                        </h3>
+                    </div>
+                    <div class="tw-p-6">
+                        <div class="tw-flex tw-flex-col tw-gap-3">
+                            @foreach($acordaos_pdfs as $pdf)
+                            <a href="{{ $pdf->presigned_url ?? '#' }}" target="_blank" class="tw-inline-flex tw-items-center tw-justify-between tw-w-full tw-max-w-md tw-px-4 tw-py-3 tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg hover:tw-bg-slate-50 hover:tw-border-slate-300 tw-transition-colors tw-group">
+                                <div class="tw-flex tw-items-center">
+                                    <div class="tw-w-8 tw-h-8 tw-rounded-md tw-bg-red-50 tw-text-red-600 tw-flex tw-items-center tw-justify-center tw-mr-3 group-hover:tw-bg-red-100 tw-transition-colors">
+                                        <i class="fa fa-download tw-text-sm"></i>
+                                    </div>
+                                    <div class="tw-flex tw-flex-col">
+                                        <span class="tw-text-sm tw-font-medium tw-text-slate-700 group-hover:tw-text-slate-900">
+                                            {{ $pdf->numero_acordao ?: 'Baixar Acórdão' }}
+                                        </span>
+                                        <span class="tw-text-xs tw-text-slate-500">
+                                            Acórdão {{ $pdf->tipo ?: 'Original' }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <i class="fa fa-chevron-right tw-text-slate-300 tw-text-xs group-hover:tw-text-slate-400 tw-transition-colors"></i>
+                            </a>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+                @endif
 
             </div>
 
