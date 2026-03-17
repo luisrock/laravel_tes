@@ -41,7 +41,15 @@
                             <i class="fa fa-times"></i>
                         </button>
                     </div>
-                    <small class="tw-block tw-mt-2 tw-text-slate-500">Digite para filtrar instantaneamente.</small>
+                    <div class="tw-flex tw-items-center tw-justify-between tw-mt-2">
+                        <small class="tw-text-slate-500">Digite para filtrar instantaneamente.</small>
+                        <label class="tw-flex tw-items-center tw-gap-2 tw-cursor-pointer tw-select-none tw-group">
+                            <input type="checkbox" id="search-number-only" class="tw-h-4 tw-w-4 tw-rounded tw-border-slate-300 tw-accent-brand-600 tw-cursor-pointer">
+                            <span class="tw-text-xs tw-text-slate-500 group-has-[:checked]:tw-text-brand-600 tw-transition-colors">
+                                Número do Tema
+                            </span>
+                        </label>
+                    </div>
                 </div>
 
                 <div class="tw-flex tw-flex-col sm:tw-flex-row tw-justify-between tw-items-start sm:tw-items-center tw-gap-4 tw-mb-6 tw-pb-4 tw-border-b tw-border-slate-100">
@@ -63,7 +71,7 @@
                         @php
                             $has_ai = in_array($tes->id ?? null, $ai_teses);
                         @endphp
-                        <div class="tese-item tw-block tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg tw-p-6 hover:tw-border-brand-300 hover:tw-shadow-sm tw-transition-all">
+                        <div class="tese-item tw-block tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg tw-p-6 hover:tw-border-brand-300 hover:tw-shadow-sm tw-transition-all" data-numero="{{ $tes->numero }}">
                             <div class="tw-flex tw-items-center tw-justify-between tw-mb-3">
                                 <h4 class="tw-text-lg tw-font-semibold tw-m-0 tw-flex tw-items-center tw-gap-3 tw-flex-wrap">
                                     <a href="{{ route($tese_route, ['tese' => $tes->id]) }}" class="tw-text-brand-600 hover:tw-text-brand-800 hover:tw-underline tw-underline-offset-2 {{ $tes->isCancelada ? 'tw-text-slate-500 tw-line-through' : '' }}">
@@ -130,9 +138,11 @@
         const clearBtn = document.getElementById('clear-search-btn');
         const toggleBtn = document.getElementById('toggle-search-btn');
         const searchContainer = document.getElementById('search-container');
+        const numberOnlyCheckbox = document.getElementById('search-number-only');
         const items = document.querySelectorAll('.tese-item');
         const noResults = document.getElementById('no-results-message');
         const countSpan = document.getElementById('results-count');
+        const defaultPlaceholder = searchInput.placeholder;
 
         toggleBtn.addEventListener('click', function() {
             searchContainer.classList.toggle('tw-hidden');
@@ -141,32 +151,41 @@
             }
         });
 
+        numberOnlyCheckbox.addEventListener('change', function() {
+            searchInput.placeholder = this.checked
+                ? 'Digite o número exato do tema...'
+                : defaultPlaceholder;
+            searchInput.dispatchEvent(new Event('input'));
+        });
+
+        function runFilter() {
+            const term = searchInput.value.trim();
+            const numberOnly = numberOnlyCheckbox.checked;
+            let visibleCount = 0;
+
+            items.forEach(function(item) {
+                let matches = false;
+                if (term === '') {
+                    matches = true;
+                } else if (numberOnly) {
+                    matches = (item.dataset.numero || '').trim() === term;
+                } else {
+                    matches = item.textContent.toLowerCase().includes(term.toLowerCase());
+                }
+
+                item.style.display = matches ? 'block' : 'none';
+                if (matches) visibleCount++;
+            });
+
+            if (countSpan) countSpan.textContent = visibleCount;
+            noResults.classList.toggle('tw-hidden', visibleCount > 0);
+        }
+
         let timeout = null;
         searchInput.addEventListener('input', function() {
             clearTimeout(timeout);
-            const term = this.value.toLowerCase().trim();
-
-            clearBtn.style.display = term ? 'inline-flex' : 'none';
-
-            timeout = setTimeout(function() {
-                let visibleCount = 0;
-
-                items.forEach(item => {
-                    const text = item.textContent.toLowerCase();
-                    if (text.includes(term)) {
-                        item.style.display = 'block';
-                        visibleCount++;
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-
-                if (countSpan) {
-                    countSpan.textContent = visibleCount;
-                }
-                noResults.classList.toggle('tw-hidden', visibleCount > 0);
-
-            }, 300);
+            clearBtn.style.display = this.value.trim() ? 'inline-flex' : 'none';
+            timeout = setTimeout(runFilter, 300);
         });
 
         clearBtn.addEventListener('click', function() {

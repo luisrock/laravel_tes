@@ -44,15 +44,23 @@
                             <div class="tw-absolute tw-inset-y-0 tw-left-0 tw-pl-3 tw-flex tw-items-center tw-pointer-events-none">
                                 <i class="fa fa-search tw-text-slate-400"></i>
                             </div>
-                            <input type="text" class="tw-block tw-w-full tw-pl-10 tw-pr-3 tw-py-2.5 tw-border tw-border-slate-300 tw-rounded-lg tw-text-slate-900 placeholder:tw-text-slate-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-brand-500 focus:tw-border-brand-500 sm:tw-text-sm" 
-                                id="table-search-input" 
+                            <input type="text" class="tw-block tw-w-full tw-pl-10 tw-pr-3 tw-py-2.5 tw-border tw-border-slate-300 tw-rounded-lg tw-text-slate-900 placeholder:tw-text-slate-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-brand-500 focus:tw-border-brand-500 sm:tw-text-sm"
+                                id="table-search-input"
                                 placeholder="Pesquisar por tema, número, texto, {{ $tribunal == 'STF' ? 'relator' : 'órgão julgador' }}...">
                         </div>
                         <button class="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-slate-300 tw-bg-white tw-px-4 tw-text-slate-600 hover:tw-bg-slate-50 hover:tw-text-slate-800 tw-transition-colors" type="button" id="clear-search-btn" style="display:none;">
                             <i class="fa fa-times"></i>
                         </button>
                     </div>
-                    <small class="tw-block tw-mt-2 tw-text-slate-500">Digite para filtrar instantaneamente.</small>
+                    <div class="tw-flex tw-items-center tw-justify-between tw-mt-2">
+                        <small class="tw-text-slate-500">Digite para filtrar instantaneamente.</small>
+                        <label class="tw-flex tw-items-center tw-gap-2 tw-cursor-pointer tw-select-none tw-group">
+                            <input type="checkbox" id="search-number-only" class="tw-h-4 tw-w-4 tw-rounded tw-border-slate-300 tw-accent-brand-600 tw-cursor-pointer">
+                            <span class="tw-text-xs tw-text-slate-500 group-has-[:checked]:tw-text-brand-600 tw-transition-colors">
+                                Número do Tema
+                            </span>
+                        </label>
+                    </div>
                 </div>
                 <!-- END Search Container -->
 
@@ -73,7 +81,7 @@
                             $has_ai = in_array((int) ($tes->id ?? 0), $teses_with_ai);
                             $has_pending = $admin && in_array((int) ($tes->id ?? 0), $pending_job_ids);
                         @endphp
-                        <div class="tese-item tw-block tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg tw-p-6 hover:tw-border-brand-300 hover:tw-shadow-sm tw-transition-all">
+                        <div class="tese-item tw-block tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg tw-p-6 hover:tw-border-brand-300 hover:tw-shadow-sm tw-transition-all" data-numero="{{ $tes->numero }}">
                             
                             <div class="tw-flex tw-items-center tw-justify-between tw-mb-3">
                                 <h4 class="tw-text-lg tw-font-semibold tw-m-0 tw-flex tw-items-center tw-gap-3 tw-flex-wrap">
@@ -160,11 +168,12 @@
         const clearBtn = document.getElementById('clear-search-btn');
         const toggleBtn = document.getElementById('toggle-search-btn');
         const searchContainer = document.getElementById('search-container');
+        const numberOnlyCheckbox = document.getElementById('search-number-only');
         const items = document.querySelectorAll('.tese-item');
         const noResults = document.getElementById('no-results-message');
         const countSpan = document.getElementById('results-count');
+        const defaultPlaceholder = searchInput.placeholder;
 
-        // Toggle search visibility
         toggleBtn.addEventListener('click', function() {
             searchContainer.classList.toggle('tw-hidden');
             if (!searchContainer.classList.contains('tw-hidden')) {
@@ -172,36 +181,43 @@
             }
         });
 
-        // Search functionality
+        numberOnlyCheckbox.addEventListener('change', function() {
+            searchInput.placeholder = this.checked
+                ? 'Digite o número exato do tema...'
+                : defaultPlaceholder;
+            searchInput.dispatchEvent(new Event('input'));
+        });
+
+        function runFilter() {
+            const term = searchInput.value.trim();
+            const numberOnly = numberOnlyCheckbox.checked;
+            let visibleCount = 0;
+
+            items.forEach(function(item) {
+                let matches = false;
+                if (term === '') {
+                    matches = true;
+                } else if (numberOnly) {
+                    matches = (item.dataset.numero || '').trim() === term;
+                } else {
+                    matches = item.textContent.toLowerCase().includes(term.toLowerCase());
+                }
+
+                item.style.display = matches ? 'block' : 'none';
+                if (matches) visibleCount++;
+            });
+
+            if (countSpan) countSpan.textContent = visibleCount;
+            noResults.classList.toggle('tw-hidden', visibleCount > 0);
+        }
+
         let timeout = null;
         searchInput.addEventListener('input', function() {
             clearTimeout(timeout);
-            const term = this.value.toLowerCase().trim();
-            
-            // Show/hide clear button
-            clearBtn.style.display = term ? 'inline-flex' : 'none';
-
-            timeout = setTimeout(function() {
-                let visibleCount = 0;
-                
-                items.forEach(item => {
-                    const text = item.textContent.toLowerCase();
-                    if (text.includes(term)) {
-                        item.style.display = 'block';
-                        visibleCount++;
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-
-                // Update count and show no results message
-                if (countSpan) countSpan.textContent = visibleCount;
-                noResults.classList.toggle('tw-hidden', visibleCount > 0);
-                
-            }, 300);
+            clearBtn.style.display = this.value.trim() ? 'inline-flex' : 'none';
+            timeout = setTimeout(runFilter, 300);
         });
 
-        // Clear search
         clearBtn.addEventListener('click', function() {
             searchInput.value = '';
             searchInput.dispatchEvent(new Event('input'));
