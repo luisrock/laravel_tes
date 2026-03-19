@@ -34,6 +34,15 @@
 
     <!-- Page Content -->
 
+    <x-tese-article-schema
+        :label="$label"
+        :description="$description"
+        :tese="$tese"
+        :tribunal="$tribunal"
+        :ai-sections="$ai_sections"
+        :ai-generated-at="$ai_generated_at"
+    />
+
     <!-- Page Content -->
 
     <div class="tw-max-w-5xl tw-mx-auto tw-px-4 tw-pt-6 md:tw-pt-8">
