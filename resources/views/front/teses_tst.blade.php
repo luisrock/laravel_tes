@@ -74,11 +74,11 @@
                         <div class="tese-item tw-block tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg tw-p-6 hover:tw-border-brand-300 hover:tw-shadow-sm tw-transition-all" data-numero="{{ $tes->numero }}">
                             <div class="tw-flex tw-items-center tw-justify-between tw-mb-3">
                                 <h4 class="tw-text-lg tw-font-semibold tw-m-0 tw-flex tw-items-center tw-gap-3 tw-flex-wrap">
-                                    <a href="{{ route('tsttesepage', ['tese' => $tes->id]) }}" class="tw-text-brand-600 hover:tw-text-brand-800 hover:tw-underline tw-underline-offset-2">
+                                    <a href="{{ route('tsttesepage', ['tese' => $tes->numero]) }}" class="tw-text-brand-600 hover:tw-text-brand-800 hover:tw-underline tw-underline-offset-2">
                                         TEMA {{ $tes->numero }}
                                     </a>
                                     @if($has_ai)
-                                        <x-ia-badge size="sm" :url="route('tsttesepage', ['tese' => $tes->id])" />
+                                        <x-ia-badge size="sm" :url="route('tsttesepage', ['tese' => $tes->numero])" />
                                     @endif
                                 </h4>
                                 <span class="tw-inline-flex tw-items-center tw-px-2.5 tw-py-0.5 tw-rounded-full tw-text-xs tw-font-medium tw-bg-slate-100 tw-text-slate-600">

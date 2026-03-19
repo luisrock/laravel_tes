@@ -74,11 +74,11 @@
                         <div class="tese-item tw-block tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg tw-p-6 hover:tw-border-brand-300 hover:tw-shadow-sm tw-transition-all" data-numero="{{ $tes->numero }}">
                             <div class="tw-flex tw-items-center tw-justify-between tw-mb-3">
                                 <h4 class="tw-text-lg tw-font-semibold tw-m-0 tw-flex tw-items-center tw-gap-3 tw-flex-wrap">
-                                    <a href="{{ route($tese_route, ['tese' => $tes->id]) }}" class="tw-text-brand-600 hover:tw-text-brand-800 hover:tw-underline tw-underline-offset-2 {{ $tes->isCancelada ? 'tw-text-slate-500 tw-line-through' : '' }}">
+                                    <a href="{{ route($tese_route, ['tese' => $tes->numero]) }}" class="tw-text-brand-600 hover:tw-text-brand-800 hover:tw-underline tw-underline-offset-2 {{ $tes->isCancelada ? 'tw-text-slate-500 tw-line-through' : '' }}">
                                         TEMA {{ $tes->numero }}
                                     </a>
                                     @if($has_ai)
-                                        <x-ia-badge size="sm" :url="route($tese_route, ['tese' => $tes->id])" />
+                                        <x-ia-badge size="sm" :url="route($tese_route, ['tese' => $tes->numero])" />
                                     @endif
                                 </h4>
                                 <div class="tw-flex tw-items-center tw-gap-2">

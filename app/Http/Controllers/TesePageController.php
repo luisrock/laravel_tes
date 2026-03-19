@@ -46,20 +46,31 @@ class TesePageController extends Controller
             return redirect()->route('searchpage');
         }
 
-        $tese_id = intval(request()->route('tese'));
-        // if no tese id, redirect to all teses page
-        if (! $tese_id) {
+        $tese_param = intval(request()->route('tese'));
+        // if no tese param, redirect to all teses page
+        if (! $tese_param) {
             return redirect()->route($alltesesroute);
         }
 
+        // Look up by numero first (new canonical URL format)
         $tese = DB::table($table)
-            // select all fields
             ->select('*')
-            ->where('id', $tese_id)
+            ->where('numero', $tese_param)
             ->first();
 
         if (! $tese) {
-            return redirect()->route($alltesesroute);
+            // Fallback: try by id (old URL format) and 301 redirect to canonical
+            $tese = DB::table($table)
+                ->select('*')
+                ->where('id', $tese_param)
+                ->first();
+
+            if (! $tese) {
+                return redirect()->route($alltesesroute);
+            }
+
+            // 301 redirect to canonical URL with numero
+            return redirect('/tese/'.strtolower($tribunal).'/'.$tese->numero, 301);
         }
 
         if ($tribunal == 'TST') {
@@ -246,14 +257,14 @@ class TesePageController extends Controller
 
         // MOCKUP TESTE IA: Busca as análises recém criadas de IA (não usa filter is_active por enquanto pois estão under test)
         $ai_sections = DB::table('tese_analysis_sections')
-            ->where('tese_id', $tese_id)
+            ->where('tese_id', $tese->id)
             ->where('tribunal', $tribunal)
             ->orderBy('generated_at', 'desc')
             ->get()
             ->unique('section_type')
             ->pluck('content', 'section_type');
 
-        $pending_ai_job = TeseAnalysisJob::where('tese_id', $tese_id)
+        $pending_ai_job = TeseAnalysisJob::where('tese_id', $tese->id)
             ->where('tribunal', strtoupper($tribunal))
             ->whereIn('status', ['queued', 'running'])
             ->exists();
@@ -299,7 +310,7 @@ class TesePageController extends Controller
         }
 
         // Buscar Acórdãos PDF via Eloquent Model para utilizar Presigned URL Accessors
-        $acordaos_pdfs = \App\Models\TeseAcordao::where('tese_id', $tese_id)
+        $acordaos_pdfs = \App\Models\TeseAcordao::where('tese_id', $tese->id)
             ->where('tribunal', $tribunal)
             ->whereNotNull('s3_key')
             ->get();

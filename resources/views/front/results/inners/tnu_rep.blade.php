@@ -7,7 +7,7 @@
                         {{ $rep['trib_rep_titulo'] }}
                     </a>
                     @if(in_array($rep['trib_rep_id'] ?? null, function_exists('get_teses_with_ai') ? get_teses_with_ai('TNU') : []))
-                        <x-ia-badge size="sm" :url="url('/tese') . '/tnu/' . $rep['trib_rep_id']" />
+                    <x-ia-badge size="sm" :url="url('/tese') . '/tnu/' . $rep['trib_rep_numero']" />
                     @endif
                 </h4>
                 <a href="{{ $rep['trib_rep_url'] }}" target="_blank" class="tw-inline-flex tw-items-center tw-px-2.5 tw-py-1 tw-rounded-full tw-text-xs tw-font-medium tw-bg-slate-100 tw-text-slate-600 hover:tw-bg-slate-200 hover:tw-text-brand-700 tw-transition-colors">

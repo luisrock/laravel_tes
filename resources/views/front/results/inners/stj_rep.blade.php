@@ -8,11 +8,11 @@
         <td class="tw-block tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg tw-p-6 hover:tw-border-brand-300 hover:tw-shadow-sm tw-transition-all">
             <div class="tw-flex tw-items-start tw-justify-between tw-gap-4 tw-mb-4">
                 <h4 class="tw-text-lg tw-font-semibold tw-text-brand-700 tw-flex tw-items-center tw-gap-3 tw-flex-wrap">
-                    <a href="{{ url('/tese') }}/stj/{{ $rep['trib_rep_id'] }}" class="hover:tw-text-brand-900 hover:tw-underline tw-transition-colors">
+                    <a href="{{ url('/tese') }}/stj/{{ $rep['trib_rep_numero'] }}" class="hover:tw-text-brand-900 hover:tw-underline tw-transition-colors">
                         Tema/Repetitivo {{ $rep['trib_rep_numero'] }}
                     </a>
                     @if(in_array($rep['trib_rep_id'] ?? null, function_exists('get_teses_with_ai') ? get_teses_with_ai('STJ') : []))
-                        <x-ia-badge size="sm" :url="url('/tese') . '/stj/' . $rep['trib_rep_id']" />
+                        <x-ia-badge size="sm" :url="url('/tese') . '/stj/' . $rep['trib_rep_numero']" />
                     @endif
                 </h4>
                 <span class="tw-inline-flex tw-items-center tw-px-2.5 tw-py-0.5 tw-rounded-full tw-text-xs tw-font-medium tw-bg-slate-100 tw-text-slate-600">
