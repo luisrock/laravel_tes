@@ -79,7 +79,7 @@
                     @foreach ($sumulas as $sum)
                         <div class="sumula-item tw-block tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg tw-p-6 hover:tw-border-brand-300 hover:tw-shadow-sm tw-transition-all" data-numero="{{ $sum->numero }}">
                             <h4 class="tw-text-lg tw-font-semibold tw-text-slate-900 tw-mb-3">
-                                <a href="{{ route($sumula_route, ['sumula' => $sum->id]) }}" class="tw-text-brand-600 hover:tw-text-brand-800 hover:tw-underline tw-underline-offset-2">
+                                <a href="{{ route($sumula_route, ['sumula' => (isset($sum->is_vinculante) && $sum->is_vinculante ? 'sv' : '') . $sum->numero]) }}" class="tw-text-brand-600 hover:tw-text-brand-800 hover:tw-underline tw-underline-offset-2">
                                     {{ $sum->titulo }}
                                 </a>
                             </h4>

@@ -588,6 +588,8 @@ function stf_adjust_query_sum($results)
         $a_r['trib_sum_data'] = $r['aprovadaEm'] ?? '';
         $a_r['trib_sum_url'] = $r['link'] ?? '';
         $a_r['trib_sum_id'] = $r['id'] ?? '';
+        $a_r['trib_sum_numero'] = $r['numero'] ?? '';
+        $a_r['trib_sum_vinculante'] = $r['is_vinculante'] ?? 0;
 
         $array[] = $a_r;
     } // end foreach
@@ -607,6 +609,7 @@ function stf_adjust_query_rep($results)
         $a_r['trib_rep_data'] = $r['aprovadaEm'] ?? '';
         $a_r['trib_rep_url'] = $r['link'] ?? '';
         $a_r['trib_rep_id'] = $r['id'] ?? '';
+        $a_r['trib_rep_numero'] = $r['numero'] ?? '';
         $array[] = $a_r;
     } // end foreach
 

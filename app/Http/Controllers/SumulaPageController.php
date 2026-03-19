@@ -39,21 +39,45 @@ class SumulaPageController extends Controller
             return redirect()->route('searchpage');
         }
 
-        // considering the route above, get the sumula id var using laravel method, Must be a number
-        $sumula_id = intval(request()->route('sumula'));
-        // if no sumula id, redirect to all sumulas page
-        if (! $sumula_id) {
+        // considering the route above, get the sumula param using laravel method
+        $sumula_param = (string) request()->route('sumula');
+        // if no sumula param, redirect to all sumulas page
+        if ($sumula_param === '') {
             return redirect()->route($allsumulasroute);
         }
 
-        $sumula = DB::table($table)
-            // select all fields
-            ->select('*')
-            ->where('id', $sumula_id)
-            ->first();
+        // Detect STF "sv" prefix for súmulas vinculantes
+        $isVinculanteRequest = false;
+        if ($tribunal === 'STF' && str_starts_with(strtolower($sumula_param), 'sv')) {
+            $isVinculanteRequest = true;
+            $numero = intval(substr($sumula_param, 2));
+        } else {
+            $numero = intval($sumula_param);
+        }
+
+        if (! $numero) {
+            return redirect()->route($allsumulasroute);
+        }
+
+        // Look up by numero first (new canonical URL format)
+        $query = DB::table($table)->select('*')->where('numero', $numero);
+        if ($tribunal === 'STF') {
+            $query->where('is_vinculante', $isVinculanteRequest ? 1 : 0);
+        }
+        $sumula = $query->first();
 
         if (! $sumula) {
-            return redirect()->route($allsumulasroute);
+            // Fallback: try by id (old URL format) and 301 redirect to canonical
+            $sumula = DB::table($table)->select('*')->where('id', intval($sumula_param))->first();
+
+            if (! $sumula) {
+                return redirect()->route($allsumulasroute);
+            }
+
+            // 301 redirect to canonical URL with numero
+            $canonicalParam = ($tribunal === 'STF' && $sumula->is_vinculante) ? 'sv'.$sumula->numero : $sumula->numero;
+
+            return redirect('/sumula/'.strtolower($tribunal).'/'.$canonicalParam, 301);
         }
 
         $text = "$tribunal, {$sumula->titulo}. {$sumula->texto}";

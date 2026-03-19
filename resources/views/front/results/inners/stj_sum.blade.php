@@ -2,7 +2,7 @@
     <tr>
         <td class="tw-block tw-bg-white tw-border tw-border-slate-200 tw-rounded-lg tw-p-6 hover:tw-border-brand-300 hover:tw-shadow-sm tw-transition-all">
             <h4 class="tw-text-lg tw-font-semibold tw-text-brand-700 tw-mb-3">
-                <a href="{{ url('/sumula') }}/stj/{{ $sum['trib_sum_id'] }}" class="hover:tw-text-brand-900 hover:tw-underline tw-transition-colors">
+                <a href="{{ url('/sumula') }}/stj/{{ $sum['trib_sum_numero'] }}" class="hover:tw-text-brand-900 hover:tw-underline tw-transition-colors">
                     {{ $sum['trib_sum_titulo'] }}
                 </a>
             </h4>

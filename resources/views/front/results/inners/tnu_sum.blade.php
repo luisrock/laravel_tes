@@ -5,7 +5,7 @@
                 @if (Str::contains($sum['trib_sum_titulo'], 'QUESTÃO DE ORDEM'))
                     <a href="{{ $sum['trib_sum_url'] }}" target="_blank" class="hover:tw-text-brand-900 hover:tw-underline tw-transition-colors">
                 @else
-                    <a href="{{ url('/sumula') }}/tnu/{{ $sum['trib_sum_id'] }}" class="hover:tw-text-brand-900 hover:tw-underline tw-transition-colors">
+                    <a href="{{ url('/sumula') }}/tnu/{{ $sum['trib_sum_numero'] }}" class="hover:tw-text-brand-900 hover:tw-underline tw-transition-colors">
                 @endif
                 {{ $sum['trib_sum_titulo'] }}
                 </a>
