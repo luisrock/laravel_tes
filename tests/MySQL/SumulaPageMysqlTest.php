@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\DB;
+use Tests\MySQLTestCase;
 
 $FIXTURE_NUMERO = 30099;
 
@@ -70,6 +71,10 @@ $STF_VINCULANTE = [
 ];
 
 beforeEach(function () use ($TRIBUNAIS, $STF_VINCULANTE) {
+    if (MySQLTestCase::integrationDatabaseUnavailable()) {
+        return;
+    }
+
     foreach ($TRIBUNAIS as $cfg) {
         DB::table($cfg['table'])->where('numero', $cfg['data']['numero'])->delete();
         DB::table($cfg['table'])->insert($cfg['data']);
@@ -79,6 +84,10 @@ beforeEach(function () use ($TRIBUNAIS, $STF_VINCULANTE) {
 });
 
 afterEach(function () use ($TRIBUNAIS) {
+    if (MySQLTestCase::integrationDatabaseUnavailable()) {
+        return;
+    }
+
     foreach ($TRIBUNAIS as $cfg) {
         DB::table($cfg['table'])->where('numero', $cfg['data']['numero'])->delete();
     }

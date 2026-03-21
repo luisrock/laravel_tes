@@ -30,6 +30,7 @@
             </span>
         </div>
 
+        {{--
         <div class="tw-px-6 tw-py-4 tw-flex tw-items-center tw-justify-between">
             <span class="tw-text-slate-700 tw-font-medium">Autenticação em dois fatores</span>
             <span class="tw-flex tw-items-center tw-gap-2">
@@ -44,6 +45,7 @@
                 @endif
             </span>
         </div>
+        --}}
 
         @if(config('subscription.enabled'))
         <div class="tw-px-6 tw-py-4 tw-flex tw-items-center tw-justify-between">
@@ -65,6 +67,43 @@
         </div>
         @endif
     </div>
+</div>
+
+{{-- Últimas visualizações --}}
+<div class="tw-bg-white tw-shadow-sm tw-rounded-lg tw-border tw-border-slate-200 tw-mb-6">
+    <div class="tw-px-6 tw-py-4 tw-border-b tw-border-slate-100 tw-bg-slate-50/50 tw-flex tw-items-center tw-justify-between">
+        <h3 class="tw-text-base tw-font-semibold tw-text-slate-800 tw-uppercase tw-tracking-wide">Últimas visualizações</h3>
+        @if($recentViews->isNotEmpty())
+            <a href="{{ route('user-panel.history') }}" class="tw-text-sm tw-font-medium tw-text-brand-600 hover:tw-text-brand-800 hover:tw-underline">Ver tudo</a>
+        @endif
+    </div>
+
+    @if($recentViews->isEmpty())
+        <div class="tw-p-6 tw-text-center">
+            <p class="tw-text-sm tw-text-slate-500">Nenhuma análise de IA visualizada ainda.</p>
+            <a href="{{ route('searchpage') }}" class="tw-mt-2 tw-inline-flex tw-text-sm tw-font-medium tw-text-brand-600 hover:tw-text-brand-800 hover:tw-underline">Buscar teses</a>
+        </div>
+    @else
+        <div class="tw-divide-y tw-divide-slate-100">
+            @foreach($recentViews as $view)
+                <div class="tw-px-6 tw-py-3 tw-flex tw-items-center tw-justify-between tw-gap-4 hover:tw-bg-slate-50 tw-transition-colors">
+                    <div class="tw-flex tw-items-center tw-gap-3 tw-min-w-0">
+                        <span class="tw-inline-flex tw-items-center tw-px-2 tw-py-0.5 tw-rounded tw-text-xs tw-font-bold tw-bg-brand-100 tw-text-brand-800 tw-shrink-0">
+                            {{ $view->tribunal_label }}
+                        </span>
+                        @if(isset($view->tese_url))
+                            <a href="{{ $view->tese_url }}" class="tw-text-sm tw-text-slate-700 hover:tw-text-brand-600 tw-truncate text-decoration-none">
+                                {{ $view->tema_texto ?: 'Tese nº ' . ($view->tese_numero ?? $view->content_id) }}
+                            </a>
+                        @else
+                            <span class="tw-text-sm tw-text-slate-500 tw-truncate">Conteúdo não disponível</span>
+                        @endif
+                    </div>
+                    <span class="tw-text-xs tw-text-slate-400 tw-whitespace-nowrap tw-shrink-0">{{ $view->viewed_at->diffForHumans() }}</span>
+                </div>
+            @endforeach
+        </div>
+    @endif
 </div>
 
 <div class="tw-bg-white tw-shadow-sm tw-rounded-lg tw-border tw-border-slate-200">

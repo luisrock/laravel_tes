@@ -1,0 +1,81 @@
+## Plan: Refatoracao da busca
+
+Refatorar o motor de busca atual em fases, preservando o comportamento existente no curto prazo e preparando a base para melhorias de relevancia, UX e possivel troca futura de engine. A recomendacao e nao trocar o backend de busca imediatamente. Primeiro, reorganizar a arquitetura em Laravel 12, documentar o comportamento real atual, encapsular parser e execucao, criar cobertura de testes aderente ao MySQL e so depois avaliar Laravel Scout como camada de abstracao para uma futura evolucao para Meilisearch, Typesense ou OpenSearch. O plano abaixo inclui o diagnostico do estado atual para nao precisarmos repetir essa descoberta.
+
+**Status atual da execucao**
+- Fase 1 concluida.
+- Fase 2 iniciada pela extracao do parser para App\Services\SearchQueryParser, mantendo bootstrap/tes_functions.php como fachada de compatibilidade.
+- Suite de caracterizacao do parser criada em tests/Feature/SearchParserCharacterizationTest.php.
+- Casos ja congelados por teste: AND implicito, AND explicito, OR, NOT, frase entre aspas, termos curtos, MESMO, aspas soltas e normalizacao de operadores para API STF.
+- Cobertura contratual ampliada para preservar a retrocompatibilidade com o parametro keyword na busca web e na API publica.
+- Documento tecnico consolidado do estado atual criado em REFATORACAO_BUSCA_ESTADO_ATUAL.md.
+- Backlog tecnico inicial da Fase 2 consolidado.
+- Extracao inicial do parser concluida sem mudanca intencional de comportamento.
+- Extracao inicial da execucao local concluida com App\Services\SearchDatabaseService, mantendo bootstrap/tes_functions.php como fachada de compatibilidade.
+- Parte dos consumidores principais ja migrada para depender explicitamente de App\Services\SearchDatabaseService.
+- SyncTemasResults tambem migrou para a nova camada para a contagem FULLTEXT em boolean mode.
+- ApiController passou a delegar a decisao entre busca local e API externa para App\Services\SearchTribunalService.
+- Configuracao de tribunal comecou a ser encapsulada em App\Services\SearchTribunalConfig dentro dos services de busca.
+- App\Services\SearchTribunalRegistry passou a centralizar o acesso a lista_tribunais para os principais consumidores da busca.
+- Objetos leves de resultado/meta foram introduzidos em App\Services\SearchResultSection, App\Services\SearchTribunalResult e App\Services\SearchUnifiedMeta, preservando o shape atual de saida.
+- SearchDatabaseService passou a expor searchResult() e executeResult() para uso interno tipado, mantendo search() e execute() como contratos em array para compatibilidade.
+- ApiController e SearchToDbPesquisas passaram a consumir os novos objetos leves apenas internamente, sem alterar o contrato HTTP nem o shape salvo em pesquisas.
+- SearchResultsAnalyzer foi introduzido para centralizar a leitura de total_count, aba ativa, subtab e agregacoes sobre o shape atual da busca.
+- SearchPageController e TemaPageController passaram a usar SearchResultsAnalyzer para reduzir repeticao e arrays magicos sem alterar as views nem o shape de saida.
+- SearchResultsAnalyzer agora tambem concentra a compatibilidade legada entre hits e results para o fluxo da pagina de tema.
+- TemaPageController deixou de conhecer diretamente a diferenca entre hits e results, consumindo apenas o adapter centralizado.
+- SearchTribunalResult agora concentra tambem a montagem do shape publico da API por tribunal e do resumo da busca unificada.
+- ApiController deixou de montar manualmente esses arrays, delegando essa traducao ao DTO.
+- SearchThemeApiNormalizer foi introduzido para concentrar a normalizacao especifica do payload de temas da API.
+- O ajuste especial de trib_rep_tema do STF em getRandomThemes saiu do controller e passou a ser tratado por esse normalizador dedicado.
+- SearchThemeApiResponseBuilder foi introduzido para concentrar a montagem do payload response/data de getRandomThemes.
+- ApiController deixou de montar manualmente o item de tema e o envelope de sucesso desse endpoint.
+- SearchThemeSelectionService foi introduzido para concentrar a selecao e a ordenacao dos temas em getRandomThemes.
+- ApiController deixou de conter tambem essa regra de selecao por contagem minima de julgados STF+STJ.
+- SearchDatabaseService passou a expor searchAllDatabaseTribunals() para consolidar a iteracao por tribunais com banco em um unico ponto.
+- ApiController::getRandomThemes e ApiController::unifiedSearch passaram a usar searchAllDatabaseTribunals(), eliminando duplicacao da iteracao tribunal-a-tribunal nesses dois endpoints.
+- SearchDatabaseService agora recebe SearchTribunalRegistry no construtor para suportar essa operacao sem exigir passagem manual do registry pelo chamador.
+- Fase 2 considerada concluida apos essa consolidacao.
+- Proximo passo recomendado: abrir a Fase 3 pela revisao de cache (item 10) ou pelos testes de integracao MySQL (item 9), conforme prioridade de produto.
+- Handoff considerado pronto para continuidade em outro chat.
+- 2026-03-06: Fase 3 iniciada pela revisao do cache de busca (item 10 do plano).
+- SearchCacheManager introduzido para encapsular estrategia de cache, chaves, TTL, invalidacao granular por tribunal e suporte a cache tags.
+- SearchDatabaseService passou a delegar cache para SearchCacheManager em vez de usar Cache::remember diretamente.
+- ClearSearchCache agora aceita --tribunal para invalidacao granular (requer driver com tags; fallback para flush completo em file/array).
+- Testes focados adicionados em tests/Feature/SearchCacheManagerTest.php e tests/Feature/ClearSearchCacheTest.php.
+- SearchDatabaseServiceTest atualizado para mockar SearchCacheManager em vez de Cache facade.
+- 109 testes passando, Pint limpo.
+- Proximo passo recomendado: completar Fase 3 com testes de integracao MySQL (item 9) ou revisao da persistencia de temas (item 11).
+- 2026-03-06: Item 9 do plano concluido. Suite de integracao MySQL criada em tests/MySQL/SearchMysqlIntegrationTest.php, executada via phpunit.mysql.xml contra forge_tes_test (banco com tabelas reais e indices FULLTEXT ativos).
+- Suite cobre 4 blocos: (1) queries FULLTEXT diretas (AND/NOT/OR/phrase), (2) parser buildBooleanSearchString alimentando MySQL, (3) countBooleanModeMatches, (4) executeResult end-to-end com shape legado verificado.
+- Arch test corrigido: SearchCacheManager adicionado ao ignoring do preset security (md5 usado para chave de cache, nao criptografia).
+- Comportamento congelado em MySQL real: frase sozinha gera string sem sinal (ex: "indenizacao moral"); frase com outros termos gera +"frase" (ex: +"dano moral" +responsabilidade).
+- 16 testes MySQL passando + 318 testes SQLite passando. Pint limpo.
+- Proximo passo recomendado: Fase 3, item 11 - revisao da persistencia de temas em pesquisas.
+- Handoff considerado pronto para continuidade em outro chat.
+- 2026-03-06: Item 11 do plano concluido. SearchPersistencePolicy introduzido para encapsular as regras de filtro de persistencia em pesquisas (isNumericOnly, containsSumulaVariant, isTooShort, worthSearching, shouldPersist).
+- Dois bugs corrigidos em SearchToDbPesquisas: strtolower substituido por mb_strtolower (bug de acento em "Súmula"), e 'sumula ' com espaco final substituido por str_contains sem espaco (bug que ignorava "sumula" ao fim da string).
+- SearchToDbPesquisas agora recebe SearchPersistencePolicy no handle() via injecao de dependencia.
+- Cobertura de testes adicionada: SearchPersistencePolicyTest.php (14 casos, 5 blocos describe) e SearchToDbPesquisasTest.php ampliado com 2 casos novos.
+- 334 testes SQLite passando. Pint limpo.
+- Proximo passo recomendado: Fase 3, item 12/13 - avaliacao do Laravel Scout como camada de abstracao, ou item 14 - melhorias de UX de busca.
+- Handoff considerado pronto para continuidade em outro chat.
+- 2026-03-06: Over-engineering revertido. Removidos 7 services e 6 arquivos de teste criados desnecessariamente: SearchResultsAnalyzer, SearchThemeApiNormalizer, SearchThemeApiResponseBuilder, SearchThemeSelectionService, SearchTribunalService, SearchPersistencePolicy, SearchUnifiedMeta. Logica reinserida como metodos privados nos controllers/jobs onde pertencia. Bugs de mb_strtolower e trailing-space permanecem corrigidos inline em SearchToDbPesquisas. Mantidos: SearchQueryParser, SearchDatabaseService, SearchCacheManager, SearchTribunalRegistry, SearchTribunalConfig, SearchTribunalResult, SearchResultSection. 302 testes passando, Pint limpo.
+- REFATORACAO_BUSCA_FASE_1_SPEC.md removido (cumpriu papel; historico preservado nos commits).
+- REFATORACAO_BUSCA_ESTADO_ATUAL.md reescrito para refletir arquitetura real atual.
+- Fases 1, 2 e 3 consideradas encerradas.
+
+**Diagnostico atual**
+- O nucleo da busca esta em bootstrap/tes_functions.php (fachada de compatibilidade) + app/Services/Search*.php (implementacao testada).
+- A busca web entra por SearchPageController.php e a API por ApiController.php.
+- A busca usa MATCH AGAINST em BOOLEAN MODE no MySQL via SearchDatabaseService.
+- Parser encapsulado em SearchQueryParser; cache em SearchCacheManager (TTL 1h, tags opcionais).
+- Configuracao de tribunais em config/tes_constants.php centralizada via SearchTribunalRegistry.
+- Estado detalhado em REFATORACAO_BUSCA_ESTADO_ATUAL.md.
+- A pagina de tema reaproveita a mesma busca real e, portanto, depende diretamente do comportamento do motor atual.
+- Temas relacionados nao usam FULLTEXT; usam LIKE simples por palavras relevantes.
+- Ainda existem conectores legados para chamadas a APIs externas de tribunais, mas o fluxo principal do site hoje e local para as bases com db=true. O TCU continua fora da busca unificada publica por depender de API externa.
+- O schema real local confirma indices FULLTEXT ativos em tabelas centrais como stf_teses, stj_teses e stf_sumulas.
+- SQLite aparece apenas nos testes automatizados configurados em /Users/maurolopes/phpSites/teses/phpunit.xml; aplicacao normal usa MySQL.
+- A suite de testes atual aceita 200 ou 500 em alguns testes de busca justamente porque SQLite nao representa o comportamento real do FULLTEXT MySQL.
+- Laravel Scout nao esta instalado no projeto atual.

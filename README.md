@@ -34,7 +34,7 @@ O painel em `/admin` oferece navegação centralizada para todas as áreas admin
 
 O site agora conta com um sistema completo de quizzes para testar conhecimentos sobre teses do STF e STJ.
 
-**Documentação completa:** Consulte o arquivo `QUIZ_IMPLEMENTATION.md` para detalhes técnicos da implementação.
+**Documentação:** A implementação está refletida no código (`app/`, `routes/`, migrations). Planejamentos e notas arquivados em `ARQUIVOS_MD/`.
 
 #### Principais Recursos
 
@@ -89,14 +89,14 @@ quiz_answers        - Respostas individuais
 A aplicação possui uma bateria abrangente de testes usando Pest v3 + PHPUnit 11.
 
 ```bash
-# Rodar todos os testes (usar PHP 8.3)
-/opt/homebrew/opt/php@8.3/bin/php artisan test
+# Rodar todos os testes (PHP 8.3 no PATH)
+php artisan test
 
 # Rodar um arquivo específico
-/opt/homebrew/opt/php@8.3/bin/php artisan test --filter=QuizTest
+php artisan test --filter=QuizTest
 
 # Rodar testes de arquitetura
-/opt/homebrew/opt/php@8.3/bin/php artisan test --filter=ArchTest
+php artisan test --filter=ArchTest
 ```
 
 **Estrutura de testes:**
@@ -133,7 +133,7 @@ A aplicação possui uma bateria abrangente de testes usando Pest v3 + PHPUnit 1
 - DB de teste: SQLite in-memory (configurado em `phpunit.xml`)
 - Queries MySQL-específicas (FULLTEXT, etc.) podem retornar 500 no SQLite — testes usam `assertRouteResponds()` que aceita 200 ou 500
 - Helpers reutilizáveis em `tests/Pest.php`: `createAdminUser()`, `createPublishedQuiz()`, `createSubscribedUser()`
-- Plano completo: `TEST_PLAN.md`
+- Planejamentos de teste e notas: pasta `ARQUIVOS_MD/`
 
 ### Registerwall e Controle de Acesso
 
@@ -150,7 +150,7 @@ O conteúdo de análise IA ("Decifrando a Tese") usa **registerwall** (registro 
 2. `git push` (deploy automático via Vito Deploy)
 3. Em produção: `php artisan db:seed --class=RolesAndPermissionsSeeder`
 4. Em `/admin/roles`: atribuir role `admin` ao usuário administrador
-5. Detalhes completos: `PAYWALL_IA_PLAN.md`, seção 3
+5. Detalhes completos: `ARQUIVOS_MD/PAYWALL_IA_PLAN.md`, seção 3
 
 ---
 
@@ -197,7 +197,7 @@ php artisan test -c phpunit.mysql.xml
 ```
 Requerem o banco `forge_tes_test` com tabelas e índices FULLTEXT criados. O pre-commit hook roda essa suite automaticamente.
 
-**Documentação técnica detalhada:** `REFATORACAO_BUSCA_ESTADO_ATUAL.md`
+**Documentação técnica detalhada:** `ARQUIVOS_MD/REFATORACAO_BUSCA_ESTADO_ATUAL.md`
 
 ---
 
@@ -822,4 +822,4 @@ GET /api/quizzes/categories
 
 ### Documentação Completa
 
-Para documentação detalhada da implementação, incluindo schema do banco, todas as rotas e sugestões de melhorias futuras, consulte o arquivo `QUIZ_IMPLEMENTATION.md`.
+Para detalhes de schema, rotas e melhorias, consulte o código-fonte e os documentos em `ARQUIVOS_MD/`.

@@ -1,0 +1,18 @@
+# MySQL dedicado à suíte Pest tests/MySQL (FULLTEXT, fixtures legados).
+# Uso: docker compose up -d --wait mysql-testing
+# Depois: composer test   (ou: php artisan test)
+services:
+  mysql-testing:
+    image: mysql:8.4
+    container_name: teses-mysql-testing
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: teses_test
+    ports:
+      - '3307:3306'
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-uroot', '-ppassword']
+      interval: 3s
+      timeout: 5s
+      retries: 20
+      start_period: 15s

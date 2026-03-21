@@ -2,9 +2,12 @@
 <!--
     IMPORTANTE: Os testes devem ser rodados contra PHP 8.3, que é a versão
     usada tanto no Valet (dev) quanto em produção (AWS EC2).
-    Se sua CLI tem PHP 8.5+, use: /opt/homebrew/opt/php@8.3/bin/php vendor/bin/pest
+    Use PHP 8.3 no PATH: php vendor/bin/pest
     O config.platform.php no composer.json garante que as dependências sejam
     resolvidas para PHP 8.3, mas a execução dos testes deve usar o binário correto.
+
+    Suíte "MySQL": integração real (FULLTEXT, fixtures legados). Ver docker-compose.yml
+    e ARQUIVOS_MD/METERED_WALL_PLAN.md. Comando recomendado: composer test (sobe MySQL em Docker).
 -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
@@ -20,6 +23,9 @@
         </testsuite>
         <testsuite name="Arch">
             <directory>tests/Arch</directory>
+        </testsuite>
+        <testsuite name="MySQL">
+            <directory>tests/MySQL</directory>
         </testsuite>
     </testsuites>
     <source>

@@ -2,6 +2,7 @@
 
 use App\Services\SearchDatabaseService;
 use Illuminate\Support\Facades\DB;
+use Tests\MySQLTestCase;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,6 +13,10 @@ use Illuminate\Support\Facades\DB;
 $FIXTURE_NUMEROS = [30001, 30002];
 
 beforeEach(function () use ($FIXTURE_NUMEROS) {
+    if (MySQLTestCase::integrationDatabaseUnavailable()) {
+        return;
+    }
+
     // Garantir limpeza de eventuais resíduos de execuções anteriores
     DB::table('stj_sumulas')->whereIn('numero', $FIXTURE_NUMEROS)->delete();
     DB::table('stj_teses')->whereIn('numero', $FIXTURE_NUMEROS)->delete();
@@ -72,6 +77,10 @@ beforeEach(function () use ($FIXTURE_NUMEROS) {
 });
 
 afterEach(function () use ($FIXTURE_NUMEROS) {
+    if (MySQLTestCase::integrationDatabaseUnavailable()) {
+        return;
+    }
+
     DB::table('stj_sumulas')->whereIn('numero', $FIXTURE_NUMEROS)->delete();
     DB::table('stj_teses')->whereIn('numero', $FIXTURE_NUMEROS)->delete();
 });

@@ -2,6 +2,7 @@
 
 use App\Models\AiModel;
 use Illuminate\Support\Facades\DB;
+use Tests\MySQLTestCase;
 
 function extractArticleSchema(string $html): ?array
 {
@@ -21,6 +22,10 @@ function extractArticleSchema(string $html): ?array
 $FIXTURE_NUMERO = 30123;
 
 beforeEach(function () use ($FIXTURE_NUMERO) {
+    if (MySQLTestCase::integrationDatabaseUnavailable()) {
+        return;
+    }
+
     DB::table('tese_analysis_sections')->where('tese_id', $FIXTURE_NUMERO)->delete();
     DB::table('stf_teses')->where('numero', $FIXTURE_NUMERO)->delete();
     DB::table('stj_teses')->where('numero', $FIXTURE_NUMERO)->delete();
@@ -58,6 +63,10 @@ beforeEach(function () use ($FIXTURE_NUMERO) {
 });
 
 afterEach(function () use ($FIXTURE_NUMERO) {
+    if (MySQLTestCase::integrationDatabaseUnavailable()) {
+        return;
+    }
+
     DB::table('tese_analysis_sections')->where('tese_id', $FIXTURE_NUMERO)->delete();
     DB::table('stf_teses')->where('numero', $FIXTURE_NUMERO)->delete();
     DB::table('stj_teses')->where('numero', $FIXTURE_NUMERO)->delete();

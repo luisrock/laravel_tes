@@ -1,6 +1,38 @@
 {{-- Header Principal - Partial DRY --}}
 {{-- Uso: @include('partials.header') --}}
 
+@if(config('teses.test_toolbar_enabled') && auth()->check() && auth()->user()->email === config('teses.test_toolbar_email'))
+<div class="tw-bg-slate-800 tw-text-white tw-text-xs tw-py-1.5 tw-px-4">
+    <div class="tw-max-w-7xl tw-mx-auto tw-flex tw-items-center tw-justify-between tw-flex-wrap tw-gap-2">
+        <span class="tw-font-semibold tw-text-amber-300"><i class="fa fa-flask tw-mr-1"></i> Teste ({{ auth()->user()->roles->pluck('name')->implode(', ') }})</span>
+
+        <div class="tw-flex tw-items-center tw-gap-3 tw-flex-wrap">
+            @php $viewCount = \App\Models\ContentView::where('user_id', auth()->id())->where('viewed_at', '>=', now()->subHours(24))->count(); @endphp
+            <span class="tw-text-slate-300">Views 24h: <strong class="tw-text-white">{{ $viewCount }}</strong></span>
+
+            <form action="{{ route('test-toolbar.reset-views') }}" method="POST" class="tw-inline">
+                @csrf
+                <button type="submit" class="tw-px-2 tw-py-0.5 tw-rounded tw-bg-red-600 hover:tw-bg-red-500 tw-text-white tw-font-medium tw-transition-colors">Zerar Views</button>
+            </form>
+
+            <span class="tw-h-4 tw-w-px tw-bg-slate-500"></span>
+
+            @foreach(['registered', 'subscriber', 'premium'] as $roleName)
+                <form action="{{ route('test-toolbar.switch-role') }}" method="POST" class="tw-inline">
+                    @csrf
+                    <input type="hidden" name="role" value="{{ $roleName }}">
+                    <button type="submit" class="tw-px-2 tw-py-0.5 tw-rounded tw-font-medium tw-transition-colors {{ auth()->user()->hasRole($roleName) ? 'tw-bg-amber-500 tw-text-slate-900' : 'tw-bg-slate-600 hover:tw-bg-slate-500 tw-text-slate-200' }}">{{ ucfirst($roleName) }}</button>
+                </form>
+            @endforeach
+        </div>
+
+        @if(session('test-toolbar-message'))
+            <span class="tw-text-green-300 tw-font-medium">{{ session('test-toolbar-message') }}</span>
+        @endif
+    </div>
+</div>
+@endif
+
 <header class="site-header tw-bg-white tw-border-b tw-border-slate-200">
     <div class="tw-max-w-7xl tw-mx-auto tw-px-4 sm:tw-px-6 lg:tw-px-8 tw-h-16 tw-flex tw-items-center tw-justify-between">
         <a href="{{ url('/') }}" class="tw-inline-flex tw-items-center tw-gap-2 tw-text-slate-900 hover:tw-text-brand-700 tw-transition">

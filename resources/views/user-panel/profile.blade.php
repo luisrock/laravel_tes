@@ -110,6 +110,7 @@
     </div>
 </div>
 
+{{--
 <div class="tw-bg-white tw-shadow-sm tw-rounded-lg tw-border tw-border-slate-200 tw-mb-6" id="2fa">
     <div class="tw-px-6 tw-py-4 tw-border-b tw-border-slate-100 tw-bg-slate-50/50">
         <h3 class="tw-text-base tw-font-semibold tw-text-slate-800 tw-uppercase tw-tracking-wide">Autenticação em dois fatores</h3>
@@ -138,4 +139,5 @@
         @endif
     </div>
 </div>
+--}}
 @endsection

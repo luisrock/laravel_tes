@@ -17,9 +17,13 @@ ads.txtSearch-Console-*/
 .DS_Store
 .psysh/
 
-# Ignore all .md files except README.md
+# Markdown: ignorar por defeito; exceções para README, regras de agentes e docs em ARQUIVOS_MD
 *.md
 !README.md
+!AGENTS.md
+!CLAUDE.md
+!GEMINI.md
+!ARQUIVOS_MD/*.md
 
 # Laravel Boost (auto-generated, regenerate with: php artisan boost:install)
 .mcp.json

@@ -133,6 +133,46 @@
                 </div>
 
                 @if(isset($ai_sections) && $ai_sections->isNotEmpty())
+
+                {{-- Banner de visualizações restantes (acima do card Decifrando) --}}
+                @if($has_access && $remainingViews !== null)
+                <div class="tw-mt-6">
+                    @if($remainingViews <= 1)
+                    <div class="tw-bg-amber-50 tw-border tw-border-amber-200 tw-rounded-xl tw-p-4 tw-flex tw-items-center tw-gap-3">
+                        <div class="tw-flex-shrink-0 tw-w-10 tw-h-10 tw-rounded-full tw-bg-amber-100 tw-flex tw-items-center tw-justify-center">
+                            <i class="fa fa-exclamation-triangle tw-text-amber-500"></i>
+                        </div>
+                        <div class="tw-flex-1">
+                            <p class="tw-text-sm tw-text-amber-800 tw-m-0 tw-font-medium">
+                                @if($remainingViews === 0)
+                                    Esta foi sua última visualização de conteúdo premium (contador atualiza a cada 24 h).
+                                @else
+                                    Resta 1 visualização de conteúdo premium (contador atualiza a cada 24 h).
+                                @endif
+                            </p>
+                            <p class="tw-text-xs tw-text-amber-600 tw-m-0 tw-mt-1">
+                                <a href="/assinar" class="tw-text-amber-700 tw-font-semibold hover:tw-text-amber-900 tw-underline">Assine o T&S</a> para ter acesso ilimitado.
+                            </p>
+                        </div>
+                    </div>
+                    @else
+                    <div class="tw-bg-blue-50 tw-border tw-border-blue-200 tw-rounded-xl tw-p-4 tw-flex tw-items-center tw-gap-3">
+                        <div class="tw-flex-shrink-0 tw-w-10 tw-h-10 tw-rounded-full tw-bg-blue-100 tw-flex tw-items-center tw-justify-center">
+                            <i class="fa fa-eye tw-text-blue-500"></i>
+                        </div>
+                        <div class="tw-flex-1">
+                            <p class="tw-text-sm tw-text-blue-800 tw-m-0">
+                                Restam {{ $remainingViews }} visualizações de conteúdo premium (contador atualiza a cada 24 h).
+                            </p>
+                            <p class="tw-text-xs tw-text-blue-600 tw-m-0 tw-mt-1">
+                                <a href="/assinar" class="tw-text-blue-700 tw-font-semibold hover:tw-text-blue-900 tw-underline">Assine o T&S</a> para ter acesso ilimitado.
+                            </p>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+                @endif
+
                 <!-- MOCKUP V1: Análise de Inteligência Artificial -->
                 <div class="tw-bg-white tw-shadow-sm tw-rounded-xl tw-border tw-border-slate-200 tw-relative tw-mt-6" id="ai-premium-box">
                     <div class="tw-px-6 tw-py-4 tw-rounded-t-xl tw-bg-slate-50 tw-border-b tw-border-slate-200">
@@ -220,7 +260,23 @@
                                     <div class="tw-absolute -tw-top-12 -tw-right-12 tw-w-32 tw-h-32 tw-bg-brand-500 tw-rounded-full tw-opacity-20 tw-blur-2xl"></div>
                                     <div class="tw-absolute -tw-bottom-12 -tw-left-12 tw-w-32 tw-h-32 tw-bg-blue-500 tw-rounded-full tw-opacity-20 tw-blur-2xl"></div>
                                     
-                                    @if($isRegisterwall)
+                                    @if($isMeteredPaywall)
+                                        {{-- METERED PAYWALL --}}
+                                        <i class="fa fa-hourglass-half tw-text-3xl tw-text-amber-400 tw-mb-4"></i>
+                                        <h3 class="tw-text-xl tw-font-bold tw-mb-2">Limite de análises atingido</h3>
+                                        <p class="tw-text-slate-300 tw-text-sm tw-mb-6 tw-leading-relaxed">
+                                            Você utilizou suas <strong>{{ $dailyLimit }} análises gratuitas</strong> de hoje. Assine o T&S para acesso ilimitado a todas as análises.
+                                        </p>
+                                        
+                                        <div class="tw-space-y-3">
+                                            <a href="/assinar" class="tw-block tw-w-full tw-bg-brand-600 hover:tw-bg-brand-500 tw-text-white tw-font-semibold tw-py-3 tw-px-4 tw-rounded-xl tw-transition-colors tw-pointer-events-auto">
+                                                Assinar o T&S
+                                            </a>
+                                            <p class="tw-text-xs tw-text-slate-400 tw-pointer-events-auto">
+                                                Volte amanhã para mais análises gratuitas.
+                                            </p>
+                                        </div>
+                                    @elseif($isRegisterwall)
                                         {{-- REGISTERWALL --}}
                                         <i class="fa fa-user-plus tw-text-3xl tw-text-brand-400 tw-mb-4"></i>
                                         <h3 class="tw-text-xl tw-font-bold tw-mb-2">Análise Jurídica Completa</h3>

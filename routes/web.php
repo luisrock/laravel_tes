@@ -220,6 +220,7 @@ Route::post('/stripe/webhook', [WebhookController::class, 'handleWebhook'])
 Route::middleware(['auth', 'verified'])->prefix('minha-conta')->group(function () {
     Route::get('/', [UserPanelController::class, 'dashboard'])->name('user-panel.dashboard');
     Route::get('/perfil', [UserPanelController::class, 'profile'])->name('user-panel.profile');
+    Route::get('/historico', [UserPanelController::class, 'history'])->name('user-panel.history');
 
     Route::middleware([\App\Http\Middleware\CheckSubscriptionsEnabled::class, 'subscription.configured'])->group(function () {
         Route::get('/assinatura', [SubscriptionController::class, 'show'])->name('subscription.show');
@@ -227,4 +228,10 @@ Route::middleware(['auth', 'verified'])->prefix('minha-conta')->group(function (
         Route::get('/estorno', [RefundRequestController::class, 'create'])->name('refund.create');
         Route::post('/estorno', [RefundRequestController::class, 'store'])->name('refund.store');
     });
+});
+
+// Toolbar de teste — restrita ao email de teste no controller
+Route::middleware(['auth'])->prefix('test-toolbar')->group(function () {
+    Route::post('/reset-views', [\App\Http\Controllers\TestToolbarController::class, 'resetViews'])->name('test-toolbar.reset-views');
+    Route::post('/switch-role', [\App\Http\Controllers\TestToolbarController::class, 'switchRole'])->name('test-toolbar.switch-role');
 });

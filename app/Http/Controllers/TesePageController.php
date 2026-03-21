@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AiModel;
 use App\Models\Quiz;
 use App\Models\TeseAnalysisJob;
+use App\Services\ContentViewService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -319,6 +320,30 @@ class TesePageController extends Controller
             ->whereNotNull('s3_key')
             ->get();
 
+        // Metered Wall: limitar views diárias de conteúdo premium
+        $isMeteredPaywall = false;
+        $remainingViews = null;
+        $dailyLimit = null;
+
+        $hasAiContent = $ai_sections->isNotEmpty();
+
+        if (auth()->check() && $hasAiContent) {
+            $viewService = app(ContentViewService::class);
+
+            if (! $admin) {
+                $viewService->recordView(auth()->user(), 'tese', $tese->id, strtolower($tribunal));
+            }
+
+            if ($viewService->isMeteredWallEnabled() && $has_access && ! $admin && ! auth()->user()->isSubscriber() && ! auth()->user()->hasAnyRole(['subscriber', 'premium'])) {
+                if ($viewService->hasReachedDailyLimit(auth()->user())) {
+                    $has_access = false;
+                    $isMeteredPaywall = true;
+                }
+                $remainingViews = $viewService->remainingViews(auth()->user());
+                $dailyLimit = $viewService->getDailyLimit(auth()->user());
+            }
+        }
+
         // Buscar temas relacionados baseados em palavras-chave similares
         $related_themes = $this->getRelatedThemes($tese->tema_texto ?? $tese->tese_texto ?? '', $tese->numero);
 
@@ -327,14 +352,14 @@ class TesePageController extends Controller
 
         // dd($teses);
         if ($tribunal == 'TST') {
-            return view('front.tese_tst', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'ai_generated_at', 'has_access', 'isRegisterwall', 'acordaos_pdfs', 'pending_ai_job', 'has_acordaos_access', 'have_tese'));
+            return view('front.tese_tst', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'ai_generated_at', 'has_access', 'isRegisterwall', 'acordaos_pdfs', 'pending_ai_job', 'has_acordaos_access', 'have_tese', 'isMeteredPaywall', 'remainingViews', 'dailyLimit'));
         }
 
         if ($tribunal == 'TNU') {
-            return view('front.tese_tnu', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'ai_generated_at', 'has_access', 'isRegisterwall', 'acordaos_pdfs', 'pending_ai_job', 'has_acordaos_access', 'have_tese'));
+            return view('front.tese_tnu', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'ai_generated_at', 'has_access', 'isRegisterwall', 'acordaos_pdfs', 'pending_ai_job', 'has_acordaos_access', 'have_tese', 'isMeteredPaywall', 'remainingViews', 'dailyLimit'));
         }
 
-        return view('front.tese', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'ai_generated_at', 'has_access', 'isRegisterwall', 'acordaos_pdfs', 'pending_ai_job', 'has_acordaos_access', 'have_tese'));
+        return view('front.tese', compact('tribunal', 'tribunal_nome_completo', 'tese', 'label', 'description', 'admin', 'display_pdf', 'alltesesroute', 'breadcrumb', 'related_themes', 'related_quizzes', 'ai_sections', 'ai_generated_at', 'has_access', 'isRegisterwall', 'acordaos_pdfs', 'pending_ai_job', 'has_acordaos_access', 'have_tese', 'isMeteredPaywall', 'remainingViews', 'dailyLimit'));
     } // end public function
 
     /**

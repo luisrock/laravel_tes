@@ -6,31 +6,29 @@ alwaysApply: true
 
 # PHP Version Rule
 
-This project uses **PHP 8.3**. The macOS system CLI defaults to PHP 8.5, which is NOT compatible.
+Este projeto usa **PHP 8.3**. Garante que o `php` do teu PATH é 8.3 (`php -v`).
 
-## ALWAYS use this PHP binary for ALL project commands:
-
-```
-/opt/homebrew/opt/php@8.3/bin/php
-```
-
-## Examples:
+## Usa `php` para todos os comandos do projeto
 
 ```bash
-# Artisan commands
-/opt/homebrew/opt/php@8.3/bin/php artisan migrate
-/opt/homebrew/opt/php@8.3/bin/php artisan cache:clear
-/opt/homebrew/opt/php@8.3/bin/php artisan make:model Foo
+# Artisan
+php artisan migrate
+php artisan cache:clear
+php artisan make:model Foo
 
-# Composer
-/opt/homebrew/opt/php@8.3/bin/php /opt/homebrew/bin/composer install
-/opt/homebrew/opt/php@8.3/bin/php /opt/homebrew/bin/composer require some/package
+# Composer (ou apenas `composer` se apontar para o PHP certo)
+composer install
+composer require some/package
 
-# Tests (Pest)
-/opt/homebrew/opt/php@8.3/bin/php vendor/bin/pest
+# Testes (Pest)
+php vendor/bin/pest
 
-# Pint (code style)
-/opt/homebrew/opt/php@8.3/bin/php vendor/bin/pint
+# Pint
+php vendor/bin/pint
 ```
 
-## NEVER use bare `php` or `php artisan` — always prefix with the full path above.
+## Verificação rápida
+
+```bash
+php -v   # deve indicar PHP 8.3.x
+```

@@ -14,7 +14,7 @@
 uses(Tests\TestCase::class, Illuminate\Foundation\Testing\RefreshDatabase::class)
     ->in('Feature');
 
-uses(Tests\TestCase::class)->in('MySQL');
+uses(Tests\MySQLTestCase::class)->in('MySQL');
 
 /*
 |--------------------------------------------------------------------------

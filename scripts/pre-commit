@@ -10,7 +10,7 @@
 # To bypass in emergencies: git commit --no-verify
 # =============================================================
 
-PHP="/opt/homebrew/opt/php@8.3/bin/php"
+PHP="${PHP:-php}"
 PINT="vendor/bin/pint"
 PEST="vendor/bin/pest"
 ARTISAN="artisan"
@@ -29,9 +29,15 @@ echo -e "${YELLOW}════════════════════�
 # -----------------------------------------------------------
 # 1. Check PHP 8.3 is available
 # -----------------------------------------------------------
-if [ ! -x "$PHP" ]; then
-    echo -e "${RED}✗ PHP 8.3 not found at $PHP${NC}"
-    echo "  Install with: brew install php@8.3"
+if ! command -v "$PHP" >/dev/null 2>&1; then
+    echo -e "${RED}✗ PHP not found (${PHP})${NC}"
+    exit 1
+fi
+
+PHP_MM="$($PHP -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')"
+if [ "$PHP_MM" != "8.3" ]; then
+    echo -e "${RED}✗ Expected PHP 8.3.x, got ${PHP_MM} ($($PHP -r 'echo PHP_VERSION;'))${NC}"
+    echo "  Set PATH so \`php\` is 8.3, or run: PHP=/path/to/php8.3 git commit"
     exit 1
 fi
 

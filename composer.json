@@ -77,6 +77,15 @@
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"
+        ],
+        "test": [
+            "Composer\\Config::disableProcessTimeout",
+            "@docker compose up -d --wait mysql-testing",
+            "@php artisan test"
+        ],
+        "test:sqlite": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan test --exclude-testsuite=MySQL"
         ]
     }
 }
