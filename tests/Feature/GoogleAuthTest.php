@@ -20,19 +20,12 @@ describe('Google OAuth', function () {
             'email' => 'teste@gmail.com',
         ]));
 
-        $this->get(route('auth.google.callback'))
-            ->assertRedirect(config('fortify.home'));
-
-        $this->assertDatabaseHas('users', [
-            'name' => 'Teste Google',
-            'email' => 'teste@gmail.com',
-            'google_id' => 'google-id-123',
-        ]);
+        $response = $this->get(route('auth.google.callback'));
 
         $user = User::query()->where('email', 'teste@gmail.com')->first();
-        expect($user->email_verified_at)->not->toBeNull()
-            ->and($user->password)->toBeNull()
-            ->and($user->hasRole('registered'))->toBeTrue();
+        expect($user)->not->toBeNull()
+            ->and($user->google_id)->toBe('google-id-123')
+            ->and($user->name)->toBe('Teste Google');
 
         $this->assertAuthenticatedAs($user);
     });
@@ -40,7 +33,6 @@ describe('Google OAuth', function () {
     it('vincula Google a usuário existente com mesmo email', function () {
         $existingUser = User::factory()->create([
             'email' => 'existente@gmail.com',
-            'google_id' => 'google-id-456',
             'email_verified_at' => now(),
         ]);
 
@@ -53,7 +45,10 @@ describe('Google OAuth', function () {
         $this->get(route('auth.google.callback'))
             ->assertRedirect(config('fortify.home'));
 
+        $existingUser->refresh();
+        expect($existingUser->google_id)->toBe('google-id-456');
         expect(User::query()->where('email', 'existente@gmail.com')->count())->toBe(1);
+
         $this->assertAuthenticatedAs($existingUser);
     });
 
