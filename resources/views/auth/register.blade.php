@@ -66,7 +66,6 @@
                 @endif
             </form>
             
-            {{-- Google Login temporariamente desativado
             <div class="tw-mt-6">
                 <div class="tw-relative">
                     <div class="tw-absolute tw-inset-0 tw-flex tw-items-center">
@@ -78,7 +77,7 @@
                 </div>
 
                 <div class="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-3">
-                    <a href="{{ url('auth/google') }}" class="tw-inline-flex tw-w-full tw-justify-center tw-rounded-md tw-border tw-border-gray-300 tw-bg-white tw-py-2 tw-px-4 tw-text-sm tw-font-medium tw-text-gray-500 tw-shadow-sm hover:tw-bg-gray-50 text-decoration-none">
+                    <a href="{{ route('auth.google') }}" class="tw-inline-flex tw-w-full tw-justify-center tw-rounded-md tw-border tw-border-gray-300 tw-bg-white tw-py-2 tw-px-4 tw-text-sm tw-font-medium tw-text-gray-500 tw-shadow-sm hover:tw-bg-gray-50 text-decoration-none">
                         <span class="tw-sr-only">Entrar com Google</span>
                         <svg class="tw-h-5 tw-w-5" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .533 5.333.533 12S5.867 24 12.48 24c3.48 0 6.16-1.147 8.213-3.28 2.08-2.08 2.667-5.187 2.667-7.68 0-.52-.053-1.04-.133-1.52h-10.747z" />
@@ -87,7 +86,6 @@
                     </a>
                 </div>
             </div>
-            --}}
         </div>
     </div>
 </div>

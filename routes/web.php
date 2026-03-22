@@ -94,6 +94,10 @@ Route::get('/admin-ajax-request-get-id', [App\Http\Controllers\AjaxController::c
 // Rota AJAX para gerar conceitos
 Route::post('/generate-concept', [ConceptController::class, 'generateConcept'])->name('generate-concept');
 
+// Google OAuth (Socialite)
+Route::get('/auth/google', [App\Http\Controllers\GoogleAuthController::class, 'redirect'])->name('auth.google');
+Route::get('/auth/google/callback', [App\Http\Controllers\GoogleAuthController::class, 'callback'])->name('auth.google.callback');
+
 // Rotas AJAX para validar, editar e remover conceitos
 Route::post('/validate-concept', [ConceptController::class, 'validateConcept'])->name('validate-concept');
 Route::post('/edit-concept', [ConceptController::class, 'editConcept'])->name('edit-concept');

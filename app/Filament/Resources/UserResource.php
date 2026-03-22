@@ -8,6 +8,7 @@ use App\Support\SubscriptionUi;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -41,6 +42,15 @@ class UserResource extends Resource
                     ->label('Email')
                     ->searchable()
                     ->sortable(),
+                IconColumn::make('google_id')
+                    ->label('Google')
+                    ->boolean()
+                    ->getStateUsing(fn (User $record): bool => ! empty($record->google_id))
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-minus-circle')
+                    ->trueColor('success')
+                    ->falseColor('gray')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('subscription_status')
                     ->label('Assinatura')
                     ->badge()
