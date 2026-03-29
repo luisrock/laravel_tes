@@ -180,7 +180,6 @@ describe('Navegação do painel', function () {
             ->assertSee('Visão Geral')
             ->assertSee('Histórico')
             ->assertSee('Coleções')
-            ->assertSee('em breve')
             ->assertSee('Perfil');
     });
 

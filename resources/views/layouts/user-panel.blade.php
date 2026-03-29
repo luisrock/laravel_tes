@@ -30,11 +30,11 @@
                     <svg class="tw-w-5 tw-h-5 tw-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     Histórico
                 </a>
-                <span class="tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-slate-400 tw-border-b tw-border-slate-100 tw-cursor-default">
+                <a href="{{ route('colecoes.index') }}"
+                   class="tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-border-b tw-border-slate-100 text-decoration-none {{ request()->routeIs('colecoes.*') ? 'tw-bg-brand-50 tw-text-brand-700' : 'tw-text-slate-700 hover:tw-bg-slate-50' }}">
                     <svg class="tw-w-5 tw-h-5 tw-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
                     Coleções
-                    <span class="tw-text-xs tw-bg-slate-100 tw-text-slate-500 tw-px-1.5 tw-py-0.5 tw-rounded-full">em breve</span>
-                </span>
+                </a>
                 <a href="{{ route('user-panel.profile') }}"
                    class="tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-border-b tw-border-slate-100 text-decoration-none {{ request()->routeIs('user-panel.profile') ? 'tw-bg-brand-50 tw-text-brand-700' : 'tw-text-slate-700 hover:tw-bg-slate-50' }}">
                     <svg class="tw-w-5 tw-h-5 tw-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>

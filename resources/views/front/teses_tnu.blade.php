@@ -107,11 +107,12 @@
                                 </p>
                             </div>
 
-                            @if(!empty($tes->tempo))
-                                <div class="tw-flex tw-justify-end tw-items-center tw-pt-3 tw-border-t tw-border-slate-50 tw-text-xs tw-text-slate-500">
+                            <div class="tw-flex tw-justify-between tw-items-center tw-pt-3 tw-border-t tw-border-slate-50 tw-text-xs tw-text-slate-500">
+                                <x-save-to-collection-btn type="tese" :tribunal="strtolower($tribunal)" :contentId="$tes->id" />
+                                @if(!empty($tes->tempo))
                                     <span>{{ $tes->tempo }}</span>
-                                </div>
-                            @endif
+                                @endif
+                            </div>
                         </div>
                     @endforeach
                 </div>

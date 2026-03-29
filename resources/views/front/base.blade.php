@@ -59,8 +59,10 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+        [x-cloak] { display: none !important; }
     </style>
 
+    @livewireStyles
     @yield('styles')
 
     <!-- Google Adsense -->
@@ -136,8 +138,10 @@
     })();
     </script>
 
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    @auth
+        <livewire:save-to-collection-modal />
+    @endauth
+    @livewireScripts
 
     @yield('scripts')
 </body>

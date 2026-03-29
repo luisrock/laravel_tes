@@ -129,16 +129,19 @@
                                 </p>
                             </div>
 
-                            <div class="tw-flex tw-justify-end tw-items-center tw-pt-3 tw-border-t tw-border-slate-50 tw-text-xs tw-text-slate-500">
-                                @if ($tribunal == 'STF')
-                                    <span>
-                                        {{ $tes->relator }}, {{ $tes->acordao }} ({{ $tes->situacao }}). {{ $tes->tempo }}
-                                    </span>
-                                @elseif($tribunal == 'STJ')
-                                    <span>
-                                        {{ $tes->orgao }}. Situação: {{ $tes->situacao }}. {{ $tes->tempo }}
-                                    </span>
-                                @endif
+                            <div class="tw-flex tw-justify-between tw-items-center tw-pt-3 tw-border-t tw-border-slate-50 tw-text-xs tw-text-slate-500">
+                                <x-save-to-collection-btn type="tese" :tribunal="strtolower($tribunal)" :contentId="$tes->id" />
+                                <div>
+                                    @if ($tribunal == 'STF')
+                                        <span>
+                                            {{ $tes->relator }}, {{ $tes->acordao }} ({{ $tes->situacao }}). {{ $tes->tempo }}
+                                        </span>
+                                    @elseif($tribunal == 'STJ')
+                                        <span>
+                                            {{ $tes->orgao }}. Situação: {{ $tes->situacao }}. {{ $tes->tempo }}
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     @endforeach

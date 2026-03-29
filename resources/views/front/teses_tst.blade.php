@@ -97,6 +97,10 @@
                                     {{ $tes->tema_pure_text }}
                                 </p>
                             @endif
+
+                            <div class="tw-flex tw-justify-start tw-items-center tw-pt-3 tw-border-t tw-border-slate-50">
+                                <x-save-to-collection-btn type="tese" :tribunal="strtolower($tribunal)" :contentId="$tes->id" />
+                            </div>
                         </div>
                     @endforeach
                 </div>

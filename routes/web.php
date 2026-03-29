@@ -232,7 +232,31 @@ Route::middleware(['auth', 'verified'])->prefix('minha-conta')->group(function (
         Route::get('/estorno', [RefundRequestController::class, 'create'])->name('refund.create');
         Route::post('/estorno', [RefundRequestController::class, 'store'])->name('refund.store');
     });
+
+    // Coleções
+    Route::prefix('colecoes')->name('colecoes.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\CollectionController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\CollectionController::class, 'store'])->name('store');
+        Route::get('/{id}/editar', [\App\Http\Controllers\CollectionController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [\App\Http\Controllers\CollectionController::class, 'update'])->name('update');
+        Route::delete('/{id}', [\App\Http\Controllers\CollectionController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/itens', [\App\Http\Controllers\CollectionController::class, 'storeItem'])->name('itens.store');
+        Route::delete('/{id}/itens/{itemId}', [\App\Http\Controllers\CollectionController::class, 'destroyItem'])->name('itens.destroy');
+        Route::patch('/{id}/itens/reorder', [\App\Http\Controllers\CollectionController::class, 'reorderItems'])->name('itens.reorder');
+    });
 });
+
+// Diretório público de coleções
+Route::get('/colecoes', [\App\Http\Controllers\CollectionDirectoryController::class, 'index'])
+    ->name('colecoes.directory');
+
+// Coleção pública
+Route::get('/colecoes/{username}/{slug}', [\App\Http\Controllers\CollectionPublicController::class, 'show'])
+    ->name('colecoes.show');
+
+// API interna — modal "Salvar em Coleção" (requer auth, retorna JSON)
+Route::middleware(['auth'])->get('/api/colecoes/modal/{type}/{tribunal}/{contentId}', [\App\Http\Controllers\CollectionModalController::class, 'show'])
+    ->name('colecoes.modal');
 
 // Toolbar de teste — restrita ao email de teste no controller
 Route::middleware(['auth'])->prefix('test-toolbar')->group(function () {

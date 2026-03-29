@@ -85,4 +85,22 @@ describe('Google OAuth', function () {
             ->assertSee('Google')
             ->assertSee(route('auth.google'));
     });
+
+    it('gera nome único com sufixo quando nome do Google já existe', function () {
+        User::factory()->create(['name' => 'Nome Existente']);
+
+        Socialite::fake('google', (new SocialiteUser)->map([
+            'id' => 'google-id-unique',
+            'name' => 'Nome Existente',
+            'email' => 'nomeunico@gmail.com',
+        ]));
+
+        $this->get(route('auth.google.callback'));
+
+        $newUser = User::query()->where('email', 'nomeunico@gmail.com')->first();
+        expect($newUser)->not->toBeNull()
+            ->and($newUser->name)->toBe('Nome Existente 2');
+
+        $this->assertAuthenticatedAs($newUser);
+    });
 });

@@ -107,9 +107,12 @@
                 <div class="tw-bg-white tw-shadow-sm tw-rounded-xl tw-border tw-border-slate-200 tw-overflow-hidden">
                     <div class="tw-px-6 tw-py-4 tw-bg-slate-50 tw-border-b tw-border-slate-200 tw-flex tw-justify-between tw-items-center">
                         <h3 class="tw-text-lg tw-font-semibold tw-text-slate-800 tw-m-0">Tese Fixada</h3>
-                        <button class="btn-copy-text tw-inline-flex tw-items-center tw-justify-center tw-px-3 tw-py-1.5 tw-border tw-border-slate-300 tw-shadow-sm tw-text-sm tw-font-medium tw-rounded-md tw-text-slate-700 tw-bg-white hover:tw-bg-slate-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-brand-500 tw-transition-colors" data-clipboard-text="{{ $tese->to_be_copied }}">
-                            <i class="fa fa-copy tw-mr-1.5"></i> <span class="btn-text">Copiar</span>
-                        </button>
+                        <div class="tw-flex tw-items-center tw-gap-2">
+                            <button class="btn-copy-text tw-inline-flex tw-items-center tw-justify-center tw-px-3 tw-py-1.5 tw-border tw-border-slate-300 tw-shadow-sm tw-text-sm tw-font-medium tw-rounded-md tw-text-slate-700 tw-bg-white hover:tw-bg-slate-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-brand-500 tw-transition-colors" data-clipboard-text="{{ $tese->to_be_copied }}">
+                                <i class="fa fa-copy tw-mr-1.5"></i> <span class="btn-text">Copiar</span>
+                            </button>
+                            <x-save-to-collection-btn type="tese" :tribunal="strtolower($tribunal)" :contentId="$tese->id" />
+                        </div>
                     </div>
                     <div class="tw-p-6 md:tw-p-8">
                          <div class="tw-prose tw-prose-slate tw-max-w-none">

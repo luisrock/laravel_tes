@@ -96,7 +96,8 @@
                                 </div>
                             @endif
 
-                            <div class="tw-flex tw-justify-end tw-items-center tw-mt-4 tw-pt-3 tw-border-t tw-border-slate-50">
+                            <div class="tw-flex tw-justify-between tw-items-center tw-mt-4 tw-pt-3 tw-border-t tw-border-slate-50">
+                                <x-save-to-collection-btn type="sumula" :tribunal="strtolower($tribunal)" :contentId="$sum->id" />
                                 <span class="tw-text-xs tw-font-medium tw-text-slate-400 tw-uppercase tw-tracking-wide">
                                     {{ $sum->tempo }}
                                 </span>

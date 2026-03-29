@@ -119,6 +119,30 @@ describe('Registro', function () {
         $this->get('/register')->assertStatus(200);
     });
 
+    it('registra novo usuário com nome único', function () {
+        $this->post('/register', [
+            'name' => 'Novo Usuário Teste',
+            'email' => 'novo@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ])->assertRedirect();
+
+        expect(User::query()->where('email', 'novo@example.com')->exists())->toBeTrue();
+    });
+
+    it('rejeita registro com nome já existente', function () {
+        User::factory()->create(['name' => 'Nome Duplicado']);
+
+        $this->post('/register', [
+            'name' => 'Nome Duplicado',
+            'email' => 'outro@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ])->assertSessionHasErrors(['name']);
+
+        expect(User::query()->where('email', 'outro@example.com')->exists())->toBeFalse();
+    });
+
 });
 
 // ==========================================

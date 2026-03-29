@@ -34,7 +34,7 @@ class GoogleAuthController extends Controller
             }
         } else {
             $user = User::create([
-                'name' => $googleUser->getName(),
+                'name' => $this->generateUniqueName($googleUser->getName()),
                 'email' => $googleUser->getEmail(),
                 'google_id' => $googleUser->getId(),
                 'email_verified_at' => now(),
@@ -47,5 +47,22 @@ class GoogleAuthController extends Controller
         Auth::login($user, remember: true);
 
         return redirect()->intended(config('fortify.home', '/minha-conta'));
+    }
+
+    /**
+     * Gera um nome único, adicionando sufixo numérico se já existir.
+     */
+    private function generateUniqueName(string $name): string
+    {
+        if (! User::query()->where('name', $name)->exists()) {
+            return $name;
+        }
+
+        $counter = 2;
+        while (User::query()->where('name', "{$name} {$counter}")->exists()) {
+            $counter++;
+        }
+
+        return "{$name} {$counter}";
     }
 }

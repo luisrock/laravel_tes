@@ -23,6 +23,7 @@
         [x-cloak] { display: none !important; }
     </style>
 
+    @livewireStyles
     @stack('styles')
 </head>
 
@@ -36,8 +37,10 @@
 
     @include('partials.footer')
 
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    @auth
+        <livewire:save-to-collection-modal />
+    @endauth
+    @livewireScripts
     @stack('scripts')
 </body>
 </html>

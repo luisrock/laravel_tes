@@ -8,6 +8,7 @@ use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Log;
@@ -198,6 +199,14 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function hasActiveSubscription(): bool
     {
         return $this->isSubscriber() || $this->isOnGracePeriod();
+    }
+
+    /**
+     * Coleções criadas pelo usuário.
+     */
+    public function collections(): HasMany
+    {
+        return $this->hasMany(Collection::class);
     }
 
     /**

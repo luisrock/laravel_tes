@@ -43,11 +43,12 @@
                         <i class="fa fa-copy tw-mr-1.5"></i> <span class="btn-text">Copiar Súmula</span>
                     </button>
                     <!-- WhatsApp Share -->
-                    <a href="https://api.whatsapp.com/send?text={{ urlencode($sumula->to_be_copied . ' ' . Request::url()) }}" 
+                    <a href="https://api.whatsapp.com/send?text={{ urlencode($sumula->to_be_copied . ' ' . Request::url()) }}"
                        target="_blank"
                        class="tw-inline-flex tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-green-200 tw-text-green-700 hover:tw-bg-green-50 tw-px-3 tw-py-1.5 tw-text-sm tw-transition">
                         <i class="fab fa-whatsapp tw-mr-1.5"></i> Compartilhar
                     </a>
+                    <x-save-to-collection-btn type="sumula" :tribunal="strtolower($tribunal)" :contentId="$sumula->id" />
                 </div>
 
                 <!-- Content -->

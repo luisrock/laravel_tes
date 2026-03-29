@@ -75,9 +75,12 @@
             </div>
 
             <div class="tw-flex tw-items-center tw-justify-between tw-flex-wrap tw-gap-3 tw-mt-5 tw-pt-4 tw-border-t tw-border-slate-100">
-                <button class="btn-copy-text tw-inline-flex tw-items-center tw-justify-center tw-px-3 tw-py-1.5 tw-border tw-border-slate-300 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-600 hover:tw-bg-slate-50 hover:tw-text-brand-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-1 focus:tw-ring-brand-500 tw-transition-colors" title="Copiar texto">
-                   <i class="fa fa-copy tw-mr-1.5"></i> Copiar
-                </button>
+                <div class="tw-flex tw-items-center tw-gap-2">
+                    <button class="btn-copy-text tw-inline-flex tw-items-center tw-justify-center tw-px-3 tw-py-1.5 tw-border tw-border-slate-300 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-600 hover:tw-bg-slate-50 hover:tw-text-brand-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-1 focus:tw-ring-brand-500 tw-transition-colors" title="Copiar texto">
+                       <i class="fa fa-copy tw-mr-1.5"></i> Copiar
+                    </button>
+                    <x-save-to-collection-btn type="tese" tribunal="tst" :contentId="$rep['trib_rep_id'] ?? 0" />
+                </div>
 
                 @if ($situacao !== '')
                     <div class="tw-text-right">
