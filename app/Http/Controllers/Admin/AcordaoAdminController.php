@@ -29,6 +29,7 @@ class AcordaoAdminController extends Controller
         $tribunal = $request->get('tribunal', 'STF');
         $search = $request->get('search');
         $onlyWithout = $request->boolean('only_without');
+        $onlyTransito = $request->boolean('only_transito');
 
         // Itens por página (validar contra valores permitidos)
         $allowedPerPage = [10, 20, 50, 100, 200, 500, 1000];
@@ -105,6 +106,11 @@ class AcordaoAdminController extends Controller
         if ($onlyWithTese) {
             $query->whereNotNull("{$table}.tese_texto")
                 ->where("{$table}.tese_texto", '!=', '');
+        }
+
+        // Filtro: apenas temas com trânsito em julgado
+        if ($onlyTransito) {
+            $query->where("{$table}.situacao", '=', 'Trânsito em Julgado');
         }
 
         if ($search) {

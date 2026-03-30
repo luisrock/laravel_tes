@@ -87,7 +87,7 @@
             <!-- Checkboxes -->
             <div class="lg:tw-col-span-12 tw-flex tw-flex-col sm:tw-flex-row tw-gap-4 tw-mt-2">
                 <div class="tw-flex tw-items-center">
-                    <input type="checkbox" name="only_with_tese_checkbox" id="only_with_tese" 
+                    <input type="checkbox" name="only_with_tese_checkbox" id="only_with_tese"
                            class="tw-h-4 tw-w-4 tw-text-brand-600 tw-focus:ring-brand-500 tw-border-gray-300 tw-rounded"
                            {{ $onlyWithTese ? 'checked' : '' }}
                            onchange="document.getElementById('only_with_tese_hidden').value = this.checked ? '1' : '0'; this.form.submit();">
@@ -96,14 +96,24 @@
                     </label>
                     <input type="hidden" name="only_with_tese" id="only_with_tese_hidden" value="{{ $onlyWithTese ? '1' : '0' }}">
                 </div>
-                
+
                 <div class="tw-flex tw-items-center">
-                    <input type="checkbox" name="only_without" id="only_without" value="1" 
+                    <input type="checkbox" name="only_without" id="only_without" value="1"
                            class="tw-h-4 tw-w-4 tw-text-brand-600 tw-focus:ring-brand-500 tw-border-gray-300 tw-rounded"
                            {{ request('only_without') ? 'checked' : '' }}
                            onchange="this.form.submit()">
                     <label for="only_without" class="tw-ml-2 tw-block tw-text-sm tw-text-gray-900">
                         Apenas temas sem acórdãos
+                    </label>
+                </div>
+
+                <div class="tw-flex tw-items-center">
+                    <input type="checkbox" name="only_transito" id="only_transito" value="1"
+                           class="tw-h-4 tw-w-4 tw-text-brand-600 tw-focus:ring-brand-500 tw-border-gray-300 tw-rounded"
+                           {{ request('only_transito') ? 'checked' : '' }}
+                           onchange="this.form.submit()">
+                    <label for="only_transito" class="tw-ml-2 tw-block tw-text-sm tw-text-gray-900">
+                        Apenas temas com trânsito em julgado
                     </label>
                 </div>
             </div>
