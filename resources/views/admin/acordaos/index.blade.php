@@ -116,6 +116,16 @@
                         Apenas temas com trânsito em julgado
                     </label>
                 </div>
+
+                <div class="tw-flex tw-items-center">
+                    <input type="checkbox" name="only_without_ia" id="only_without_ia" value="1"
+                           class="tw-h-4 tw-w-4 tw-text-brand-600 tw-focus:ring-brand-500 tw-border-gray-300 tw-rounded"
+                           {{ request('only_without_ia') ? 'checked' : '' }}
+                           onchange="this.form.submit()">
+                    <label for="only_without_ia" class="tw-ml-2 tw-block tw-text-sm tw-text-gray-900">
+                        Apenas temas sem resumo IA
+                    </label>
+                </div>
             </div>
         </form>
     </div>

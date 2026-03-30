@@ -30,6 +30,7 @@ class AcordaoAdminController extends Controller
         $search = $request->get('search');
         $onlyWithout = $request->boolean('only_without');
         $onlyTransito = $request->boolean('only_transito');
+        $onlyWithoutIa = $request->boolean('only_without_ia');
 
         // Itens por página (validar contra valores permitidos)
         $allowedPerPage = [10, 20, 50, 100, 200, 500, 1000];
@@ -80,6 +81,7 @@ class AcordaoAdminController extends Controller
         }
 
         $selectColumns[] = DB::raw('COUNT(tese_acordaos.id) as acordaos_count');
+        $selectColumns[] = DB::raw('COUNT(tese_analysis_sections.id) as ia_sections_count');
 
         // Colunas para GROUP BY (sem acordao/link para STJ)
         $groupByColumns = [
@@ -101,6 +103,10 @@ class AcordaoAdminController extends Controller
                 $join->on('tese_acordaos.tese_id', '=', "{$table}.id")
                     ->on('tese_acordaos.tribunal', '=', DB::raw("'{$tribunal}'"))
                     ->whereNull('tese_acordaos.deleted_at');
+            })
+            ->leftJoin('tese_analysis_sections', function ($join) use ($table, $tribunal) {
+                $join->on('tese_analysis_sections.tese_id', '=', "{$table}.id")
+                    ->on('tese_analysis_sections.tribunal', '=', DB::raw("'{$tribunal}'"));
             })
             ->groupBy($groupByColumns);
 
@@ -124,6 +130,10 @@ class AcordaoAdminController extends Controller
 
         if ($onlyWithout) {
             $query->having('acordaos_count', '=', 0);
+        }
+
+        if ($onlyWithoutIa) {
+            $query->having('ia_sections_count', '=', 0);
         }
 
         $teses = $query->orderBy("{$table}.numero", $order)
