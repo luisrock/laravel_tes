@@ -30,6 +30,29 @@ describe('Subscription Global Toggle', function () {
         $response->assertNotFound();
     });
 
+    it('nao exibe links de assinatura no footer quando desabilitado', function () {
+        Config::set('subscription.enabled', false);
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get(route('searchpage'));
+
+        $response->assertOk();
+        $response->assertDontSee('Minha assinatura', false);
+        $response->assertDontSee('Gerenciar pagamento', false);
+        $response->assertDontSee('/minha-conta/assinatura', false);
+    });
+
+    it('exibe links de assinatura no footer quando habilitado', function () {
+        Config::set('subscription.enabled', true);
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get(route('searchpage'));
+
+        $response->assertOk();
+        $response->assertSee('Minha assinatura', false);
+        $response->assertSee('Gerenciar pagamento', false);
+    });
+
     it('permite o acesso a /assinar quando habilitado', function () {
         Config::set('subscription.enabled', true);
         Config::set('cashier.key', 'pk_test_fake');

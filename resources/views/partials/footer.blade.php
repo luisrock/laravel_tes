@@ -45,8 +45,10 @@
                             @if(auth()->user()->hasRole('admin'))
                                 <a href="{{ route('admin') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white"><b>Admin Dashboard</b></a>
                             @endif
-                            <a href="{{ route('subscription.show') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white">Minha assinatura</a>
-                            <a href="{{ route('subscription.portal') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white">Gerenciar pagamento</a>
+                            @if(config('subscription.enabled'))
+                                <a href="{{ route('subscription.show') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white">Minha assinatura</a>
+                                <a href="{{ route('subscription.portal') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white">Gerenciar pagamento</a>
+                            @endif
                             <a href="{{ route('user-panel.dashboard') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white">Minha conta</a>
                         @else
                             <a href="{{ route('login') }}" class="tw-block tw-text-sm tw-text-slate-100 hover:tw-text-white">Entrar</a>
