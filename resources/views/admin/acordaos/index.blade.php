@@ -179,6 +179,17 @@
                                             ⚠️ Sem acórdãos
                                         </span>
                                     @endif
+                                    @if(!empty($tese->situacao))
+                                        @php
+                                            $isTransito = $tese->situacao === 'Trânsito em Julgado';
+                                            $badgeClasses = $isTransito
+                                                ? 'tw-bg-gradient-to-r tw-from-yellow-400 tw-to-amber-500 tw-text-amber-900 tw-font-semibold tw-shadow-md'
+                                                : 'tw-bg-blue-100 tw-text-blue-800';
+                                        @endphp
+                                        <span class="tw-inline-flex tw-items-center tw-px-2.5 tw-py-0.5 tw-rounded-full tw-text-xs tw-font-medium {{ $badgeClasses }}">
+                                            {{ $tese->situacao }}
+                                        </span>
+                                    @endif
                                 </h3>
                                 <p class="tw-mt-1 tw-text-sm tw-text-gray-500 tw-line-clamp-3">
                                     {{ $tese->tema ?? 'Sem tema definido' }}

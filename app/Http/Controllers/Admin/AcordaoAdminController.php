@@ -66,6 +66,7 @@ class AcordaoAdminController extends Controller
             "{$table}.numero",
             "{$table}.{$temaColumn} as tema",
             "{$table}.tese_texto",
+            "{$table}.situacao",
         ];
 
         // Colunas específicas por tribunal
@@ -86,6 +87,7 @@ class AcordaoAdminController extends Controller
             "{$table}.numero",
             "{$table}.{$temaColumn}",
             "{$table}.tese_texto",
+            "{$table}.situacao",
         ];
 
         if ($tribunal === 'STF') {
