@@ -14,6 +14,9 @@
 uses(Tests\TestCase::class, Illuminate\Foundation\Testing\RefreshDatabase::class)
     ->in('Feature');
 
+uses(Tests\TestCase::class, Illuminate\Foundation\Testing\RefreshDatabase::class)
+    ->in('Unit');
+
 uses(Tests\MySQLTestCase::class)->in('MySQL');
 
 /*
@@ -124,6 +127,30 @@ function createPublishedQuiz(int $questionCount = 3): \App\Models\Quiz
 /**
  * Cria um usuário com assinatura ativa (Cashier Subscription + Item).
  */
+/**
+ * Substitui a connection sendy por SQLite in-memory com tabela subscribers mock.
+ */
+function fakeSendyConnection(): void
+{
+    config()->set('services.sendy.db_enabled', true);
+
+    config()->set('database.connections.sendy', [
+        'driver' => 'sqlite',
+        'database' => ':memory:',
+        'prefix' => '',
+    ]);
+
+    \Illuminate\Support\Facades\Schema::connection('sendy')->create('subscribers', function (\Illuminate\Database\Schema\Blueprint $table) {
+        $table->id();
+        $table->string('email');
+        $table->integer('list');
+        $table->tinyInteger('unsubscribed')->default(0);
+        $table->tinyInteger('bounced')->default(0);
+        $table->tinyInteger('complaint')->default(0);
+        $table->tinyInteger('confirmed')->default(1);
+    });
+}
+
 function createSubscribedUser(string $productId = 'prod_test'): \App\Models\User
 {
     $user = \App\Models\User::factory()->create();

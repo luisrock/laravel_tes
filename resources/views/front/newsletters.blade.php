@@ -25,15 +25,62 @@
         <div class="tw-bg-white tw-shadow-sm tw-rounded-xl tw-border tw-border-slate-200 tw-overflow-hidden">
             <div class="tw-p-6 md:tw-p-8">
                 
-                <div class="tw-flex tw-flex-col sm:tw-flex-row tw-justify-between tw-items-start sm:tw-items-center tw-gap-4 tw-mb-6 tw-pb-4 tw-border-b tw-border-slate-100">
-                    <div class="tw-flex tw-items-center tw-gap-2">
+                @php
+                    $user = auth()->user();
+                @endphp
+
+                <div class="tw-flex tw-w-full tw-flex-col md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-8 tw-gap-3 tw-mb-6 tw-pb-4 tw-border-b tw-border-slate-100">
+                    <div class="tw-flex tw-items-center tw-gap-2 tw-shrink-0">
                         <span class="tw-px-2.5 tw-py-0.5 tw-rounded-full tw-text-xs tw-font-medium tw-bg-purple-100 tw-text-purple-800">Arquivo</span>
                         <span class="tw-text-slate-600 tw-font-medium">Newsletters</span>
                     </div>
-                    <div class="tw-text-sm tw-text-slate-600">
-                        Inscreva-se <a class="tw-text-brand-600 hover:tw-text-brand-800 tw-font-medium hover:tw-underline"
-                                href="https://newsletter.maurolopes.com.br/subscription?f=guJ3cS2Vm7AxAFSQ24hY1x2LOVOrbH44BBFmy4NXDEULQPmQ9VecJ538XJVLM9JbWogaBgUkTuwWL1y8WaWG1w">aqui</a> para receber por email.
-                    </div>
+
+                    @if ($integrationEnabled)
+                        <div class="tw-w-full md:tw-w-auto md:tw-shrink-0 md:tw-ml-auto">
+                            @if ($isAlreadySubscribed)
+                                <p class="tw-text-sm tw-font-medium tw-text-emerald-700 tw-m-0 md:tw-text-right">
+                                    Você está inscrito!
+                                    <a href="{{ route('user-panel.profile') }}" class="tw-font-normal tw-underline">Gerir em Perfil</a>
+                                </p>
+                            @elseif ($user)
+                                <div x-data="newsletterQuickSubscribe()" class="tw-flex tw-flex-col tw-items-start md:tw-items-end tw-gap-1">
+                                    <button type="button" @click="subscribe()" :disabled="loading"
+                                            class="tw-text-sm tw-font-medium tw-text-brand-600 hover:tw-text-brand-800 hover:tw-underline disabled:tw-opacity-50 disabled:tw-cursor-wait tw-bg-transparent tw-border-0 tw-p-0">
+                                        <span x-show="!loading">Receba atualização semanal</span>
+                                        <span x-show="loading" x-cloak>Inscrevendo…</span>
+                                    </button>
+                                    <p x-show="message" x-text="message" x-cloak
+                                       :class="success ? 'tw-text-emerald-700' : 'tw-text-rose-700'"
+                                       class="tw-text-xs tw-m-0 md:tw-text-right"></p>
+                                </div>
+                            @else
+                                <div x-data="newsletterForm()" x-init="init()" class="tw-flex tw-flex-col tw-items-start md:tw-items-end tw-gap-1">
+                                    <form @submit.prevent="submit($event)" class="tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center sm:tw-justify-end tw-gap-1.5" novalidate>
+                                        @csrf
+                                        @honeypot
+                                        <label class="tw-sr-only" for="newsletter-name">Nome</label>
+                                        <input id="newsletter-name" type="text" name="name" required maxlength="255"
+                                               placeholder="Nome"
+                                               x-model="name"
+                                               class="tw-block tw-w-full sm:tw-w-36 tw-rounded tw-border tw-border-slate-300 tw-px-2 tw-py-1.5 tw-text-xs tw-text-slate-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-brand-500 focus:tw-border-brand-500">
+                                        <label class="tw-sr-only" for="newsletter-email">E-mail</label>
+                                        <input id="newsletter-email" type="email" name="email" required maxlength="255"
+                                               placeholder="E-mail"
+                                               x-model="email"
+                                               class="tw-block tw-w-full sm:tw-w-44 tw-rounded tw-border tw-border-slate-300 tw-px-2 tw-py-1.5 tw-text-xs tw-text-slate-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-brand-500 focus:tw-border-brand-500">
+                                        <button type="submit" :disabled="loading"
+                                                class="tw-shrink-0 tw-rounded tw-bg-brand-600 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-white hover:tw-bg-brand-700 disabled:tw-opacity-50">
+                                            <span x-show="!loading">Receba</span>
+                                            <span x-show="loading" x-cloak>…</span>
+                                        </button>
+                                    </form>
+                                    <p x-show="message" x-text="message" x-cloak
+                                       :class="success ? 'tw-text-emerald-700' : 'tw-text-rose-700'"
+                                       class="tw-text-xs tw-m-0 md:tw-text-right"></p>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
                 </div>
 
                 <div class="tw-space-y-4">
@@ -73,4 +120,87 @@
 
     </div>
 
+@endsection
+
+@section('scripts')
+    @if ($integrationEnabled && ! $isAlreadySubscribed)
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js"></script>
+        <script>
+            function newsletterForm() {
+                return {
+                    name: '',
+                    email: '',
+                    loading: false,
+                    message: '',
+                    success: false,
+                    init() {},
+                    async submit(event) {
+                        this.loading = true;
+                        this.message = '';
+                        const formData = new FormData(event.target);
+                        try {
+                            const res = await fetch(@json(route('newsletter.subscribe')), {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                    'Accept': 'application/json',
+                                },
+                                body: formData,
+                            });
+                            const data = await res.json();
+                            this.success = !!data.success || !!data.already_subscribed;
+                            this.message = data.message ?? 'Não foi possível inscrever agora.';
+                            if (this.success) {
+                                setTimeout(() => window.location.reload(), 1200);
+                            }
+                        } catch (e) {
+                            this.success = false;
+                            this.message = 'Erro de rede. Tente em instantes.';
+                        } finally {
+                            this.loading = false;
+                        }
+                    },
+                };
+            }
+
+            function newsletterQuickSubscribe() {
+                return {
+                    name: @json(auth()->user()?->name ?? ''),
+                    email: @json(auth()->user()?->email ?? ''),
+                    loading: false,
+                    message: '',
+                    success: false,
+                    async subscribe() {
+                        this.loading = true;
+                        this.message = '';
+                        const formData = new FormData();
+                        formData.append('name', this.name);
+                        formData.append('email', this.email);
+                        formData.append('_token', document.querySelector('meta[name=csrf-token]').content);
+                        try {
+                            const res = await fetch(@json(route('newsletter.subscribe')), {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                    'Accept': 'application/json',
+                                },
+                                body: formData,
+                            });
+                            const data = await res.json();
+                            this.success = !!data.success || !!data.already_subscribed;
+                            this.message = data.message ?? 'Não foi possível inscrever agora.';
+                            if (this.success) {
+                                setTimeout(() => window.location.reload(), 1200);
+                            }
+                        } catch (e) {
+                            this.success = false;
+                            this.message = 'Erro de rede. Tente em instantes.';
+                        } finally {
+                            this.loading = false;
+                        }
+                    },
+                };
+            }
+        </script>
+    @endif
 @endsection

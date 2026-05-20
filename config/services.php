@@ -40,4 +40,16 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
     ],
 
+    'sendy' => [
+        'api_base_url' => env('SENDY_API_BASE_URL'),
+        'api_token' => env('SENDY_API_TOKEN'),
+        'list_id' => env('SENDY_LIST_ID'),
+        'list_internal_id' => env('SENDY_LIST_INTERNAL_ID'),
+        'brand_id' => env('SENDY_BRAND_ID', 1),
+        'silent_authenticated' => env('SENDY_SILENT_AUTHENTICATED', true),
+        'silent_visitor' => env('SENDY_SILENT_VISITOR', false),
+        // false em dev local (Mac sem acesso à DB Sendy de prod); true em prod
+        'db_enabled' => env('SENDY_DB_ENABLED', true),
+    ],
+
 ];

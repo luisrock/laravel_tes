@@ -15,6 +15,7 @@ class SiteSettingsSeeder extends Seeder
     private array $defaults = [
         'metered_wall_enabled' => '1',
         'metered_wall_daily_limit' => '3',
+        'newsletter_integration_enabled' => '0',
     ];
 
     public function run(): void

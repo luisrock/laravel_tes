@@ -91,6 +91,19 @@ return [
             'prefix_indexes' => true,
         ],
 
+        'sendy' => [
+            'driver' => 'mysql',
+            'host' => env('SENDY_DB_HOST', '127.0.0.1'),
+            'port' => env('SENDY_DB_PORT', 3306),
+            'database' => env('SENDY_DB_NAME'),
+            'username' => env('SENDY_DB_USER'),
+            'password' => env('SENDY_DB_PASSWORD'),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+        ],
+
     ],
 
     /*

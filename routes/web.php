@@ -126,6 +126,8 @@ Route::prefix('admin')->group(function () {
 
 Route::get('/newsletters', [App\Http\Controllers\CampaignsPageController::class, 'index'])->name('newsletterspage');
 Route::get('/newsletter/{slug}', [App\Http\Controllers\NewsletterController::class, 'show'])->name('newsletter.show');
+Route::middleware(['throttle:5,1'])->post('/newsletter/subscribe', [App\Http\Controllers\NewsletterSubscriptionController::class, 'subscribe'])
+    ->name('newsletter.subscribe');
 
 // Quiz Public Routes
 Route::get('/quizzes', [App\Http\Controllers\QuizController::class, 'index'])->name('quizzes.index');

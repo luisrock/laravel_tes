@@ -52,7 +52,14 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
+            'newsletter_subscribed_at' => 'datetime',
+            'newsletter_synced_at' => 'datetime',
         ];
+    }
+
+    public function wantsNewsletter(): bool
+    {
+        return $this->newsletter_subscribed_at !== null;
     }
 
     /**
