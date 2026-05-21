@@ -25,7 +25,7 @@ todos:
     status: completed
   - id: phase7
     content: "FASE 7 — Filament NewsletterStats (dashboard) + comando newsletter:sync + schedule"
-    status: pending
+    status: completed
   - id: phase8
     content: "FASE 8 — Atualizar PROJECT_BRIEF.md + Pint + suite completa de testes"
     status: pending
@@ -50,8 +50,8 @@ Integração ponta-a-ponta para captura de inscrições na newsletter do T&S, si
 | 3 | Form AJAX em /newsletters + Filament kill switch | `validated` | 2026-05-20 | 4253b7c |
 | 4 | Auto-inscrição registro/Google + Rule::email + toast | `validated` | 2026-05-21 | — |
 | 5 | Toggle no painel /minha-conta/perfil | `validated` | 2026-05-20 | 4253b7c |
-| 6 | Popup visitante + Filament settings | `validated` | 2026-05-21 | — |
-| 7 | Filament stats + sync command | `pending` | — | — |
+| 6 | Popup visitante + Filament settings | `validated` | 2026-05-21 | 55379a0, 9fdc9fa |
+| 7 | Filament stats + sync command + scheduler unificado | `validated` | 2026-05-21 | (este commit) |
 | 8 | PROJECT_BRIEF + Pint + suite final | `pending` | — | — |
 
 Status válidos: `pending` | `in_progress` | `awaiting_validation` | `validated` | `blocked`.
@@ -1048,8 +1048,10 @@ Antes do `</body>`, depois do `livewireScripts`:
 - **Front:** `partials/newsletter-popup.blade.php` + `newsletter-popup-content.blade.php`; include em `front/base.blade.php`. UI: cabeçalho gradiente brand, CTA brick, overlay escuro; X não sobrepõe título.
 - **API:** `POST /newsletter/event` (30/min); `trackEvent()` → `impression`/`dismissed`. `POST /newsletter/subscribe` com `from_popup=1` → `source=popup`.
 - **Cookies:** `newsletter_popup_dismissed_until` + `newsletter_popup_dismiss_epoch`; `newsletter_subscribed` + `newsletter_popup_subscribed_epoch`; `newsletter_popup_variant` (A/B).
-- **Testes:** `PopupConfigTest`, `PopupEventsTest`.
-- **Deploy:** sem migration nova nesta fase; **sem seeder obrigatório** para chaves popup (defaults no `mount()` Filament e no Blade). Ver secção «Deploy Fase 6» no `NEWSLETTER_SENDY_EXECUTION_PROMPT.md`.
+- **Testes:** `PopupConfigTest`, `PopupEventsTest` (`--filter=Popup` → 18 testes após hotfix).
+- **Hotfix dedup (commit `9fdc9fa`):** segundo POST `/newsletter/subscribe` no mesmo email em &lt;60s não chama Sendy de novo (`Cache::lock` + evento recente); popup com `submitting` + Alpine `@once`.
+- **Prod:** popup e inscrição validados pelo user (2026-05-21). Duplicata Sendy reportada antes do hotfix — apagar contacto extra manualmente no Sendy.
+- **Deploy:** ver secção «Deploy Vito» abaixo. Sem migration nova na Fase 6.
 
 ---
 
@@ -1110,13 +1112,20 @@ $schedule->command('newsletter:sync')->everySixHours()->withoutOverlapping();
 3. Conferir schedule registrado (`php artisan schedule:list`).
 
 ## Critérios de aceitação
-- [ ] Testes verdes.
-- [ ] Suite completa sem regressão.
-- [ ] Stats page funcional para admin.
-- [ ] Schedule registrado.
+- [x] Testes verdes (`SyncCommandTest`, `NewsletterStatsPageTest`, `SiteMetricsTest`).
+- [x] Stats page funcional para admin (browser + cron Vito).
+- [x] Schedule unificado no Kernel + `schedule:run` no Vito.
 
 ## Notas de execução
-_(preencher)_
+- **Filament:** `SiteStats` em `/admin/painel/estatisticas` (sort 54); filtro período 24h/3/7/30/60d; botão **Atualizar** → `newsletter:sync --all`; redirect `/newsletter-stats`.
+- **Widgets:** `SiteOverviewStats` (registos + newsletter + Sendy + contas + popup), gráficos, tabela A/B; `$isDiscovered = false`.
+- **Métricas:** `SiteMetrics` (+ `NewsletterMetrics` deprecated alias).
+- **Comando:** `SyncNewsletterStatus` — batch via `SendyService::syncUsersFromSendyDb()`.
+- **Kernel:** migrou crontab T&S (queue 00:00, sitemap 06:00, matomo seg 03:00, import ter 23:00, renewal 10:00, newsletter:sync 6h).
+- **Cron Vito:** única linha `* * * * * php8.3 …/artisan schedule:run`; removidas 4 linhas artisan diretas.
+- **Manual:** `ARQUIVOS_MD/NEWSLETTER_STATS_MANUAL.md`.
+- **Testes:** 83 passed `--filter=Newsletter|SiteMetrics|SyncCommand` (handoff).
+- **Validação humana:** 2026-05-21 (stats + cron Vito).
 
 ---
 
@@ -1195,13 +1204,24 @@ Pós Fase 8 (operação manual em prod):
 - Setar `newsletter_integration_enabled='1'` em Filament `/painel`.
 - Rodar `php artisan newsletter:sync --all` uma vez (popular cache local) — comando criado na **Fase 7**.
 
-## Deploy automático (push `master`) — Fases 1–6 acumuladas
+## Deploy Vito (script real no painel)
 
-O Vito já executa `migrate --force` e `SiteSettingsSeeder --force`. Para este push:
+O deploy automático (`git push` → `master`) executa:
 
-| Item | Necessário? |
-|------|-------------|
-| **Migrations** | Só se ainda não correram em prod: `add_newsletter_columns_to_users`, `create_newsletter_subscription_events`. O deploy habitual aplica pendentes. |
-| **Seeder** | **Não obrigatório** para popup. `SiteSettingsSeeder` só garante `newsletter_integration_enabled=0` via `firstOrCreate` (não sobrescreve valor existente). Chaves do popup **não** estão no seeder — defaults no Filament/Blade até o admin salvar. |
-| **`.env` Sendy** | Já deve estar em prod (Fases 0–1). |
-| **Pós-deploy manual** | Filament: ligar integração e popup se quiseres em prod; configurar gatilho/textos. `newsletter:sync` só após Fase 7. |
+- `composer install`, `npm ci && npm run build`
+- `php artisan migrate --force`
+- `php artisan db:seed --class=CollectionSettingsSeeder --force` (coleções — **não** newsletter)
+- `optimize:clear`, `config:cache`, `view:cache`
+
+**Não** corre `SiteSettingsSeeder` nem `RolesAndPermissionsSeeder` no script habitual.
+
+| Item | Ação |
+|------|------|
+| **Migrations newsletter** | Automático via `migrate --force` (confirmado em prod 2026-05-21: Ran). |
+| **SiteSettingsSeeder** | **Manual uma vez** se faltar chaves: `php artisan db:seed --class=SiteSettingsSeeder --force` (idempotente, `firstOrCreate`). |
+| **Chaves popup** | Sem seeder — configurar em Filament → Newsletter Popup. |
+| **`.env` Sendy** | Já em prod (Fases 0–1). |
+| **Cron Vito** | **Uma linha:** `* * * * * php8.3 /home/vito/tesesesumulas.com.br/artisan schedule:run >> /dev/null 2>&1` |
+| **Pós-deploy** | Filament: Estatísticas, Newsletter Sendy, Popup. Opcional: `newsletter:sync --all` uma vez. |
+
+Commits em prod: Fase 6 `55379a0`, `9fdc9fa`; Fase 7 (este deploy).

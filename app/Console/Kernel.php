@@ -18,26 +18,42 @@ class Kernel extends ConsoleKernel
     ];
 
     /**
-     * Define the application's command schedule.
+     * Agendamento centralizado (antes disperso no crontab do servidor).
      *
-     * @return void
+     * Em produção: uma única entrada no cron/Vito —
+     * * * * * php8.3 /home/vito/tesesesumulas.com.br/artisan schedule:run >> /dev/null 2>&1
      */
-    protected function schedule(Schedule $schedule)
+    protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
-        $schedule->command('newsletters:import')->dailyAt('04:00');
+        $schedule->command('queue:work', ['--stop-when-empty'])
+            ->dailyAt('00:00')
+            ->withoutOverlapping();
+
+        $schedule->command('sitemap:generate')
+            ->dailyAt('06:00')
+            ->withoutOverlapping();
+
+        $schedule->command('matomo:sync')
+            ->weeklyOn(1, '03:00')
+            ->withoutOverlapping();
+
+        $schedule->command('newsletters:import')
+            ->weeklyOn(2, '23:00')
+            ->withoutOverlapping();
 
         $schedule->job(new SendRenewalReminders)
             ->dailyAt('10:00')
+            ->withoutOverlapping();
+
+        $schedule->command('newsletter:sync')
+            ->everySixHours()
             ->withoutOverlapping();
     }
 
     /**
      * Register the commands for the application.
-     *
-     * @return void
      */
-    protected function commands()
+    protected function commands(): void
     {
         $this->load(__DIR__.'/Commands');
 

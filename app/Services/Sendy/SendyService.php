@@ -9,6 +9,7 @@ use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Http\Client\Factory as HttpFactory;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Throwable;
@@ -218,6 +219,88 @@ final class SendyService
                 ->count();
         } catch (Throwable $e) {
             Log::error('Sendy activeSubscriberCount exception', ['error' => $e->getMessage()]);
+
+            return null;
+        }
+    }
+
+    /**
+     * @param  iterable<User>  $users
+     */
+    public function syncUsersFromSendyDb(iterable $users): int
+    {
+        if (! Schema::hasColumn('users', 'newsletter_subscribed_at')) {
+            return 0;
+        }
+
+        $userList = $users instanceof Collection ? $users : collect($users);
+
+        if ($userList->isEmpty()) {
+            return 0;
+        }
+
+        $subscribedEmails = $this->subscribedEmailsFromDb(
+            $userList->pluck('email')->filter()->unique()->values()->all(),
+        );
+
+        if ($subscribedEmails === null) {
+            $synced = 0;
+            foreach ($userList as $user) {
+                $status = $this->getStatus($user->email);
+                $user->forceFill([
+                    'newsletter_subscribed_at' => $status === SendyStatus::Subscribed ? now() : null,
+                    'newsletter_synced_at' => now(),
+                ])->save();
+                $synced++;
+            }
+
+            return $synced;
+        }
+
+        $synced = 0;
+
+        foreach ($userList as $user) {
+            $isSubscribed = in_array($user->email, $subscribedEmails, true);
+
+            $user->forceFill([
+                'newsletter_subscribed_at' => $isSubscribed ? now() : null,
+                'newsletter_synced_at' => now(),
+            ])->save();
+
+            $synced++;
+        }
+
+        return $synced;
+    }
+
+    /**
+     * @param  array<int, string>  $emails
+     * @return array<int, string>|null null quando DB Sendy indisponível (fallback por user)
+     */
+    private function subscribedEmailsFromDb(array $emails): ?array
+    {
+        if ($emails === [] || ! $this->usesSendyDb() || $this->listInternalId() === null) {
+            return null;
+        }
+
+        try {
+            $subscribed = [];
+
+            $rows = $this->db->connection('sendy')
+                ->table('subscribers')
+                ->where('list', $this->listInternalId())
+                ->whereIn('email', $emails)
+                ->get();
+
+            foreach ($rows as $row) {
+                if ($this->mapSubscriberRowToStatus($row) === SendyStatus::Subscribed) {
+                    $subscribed[] = $row->email;
+                }
+            }
+
+            return $subscribed;
+        } catch (Throwable $e) {
+            Log::error('Sendy subscribedEmailsFromDb exception', ['error' => $e->getMessage()]);
 
             return null;
         }

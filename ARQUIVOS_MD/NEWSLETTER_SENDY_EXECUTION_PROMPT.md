@@ -7,17 +7,17 @@ Cole o bloco abaixo numa **nova conversa** do Cursor. Não precisa de ajustes ma
 ## Bloco para colar no chat
 
 ```
-Executar integração Newsletter Sendy — continuação (Fase 7).
+Executar integração Newsletter Sendy — continuação (Fase 8).
 
 Antes de qualquer código, ler nesta ordem:
 1. PROJECT_BRIEF.md (raiz)
-2. ARQUIVOS_MD/NEWSLETTER_SENDY_PLAN.md (STATUS TRACKER + secção FASE 7)
+2. ARQUIVOS_MD/NEWSLETTER_SENDY_PLAN.md (STATUS TRACKER + secção FASE 8)
 3. ARQUIVOS_MD/NEWSLETTER_SENDY_EXECUTION_PROMPT.md (este arquivo)
 4. AGENTS.md / CLAUDE.md
 
-Confirmar em uma frase: "Li o briefing e o plano. Estou pronto para começar a Fase 7."
+Confirmar em uma frase: "Li o briefing e o plano. Estou pronto para começar a Fase 8."
 
-## Estado já entregue (Fases 0–6 validated)
+## Estado já entregue (Fases 0–7 validated; Fase 7 em deploy)
 
 | Fase | Entregáveis principais |
 |------|------------------------|
@@ -27,37 +27,38 @@ Confirmar em uma frase: "Li o briefing e o plano. Estou pronto para começar a F
 | 3 | `POST /newsletter/subscribe`, form AJAX `/newsletters`, kill switch Filament |
 | 4 | Auto-inscrição registro/Google (variante B) + toast; `Rule::email()` |
 | 5 | `NewsletterToggle` em `/minha-conta/perfil` |
-| 6 | Popup visitante + `NewsletterPopupSettings` + `POST /newsletter/event` |
+| 6 | Popup + `NewsletterPopupSettings` + `POST /newsletter/event` + anti-duplicata (`9fdc9fa`) |
+| 7 | `SiteStats` (`/admin/painel/estatisticas`), `newsletter:sync`, Kernel unificado, cron Vito `schedule:run` |
 
-### Fase 6 — referência rápida (não regredir)
+### Fase 7 — referência rápida (não regredir)
 
-- **Filament:** `/admin/painel/newsletter-popup-settings` — gatilho `->live()` (timer→segundos, scroll→%, exit-intent→sem extra). Reset **espera** / **completo** via epochs em `SiteSetting`.
-- **Front:** `partials/newsletter-popup*.blade.php` em `front/base.blade.php`; só `@guest` + duas flags.
-- **Tracking:** `newsletter_subscription_events` com `source=popup`, actions `impression`/`dismissed`/`subscribed`.
-- **Testes:** `--filter=Popup` (17 testes).
+- **Filament:** `/admin/painel/estatisticas` — filtro período (24h/3/7/30/60d); botão **Atualizar** → `newsletter:sync --all`.
+- **Cards:** novos registos, novas inscrições, total Sendy, contas inscritas no site, conversão popup.
+- **Scheduler:** `app/Console/Kernel.php` — queue, sitemap, matomo, newsletters:import, renewal, `newsletter:sync` (6h).
+- **Cron Vito (única linha):** `* * * * * php8.3 …/artisan schedule:run` — remover linhas antigas que chamavam artisan direto.
+- **Manual:** `ARQUIVOS_MD/NEWSLETTER_STATS_MANUAL.md`.
+- **Redirect:** `/newsletter-stats` → `/estatisticas`.
+- **Testes:** `--filter=SyncCommand`, `NewsletterStatsPage`, `SiteMetrics`.
 
 ### Regras de ouro
 
 1. Uma fase por vez. Avançar só após "Pode avançar para a Fase N+1".
 2. Kill switch: `newsletter_integration_enabled` OFF = nada de UI inscrição.
 3. Sendy nunca quebra o site (try/catch, `SendyResult`).
-4. Testes: `php artisan test --compact --filter=...` + Pint `--dirty`.
+4. Testes: `php artisan test --compact` + Pint `--dirty`.
 5. PHP 8.3 · Português com o user.
 
-## Próxima fase: 7
+## Próxima fase: 8
 
-**Objetivo:** painel de stats de cadastros + reconciliação cache.
+**Objetivo:** documentar no PROJECT_BRIEF, Pint, suite completa, checklist de ativação em prod.
 
-Implementar conforme secção **FASE 7** do plano:
-- `NewsletterStats` (Filament, read-only) + 4 widgets (overview, daily chart, by source, popup A/B).
-- Comando `php artisan newsletter:sync` (`--all`, `--user=ID`).
-- Schedule `everySixHours()` em `app/Console/Kernel.php`.
-- Botão «Sincronizar agora» na página stats.
-- Testes: `SyncCommandTest`, `NewsletterStatsPageTest`.
+Implementar conforme secção **FASE 8** do plano:
+- Secção "Newsletter (Sendy)" em `PROJECT_BRIEF.md`.
+- `vendor/bin/pint --dirty --format agent`.
+- `php artisan test --compact` (suite completa verde).
+- Documentar processo: ligar flag em Filament, `newsletter:sync --all` uma vez.
 
-Dados: `newsletter_subscription_events` + `SendyService::activeSubscriberCount()` + sync `users.newsletter_subscribed_at` via DB Sendy.
-
-Não escrever código até o user confirmar: "Pode avançar para a Fase 7" / "ok".
+Não escrever código até o user confirmar: "Pode avançar para a Fase 8" / "ok".
 ```
 
 ---
@@ -66,38 +67,34 @@ Não escrever código até o user confirmar: "Pode avançar para a Fase 7" / "ok
 
 ### Workflow por fase
 
-1. Ler secção FASE 7 no plano.
-2. Confirmar com o user antes de codar.
-3. `search-docs` para Filament 4 widgets/charts e Artisan commands.
-4. Implementar → testes → Pint → passos browser → atualizar STATUS TRACKER.
-5. Fase 8 depois: `PROJECT_BRIEF.md` + suite final + checklist prod.
+1. Ler secção FASE 8 no plano.
+2. Confirmar com o user antes de codar (se aplicável — Fase 8 é sobretudo docs + QA).
+3. Implementar → Pint → suite completa → atualizar STATUS TRACKER.
+4. Handoff final da integração newsletter.
 
-### Arquivos-chave existentes (Fase 6)
+### Arquivos-chave existentes
 
 | Arquivo | Função |
 |---------|--------|
-| `app/Filament/Pages/NewsletterPopupSettings.php` | Config popup + reset epochs |
-| `app/Http/Controllers/NewsletterSubscriptionController.php` | `subscribe`, `trackEvent` |
-| `resources/views/partials/newsletter-popup-content.blade.php` | Alpine + UI |
-| `app/Models/NewsletterSubscriptionEvent.php` | Auditoria/stats (Fase 7 lê isto) |
-| `app/Services/Sendy/SendyService.php` | API/DB Sendy, `activeSubscriberCount()` |
-| `app/Jobs/Newsletter/SyncNewsletterStatusJob.php` | Job existente — reutilizar no comando |
-| `tests/Pest.php` | `fakeSendyConnection()`, `createAdminUser()` |
+| `app/Filament/Pages/SiteStats.php` | Estatísticas gerais + filtro período |
+| `app/Services/Newsletter/SiteMetrics.php` | Métricas agregadas |
+| `app/Console/Commands/SyncNewsletterStatus.php` | `newsletter:sync` |
+| `app/Console/Kernel.php` | Scheduler unificado |
+| `ARQUIVOS_MD/NEWSLETTER_STATS_MANUAL.md` | Manual dos cards |
+| `app/Filament/Pages/NewsletterIntegrationSettings.php` | Kill switch |
+| `app/Filament/Pages/NewsletterPopupSettings.php` | Config popup |
 
-### Deploy / prod (push master — já com Fase 6)
+### Deploy Vito
 
-| Ação | Necessário? |
-|------|-------------|
-| `php artisan migrate --force` | Automático no Vito; só relevante se migrations 2026_05_20 newsletter ainda não correram em prod. |
-| `php artisan db:seed --class=SiteSettingsSeeder --force` | Automático; **não** cria chaves do popup. Só `newsletter_integration_enabled` (default 0 se ausente). |
-| Seeder extra para popup | **Não.** |
-| Pós-deploy | Filament: integração + popup se desejado. `newsletter:sync --all` **após Fase 7**. |
+- **Cron:** só `schedule:run` (user já configurou no painel Vito).
+- **Script deploy:** `migrate --force` automático; sem `SiteSettingsSeeder`.
+- **Pós-deploy Fase 7+8:** `newsletter:sync --all` opcional; ligar flag se ainda OFF.
 
-### Convenções
+### Sessão anterior (Fase 7 — 2026-05-21)
 
-- Laravel 10 legada: `Http/Kernel.php`, `Console/Kernel.php`.
-- Filament 4 em `/admin/painel`; espelhar páginas existentes (`MeteredWallSettings`, widgets do projeto se houver).
-- Tailwind `tw-` no front; admin usa Filament.
+- Stats, sync, Kernel migrado do crontab, UI «Estatísticas», botão Atualizar.
+- Cron Vito atualizado para `schedule:run` (linhas artisan antigas removidas pelo user).
+- **Pendente:** Fase 8 (PROJECT_BRIEF + fecho).
 
 ### Em caso de bloqueio
 
