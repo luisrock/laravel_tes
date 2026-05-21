@@ -152,6 +152,21 @@ it('aplica rate limit de 5 requisições por minuto', function () {
     ])->assertStatus(429);
 });
 
+it('rejeita email inválido no subscribe', function () {
+    SiteSetting::set('newsletter_integration_enabled', '1');
+
+    Http::fake();
+
+    $this->postJson(route('newsletter.subscribe'), [
+        'name' => 'Visitante',
+        'email' => 'nao-e-um-email',
+    ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['email']);
+
+    Http::assertNothingSent();
+});
+
 it('rejeita honeypot quando habilitado', function () {
     SiteSetting::set('newsletter_integration_enabled', '1');
     Config::set('honeypot.enabled', true);

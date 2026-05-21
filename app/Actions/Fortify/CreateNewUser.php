@@ -2,7 +2,9 @@
 
 namespace App\Actions\Fortify;
 
+use App\Enums\NewsletterEventSource;
 use App\Models\User;
+use App\Services\Sendy\NewUserNewsletterSubscription;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -40,6 +42,9 @@ class CreateNewUser implements CreatesNewUsers
 
         $role = Role::findOrCreate('registered', 'web');
         $user->assignRole($role);
+
+        app(NewUserNewsletterSubscription::class)
+            ->subscribeNewUser($user, NewsletterEventSource::Registration);
 
         return $user;
     }

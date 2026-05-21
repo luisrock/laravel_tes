@@ -1,6 +1,6 @@
 ---
 name: newsletter sendy integration
-overview: "Integrar opt-in/opt-out da newsletter (Sendy lista 2, brand 1) em todo o site: checkbox no registro, toggle no painel, form AJAX em `/newsletters`, popup configurável para visitantes (com A/B e múltiplos gatilhos) e stats granulares. Arquitetura híbrida: escritas via API Sendy, leituras via MySQL do Sendy, com cache local em `users.newsletter_subscribed_at`. Execução compartimentalizada em 8 fases com validação humana entre cada uma."
+overview: "Integrar opt-in/opt-out da newsletter (Sendy lista 2, brand 1) em todo o site: auto-inscrição no registro/Google (variante B + toast), toggle no painel, form AJAX em `/newsletters`, popup configurável para visitantes (A/B e gatilhos) e stats granulares. Arquitetura híbrida: escritas via API Sendy, leituras via MySQL do Sendy, cache em `users.newsletter_subscribed_at`. 8 fases com validação humana entre cada uma."
 todos:
   - id: phase0
     content: "FASE 0 — Briefing, feature flag e leitura do plano (sem código de domínio)"
@@ -15,8 +15,8 @@ todos:
     content: "FASE 3 — Endpoint público + form AJAX em /newsletters (substitui link externo, 3 estados)"
     status: completed
   - id: phase4
-    content: "FASE 4 — Checkbox no registro (Fortify) + opt-in automático Google OAuth + toast"
-    status: pending
+    content: "FASE 4 — Rule::email + auto-inscrição registro/Google (variante B) + toast"
+    status: completed
   - id: phase5
     content: "FASE 5 — Toggle Livewire no painel /minha-conta/perfil"
     status: completed
@@ -47,9 +47,9 @@ Integração ponta-a-ponta para captura de inscrições na newsletter do T&S, si
 | 0 | Briefing + feature flag + .env.example confirmado | `validated` | 2026-05-20 | — |
 | 1 | SendyService + jobs + testes unit | `validated` | 2026-05-20 | — |
 | 2 | Migrations + Models + Enums + DTOs | `validated` | 2026-05-20 | — |
-| 3 | Form AJAX em /newsletters + Filament kill switch | `validated` | 2026-05-20 | — |
-| 4 | Checkbox registro + Google OAuth | `pending` | — | — |
-| 5 | Toggle no painel /minha-conta/perfil | `validated` | 2026-05-20 | — |
+| 3 | Form AJAX em /newsletters + Filament kill switch | `validated` | 2026-05-20 | 4253b7c |
+| 4 | Auto-inscrição registro/Google + Rule::email + toast | `validated` | 2026-05-21 | — |
+| 5 | Toggle no painel /minha-conta/perfil | `validated` | 2026-05-20 | 4253b7c |
 | 6 | Popup visitante + Filament settings | `pending` | — | — |
 | 7 | Filament stats + sync command | `pending` | — | — |
 | 8 | PROJECT_BRIEF + Pint + suite final | `pending` | — | — |
@@ -86,11 +86,43 @@ Status válidos: `pending` | `in_progress` | `awaiting_validation` | `validated`
 ## CONVENÇÕES DO PROJETO
 
 - PHP 8.3, Laravel 12 (estrutura legada — middleware em `Http/Kernel.php`, schedule em `Console/Kernel.php`).
-- Filament 4 (painel `/painel`), Tailwind v3 com prefixo `tw-`, Livewire 3.
+- Filament 4 (painel `/admin/painel`), Tailwind v3 com prefixo `tw-`, Livewire 3.
 - Form Requests para validação. Eloquent + relações tipadas. `php artisan make:*` para scaffolding.
 - Honeypot Spatie (`@honeypot`) em todos os forms públicos.
 - Laravel Boost MCP habilitado: usar `search-docs`, `database-schema`, `database-query`, `tinker`, `list-artisan-commands`.
 - Toda comunicação com user em **português**.
+
+### Validação de email (Laravel 12 — padrão do projeto)
+
+Todos os endpoints/formulários da newsletter que aceitam email de terceiros devem usar o rule builder nativo:
+
+```php
+use Illuminate\Validation\Rule;
+
+'email' => [
+    'required',
+    'string',
+    'max:255',
+    Rule::email()
+        ->rfcCompliant(strict: false)
+        ->validateMxRecord()
+        ->preventSpoofing(),
+],
+```
+
+Equivalente legado: `email:rfc,dns,spoof` (preferir `Rule::email()` em código novo).
+
+- `NewsletterSubscribeRequest` usa `Rule::email()` (refatorado na Fase 4).
+- Em dev/testes Pest, emails de teste devem usar domínios com MX real (ex.: `@gmail.com`), não `@example.com`.
+- Requer extensão PHP `intl` para `preventSpoofing()` / `dns` (já usada no projeto).
+
+### Ambiente dev vs prod (Sendy)
+
+| | Dev (Mac) | Prod |
+|---|-----------|------|
+| `SENDY_DB_ENABLED` | `false` | `true` |
+| Leituras | API Sendy | DB + API |
+| Kill switch | Filament `/admin/painel/newsletter-integration-settings` | idem |
 
 ## DECISÕES ARQUITETURAIS (já fechadas)
 
@@ -483,10 +515,20 @@ Primeiro entregável visível: substituir o link externo do Sendy na página `/n
 
 ## Spec do `NewsletterSubscribeRequest`
 ```php
+use Illuminate\Validation\Rule;
+
 public function rules(): array {
     return [
         'name' => ['required', 'string', 'max:255'],
-        'email' => ['required', 'email:rfc,dns', 'max:255'],
+        'email' => [
+            'required',
+            'string',
+            'max:255',
+            Rule::email()
+                ->rfcCompliant(strict: false)
+                ->validateMxRecord()
+                ->preventSpoofing(),
+        ],
     ];
 }
 
@@ -494,9 +536,10 @@ public function messages(): array {
     return [
         'name.required' => 'Informe o seu nome.',
         'email.required' => 'Informe o seu email.',
-        'email.email' => 'O email informado é inválido.',
+        'email' => 'O email informado é inválido.',
     ];
 }
+```
 
 public function authorize(): bool {
     // Se logado, força que email batenha o do user (evita phishing)
@@ -669,132 +712,78 @@ Por (estrutura simplificada — completar com Tailwind do projeto):
 6. **IMPORTANTE**: voltar a flag para `'0'` antes do commit.
 
 ## Critérios de aceitação
-- [ ] Testes Pest da fase verdes.
-- [ ] Suite completa sem regressão.
-- [ ] Validação no browser concluída e flag volta a `'0'`.
-- [ ] **Site mantém link externo** quando flag=false (garante que prod não muda).
+- [x] Testes Pest da fase verdes (`--filter=NewslettersPageForm` + `NewsletterIntegrationSettings`).
+- [x] Suite completa sem regressão.
+- [x] Validação no browser concluída (user confirmou).
+- [x] Flag OFF = nenhuma UI de inscrição (tudo ou nada; sem link externo).
 
 ## Notas de execução
-_(preencher)_
+- **UI:** form compacto à direita (`justify-between`); botão «Receba»; guest only; logado inscrito «Você está inscrito!»; logado não inscrito link AJAX «Receba atualização semanal».
+- **Sync:** `CampaignsPageController` + `SendyService::syncUserSubscriptionState()` consulta API e atualiza cache `users`.
+- **Filament:** `NewsletterIntegrationSettings` para kill switch (extra).
+- **Commit:** `4253b7c` em `master`.
+- **Prod:** migrate automático; `SiteSettingsSeeder --force` feito pelo user.
 
 ---
 
-# FASE 4 — Checkbox no registro + Google OAuth + toast
+# FASE 4 — Auto-inscrição no registro + Google OAuth + toast (variante B)
 
 ## Objetivo
-Capturar opt-in no momento do registro (form email com checkbox; Google com auto-subscribe + toast).
+Inscrição automática na newsletter para novos usuários (email e Google), com toast informativo; falha no Sendy não bloqueia o cadastro.
 
 ## Pré-requisitos
-- Fase 3 validada.
+- Fases 3 e 5 validadas.
 
-## Arquivos a tocar
-- `resources/views/auth/register.blade.php` — adicionar checkbox.
-- `app/Actions/Fortify/CreateNewUser.php` — aceitar `newsletter_optin`.
-- `app/Http/Controllers/GoogleAuthController.php` — disparar subscribe + flash session.
-- `resources/views/layouts/user-panel.blade.php` — incluir toast.
+## Tarefa transversal (início da Fase 4)
+
+Refatorar `NewsletterSubscribeRequest` para `Rule::email()` (Laravel 12) conforme secção **Validação de email** em CONVENÇÕES. Atualizar testes em `NewslettersPageFormTest` se mensagens de erro mudarem.
+
+## Arquivos entregues
+- `app/Services/Sendy/NewUserNewsletterSubscription.php`
+- `app/Actions/Fortify/CreateNewUser.php`
+- `app/Http/Controllers/GoogleAuthController.php`
+- `resources/views/partials/newsletter-registration-toast.blade.php`
+- `resources/views/layouts/app.blade.php`
+- `app/Http/Requests/NewsletterSubscribeRequest.php` (Rule::email)
 - `tests/Feature/Newsletter/RegistrationNewsletterTest.php`
 - `tests/Feature/Newsletter/GoogleOAuthOptInTest.php`
 
-## Spec da view de registro
-Adicionar entre o campo de confirm password e `@honeypot`:
-```blade
-@if (\App\Models\SiteSetting::getAsBool('newsletter_integration_enabled'))
-    <label class="tw-flex tw-items-start tw-gap-2 tw-text-sm tw-text-slate-600">
-        <input type="checkbox" name="newsletter_optin" value="1" {{ old('newsletter_optin', '1') ? 'checked' : '' }}
-            class="tw-mt-1 tw-rounded tw-border-slate-300 tw-text-brand-600 focus:tw-ring-brand-500">
-        <span>Quero receber email semanal de atualização em Teses &amp; Súmulas</span>
-    </label>
-@endif
-```
+## Spec implementada (variante B — acordada com o user)
 
-## Spec do `CreateNewUser`
-Após `User::create()`:
-```php
-if ($this->shouldSubscribeToNewsletter($input)) {
-    SubscribeToSendyJob::dispatch(
-        $user->email,
-        $user->name,
-        NewsletterSubscriptionContext::fromRequest(
-            NewsletterEventSource::Registration,
-            request(),
-            $user->id,
-        ),
-    );
-}
-
-return $user;
-```
-
-```php
-private function shouldSubscribeToNewsletter(array $input): bool
-{
-    if (! app(SendyService::class)->isEnabled()) {
-        return false;
-    }
-    return filter_var($input['newsletter_optin'] ?? false, FILTER_VALIDATE_BOOLEAN);
-}
-```
-
-## Spec do `GoogleAuthController`
-No branch onde `User::create()` é chamado (linhas 37-49 do arquivo atual), após `Auth::login()`:
-```php
-if (app(SendyService::class)->isEnabled()) {
-    SubscribeToSendyJob::dispatch(
-        $user->email,
-        $user->name,
-        NewsletterSubscriptionContext::fromRequest(
-            NewsletterEventSource::GoogleOauth,
-            request(),
-            $user->id,
-        ),
-    );
-    session()->flash('newsletter.auto_subscribed', true);
-}
-```
-
-## Spec do toast (em `layouts/user-panel.blade.php`)
-```blade
-@if (session('newsletter.auto_subscribed'))
-    <div x-data="{ open: true }" x-show="open" x-init="setTimeout(() => open = false, 8000)"
-         class="tw-fixed tw-bottom-4 tw-right-4 tw-z-50 tw-max-w-sm tw-rounded-lg tw-bg-emerald-600 tw-text-white tw-shadow-lg tw-p-4">
-        <div class="tw-flex tw-items-start tw-gap-2">
-            <p class="tw-text-sm">
-                Você foi inscrito na nossa newsletter semanal. Para sair, vá em
-                <a href="{{ route('user-panel.profile') }}" class="tw-underline">Perfil</a>.
-            </p>
-            <button @click="open = false" class="tw-text-white/80 hover:tw-text-white">&times;</button>
-        </div>
-    </div>
-@endif
-```
+- **Sem checkbox** no registro.
+- **`NewUserNewsletterSubscription`**: chamada síncrona a `SendyService::subscribe()` após criar o user (nunca quebra o cadastro).
+- **Toast** (`partials/newsletter-registration-toast.blade.php` em `layouts/app.blade.php`):
+  - `subscribed` — sucesso ou «Already subscribed.» (já na lista).
+  - `invite` — falha Sendy; texto convida a inscrever via Minha Conta > Perfil.
+- Sessão `newsletter.registration_toast` com `session()->pull()` na primeira página que renderiza o partial (sobrevive à tela de verificação de email).
+- **Google**: só novos users (`$isNewUser`); re-login não dispara subscribe nem toast.
 
 ## Testes
-- `RegistrationNewsletterTest`:
-  - Flag ON + checkbox marcado → User criado + job despachado (`Bus::fake()`).
-  - Flag ON + checkbox desmarcado → User criado + **nenhum** job.
-  - Flag OFF → User criado + nenhum job.
-  - Checkbox renderiza apenas se flag ON.
-- `GoogleOAuthOptInTest`:
-  - Novo user via Google (mock Socialite) + flag ON → job + flash session.
-  - User Google existente re-login → **nada** disparado.
-  - Flag OFF → nada disparado.
+- `NewslettersPageFormTest`: email inválido → 422 JSON; `Rule::email()` no request.
+- `RegistrationNewsletterTest`: subscribe OK / já inscrito / falha Sendy / flag OFF; toast HTML; toast na `verification.notice`.
+- `GoogleOAuthOptInTest`: novo user (OK, já inscrito, falha); re-login sem toast; flag OFF.
 
 ## Validação no browser
-1. Flag = `'1'` local. Registrar conta nova com checkbox marcado → conferir email no Sendy.
-2. Registrar com checkbox desmarcado → conferir que NÃO foi adicionado.
-3. Login Google → ver toast aparecer em `/minha-conta` + email no Sendy.
-4. Login Google de novo (user já existente) → SEM toast, sem evento novo.
-5. Flag = `'0'`: checkbox some, Google OAuth não inscreve.
-6. Voltar flag a `'0'` antes do commit.
+1. Flag = `'1'`. Registrar conta nova → toast `subscribed` (ou na `/email/verify`) + email no Sendy.
+2. Simular falha Sendy → registo conclui + toast `invite` com link ao Perfil.
+3. Login Google (conta nova) → toast em `/minha-conta` + email no Sendy.
+4. Login Google (conta existente) → sem toast.
+5. Flag = `'0'` → sem subscribe nem toast.
+6. User validou 2026-05-21 (novo user inscrito + toast OK).
 
 ## Critérios de aceitação
-- [ ] Testes da fase verdes.
-- [ ] Suite completa sem regressão.
-- [ ] Validação browser concluída.
-- [ ] Registro existente continua funcionando com flag OFF (não muda nada para o user atual).
+- [x] `NewsletterSubscribeRequest` usa `Rule::email()` (RFC + MX + anti-spoof).
+- [x] Testes da fase verdes (22 testes newsletter da fase + suite 622 passed).
+- [x] Suite completa sem regressão.
+- [x] Validação browser concluída (user confirmou 2026-05-21; verificação de email em dev não testada).
+- [x] Flag OFF: sem subscribe nem toast.
 
 ## Notas de execução
-_(preencher)_
+- **Variante B** (sem checkbox): `NewUserNewsletterSubscription` + toast `subscribed`/`invite`.
+- **Arquivos**: `CreateNewUser`, `GoogleAuthController`, `NewUserNewsletterSubscription`, partial toast, `layouts/app.blade.php`.
+- **Testes**: `RegistrationNewsletterTest`, `GoogleOAuthOptInTest`, caso email inválido em `NewslettersPageFormTest`.
+- **Pint**: OK. **Suite**: 622 passed.
+- **Browser**: user confirmou toast + inscrição com novo user (2026-05-21).
 
 ---
 
@@ -925,12 +914,14 @@ Em `resources/views/user-panel/profile.blade.php` antes do card "Atualizar senha
 4. Voltar flag a `'0'` antes do commit.
 
 ## Critérios de aceitação
-- [ ] Testes da fase verdes.
-- [ ] Suite completa sem regressão.
-- [ ] Validação browser com confirm() exato.
+- [x] Testes da fase verdes (`--filter=PanelToggle`).
+- [x] Suite completa sem regressão.
+- [x] Validação browser (user confirmou subscribe/unsubscribe + sync).
 
 ## Notas de execução
-_(preencher)_
+- **Adiantada** na mesma entrega que Fase 3 (commit `4253b7c`).
+- `NewsletterToggle` Livewire em `user-panel/profile.blade.php`; sync no `mount()` via API.
+- Confirm opt-out com texto exato do plano.
 
 ---
 

@@ -1,76 +1,120 @@
-# Prompt — Executor da integração Newsletter Sendy
+# Prompt — Continuação integração Newsletter Sendy
 
-Cole o conteúdo abaixo na nova conversa do Cursor. Não precisa de ajustes; tudo o que o agente executor precisa está nos dois arquivos referenciados (briefing do projeto + plano em fases).
+Cole o bloco abaixo numa **nova conversa** do Cursor. Não precisa de ajustes manuais.
 
 ---
 
-# Instruções para a IA executora
-
-Sou o agente responsável por executar a integração da newsletter T&S com o Sendy. **Antes de qualquer coisa, leia, nesta ordem**:
-
-1. `PROJECT_BRIEF.md` (raiz do projeto) — briefing compacto do site, stack, modelos, rotas, convenções.
-2. `ARQUIVOS_MD/NEWSLETTER_SENDY_PLAN.md` — plano detalhado em 8 fases, com critérios de aceitação, testes e gates de validação humana.
-3. `AGENTS.md` / `CLAUDE.md` (já carregados automaticamente como `always_applied_workspace_rules`).
-
-Depois confirme em uma única frase: "Li o briefing e o plano. Estou pronto para começar a Fase N." (substituindo N pela fase pendente mais antiga conforme o STATUS TRACKER do plano).
-
-## Regras de ouro (não negociáveis)
-
-1. **Execução compartimentalizada**: trabalho avança UMA fase por vez. Cada fase tem um gate de validação humana ao fim. **NÃO inicie a próxima fase sem o user dizer explicitamente "Pode avançar para a Fase N+1"**.
-2. **Site sempre estável**: o user pode commitar/empurrar para prod a qualquer momento. Toda integração com Sendy passa por `SiteSetting::getAsBool('newsletter_integration_enabled')` (default `'0'`). Quando `false`, UI nova esconde-se e fallbacks antigos (ex.: link externo em `/newsletters`) seguem ativos.
-3. **Falhas no Sendy não podem quebrar o site**: todo chamado externo em `try/catch` + log. Service sempre retorna DTO de sucesso/erro; jamais throw para o caller.
-4. **Testes obrigatórios por fase**: a fase só está concluída quando os testes específicos passam (`php artisan test --compact --filter=...`) E a suite completa não regrediu (`php artisan test --compact`).
-5. **Validação no browser obrigatória** quando a fase tem componente visual: reporte os passos exatos (URLs, credenciais de teste se necessárias, o que olhar) para o user testar em `https://teses.test`. **Aguarde a confirmação** antes de marcar a fase como `validated`.
-6. **Atualize o plano no fim de cada fase**:
-   - Marcar status (`validated` + data) na tabela STATUS TRACKER no topo do plano.
-   - Marcar a checkbox de gate na seção da fase.
-   - Preencher a subseção "Notas de execução" com decisões tomadas, comandos rodados, número de testes verdes, e qualquer surpresa que pode ser útil em um restart de contexto.
-7. **Pint antes de cada handoff/commit**: `vendor/bin/pint --dirty --format agent`.
-8. **Use Laravel Boost MCP**: `search-docs` antes de mexer em Laravel/Filament/Livewire/Pest; `database-schema` antes de queries; `tinker` para debug; `list-artisan-commands` para parâmetros de comandos.
-9. **PHP 8.3** — confirmar com `php -v` na primeira fase.
-10. **Comunicação em português** com o user.
-
-## Convenções específicas do projeto (não esqueça)
-
-- Estrutura Laravel 10 legada (middleware em `app/Http/Kernel.php`, schedule em `app/Console/Kernel.php`). NÃO mexer em `bootstrap/app.php`.
-- Tailwind v3 com prefixo `tw-`. Cor primária bordô `#912F56`.
-- Form Requests para validação. Eloquent + return types tipados.
-- `php artisan make:*` com `--no-interaction` para scaffolding.
-- Honeypot Spatie (`@honeypot`) em forms públicos.
-- Padrão de Filament settings page já existente em `app/Filament/Pages/MeteredWallSettings.php` — espelhar.
-- Testes Pest. Helpers em `tests/Pest.php`. SQLite in-memory; para testar connection `sendy` use o helper `fakeSendyConnection()` que será criado na Fase 1.
-
-## Workflow esperado por fase
+## Bloco para colar no chat
 
 ```
+Executar integração Newsletter Sendy — continuação (Fase 6 em diante).
+
+Antes de qualquer código, ler nesta ordem:
+1. PROJECT_BRIEF.md (raiz)
+2. ARQUIVOS_MD/NEWSLETTER_SENDY_PLAN.md (STATUS TRACKER + seção Fase 6)
+3. ARQUIVOS_MD/NEWSLETTER_SENDY_EXECUTION_PROMPT.md (este arquivo — regras operacionais)
+4. AGENTS.md / CLAUDE.md (regras do projeto)
+
+Confirmar em uma frase: "Li o briefing e o plano. Estou pronto para começar a Fase N." (N = primeira fase `pending` no STATUS TRACKER → **6**).
+
+## Estado já entregue
+
+| Fase | Status | Entregáveis principais |
+|------|--------|------------------------|
+| 0 | validated | `newsletter_integration_enabled` no seeder; `.env.example` Sendy + `SENDY_DB_ENABLED` |
+| 1 | validated | `SendyService`, jobs, enums, DTOs, `fakeSendyConnection()` |
+| 2 | validated | migrations `users` + `newsletter_subscription_events`, models |
+| 3 | validated | `POST /newsletter/subscribe`, form AJAX `/newsletters`, sync API no load |
+| 4 | validated | **Variante B**: auto-inscrição registro + Google; toast; `Rule::email()` |
+| 5 | validated | `NewsletterToggle` em `/minha-conta/perfil` |
+| 6 | **pending** | popup visitante + Filament `NewsletterPopupSettings` |
+| 7–8 | pending | stats/sync + `PROJECT_BRIEF.md` |
+
+### Fase 4 — detalhe (não regredir)
+
+- **Sem checkbox** no registro. Novos users (email ou Google) são inscritos automaticamente se `newsletter_integration_enabled=true`.
+- **`NewUserNewsletterSubscription`**: `SendyService::subscribe()` **síncrono** após criar user — nunca quebra o cadastro.
+- **Toast** (`partials/newsletter-registration-toast.blade.php` em `layouts/app.blade.php`):
+  - `subscribed` — sucesso ou «Already subscribed.» (já na lista Sendy).
+  - `invite` — falha Sendy; convida inscrição via Minha Conta > Perfil.
+- Sessão `newsletter.registration_toast` com `session()->pull()` (sobrevive à página `/email/verify`).
+- Google: só `$isNewUser`; re-login sem subscribe nem toast.
+- `NewsletterSubscribeRequest` usa `Rule::email()` (RFC + MX + anti-spoof).
+
+Extra: `app/Filament/Pages/NewsletterIntegrationSettings.php` — kill switch em `/admin/painel/newsletter-integration-settings`.
+
+## Regras de ouro
+
+1. **Uma fase por vez.** Só avançar após o user dizer: "Pode avançar para a Fase N+1".
+2. **Kill switch:** `SiteSetting::getAsBool('newsletter_integration_enabled', false)`. Flag OFF = **nada** de UI de inscrição (sem link externo; tudo ou nada).
+3. **Sendy não quebra o site:** try/catch + `SendyResult` / enums; nunca throw ao caller.
+4. **Testes:** `php artisan test --compact --filter=...` da fase + suite completa. Pre-commit roda Pint + Pest + MySQL.
+5. **Browser:** passos em `https://teses.test`; aguardar confirmação antes de marcar `validated`.
+6. **Atualizar** STATUS TRACKER + notas no plano ao fim de cada fase.
+7. **Pint:** `vendor/bin/pint --dirty --format agent`.
+8. **Boost MCP:** `search-docs`, `database-schema`, `tinker`, `list-artisan-commands`.
+9. **PHP 8.3** · **Português** com o user.
+
+## Ambientes
+
+- **Dev (Mac):** `SENDY_DB_ENABLED=false` — leituras Sendy via API; testes usam `fakeSendyConnection()`.
+- **Prod:** `SENDY_DB_ENABLED=true`; deploy automático após push em `master`.
+- **Flag ON/OFF:** Filament → Newsletter Sendy (não depender de tinker).
+
+## Validação de email (Laravel 12)
+
+`Rule::email()->rfcCompliant(strict: false)->validateMxRecord()->preventSpoofing()` em Form Requests da newsletter. Em testes Pest, emails válidos com domínio MX real (ex. `@gmail.com`).
+
+## UI /newsletters (não regredir)
+
+- Guest: inputs compactos + botão **Receba**.
+- Logado inscrito: **Você está inscrito!**
+- Logado não inscrito: link **Receba atualização semanal** (AJAX).
+
+## Próxima fase: 6
+
+Popup visitante (Alpine, 3 gatilhos timer/exit-intent/scroll, A/B, cookies), `NewsletterPopupSettings` no Filament, `POST /newsletter/event` para tracking. Spec completa na secção FASE 6 do plano. Espelhar `MeteredWallSettings.php`.
+
+Não escrever código até o user confirmar: "Pode avançar para a Fase 6" / "ok".
+```
+
+---
+
+# Instruções para a IA executora (referência permanente)
+
+### Workflow por fase
+
 1. Ler a seção da fase no plano.
-2. Confirmar com o user que vamos começar essa fase ("Vou iniciar a Fase N. Faz sentido?").
-3. Implementar conforme spec (sem desviar — se algo não estiver claro, perguntar).
-4. Rodar testes específicos + suite completa.
-5. Rodar Pint.
-6. Listar para o user os passos exatos de validação no browser (se aplicável).
-7. Aguardar resposta do user.
-8. Após validação, atualizar plano (STATUS TRACKER + checkbox + Notas de execução).
+2. Confirmar com o user: "Vou iniciar a Fase N. Faz sentido?"
+3. Implementar conforme spec (`search-docs` antes de Laravel/Filament/Livewire).
+4. Testes da fase + suite completa.
+5. Pint.
+6. Passos de validação no browser (se aplicável).
+7. Aguardar confirmação do user.
+8. Atualizar plano (STATUS TRACKER + notas).
 9. Perguntar: "Posso avançar para a Fase N+1?"
-```
 
-## Em caso de bloqueio
+### Arquivos-chave da Fase 4 (referência)
 
-- Se um teste falhar e você não souber resolver em 2 tentativas: pare, reporte ao user com diagnóstico e opções.
-- Se a API/DB do Sendy não responder: pare, reporte, NÃO improvise mocks que mascarem o problema.
-- Se um requisito do plano colidir com a realidade do código existente: pare, reporte, sugira ajuste, espere decisão.
+| Arquivo | Função |
+|---------|--------|
+| `app/Services/Sendy/NewUserNewsletterSubscription.php` | Subscribe síncrono + sessão toast |
+| `app/Actions/Fortify/CreateNewUser.php` | Chama após criar user |
+| `app/Http/Controllers/GoogleAuthController.php` | Só se `$isNewUser` |
+| `resources/views/partials/newsletter-registration-toast.blade.php` | Toast subscribed/invite |
+| `resources/views/layouts/app.blade.php` | Inclui partial |
+| `tests/Feature/Newsletter/RegistrationNewsletterTest.php` | Testes registro |
+| `tests/Feature/Newsletter/GoogleOAuthOptInTest.php` | Testes Google |
 
-## Smoke test inicial (Fase 0/1)
+### Convenções do projeto
 
-Antes de escrever qualquer linha de código de domínio, confirme via tinker (ou Boost `tinker` MCP):
-- `config('services.sendy.api_base_url')` retorna URL não vazia.
-- `config('services.sendy.list_id')` retorna string não vazia (hash).
-- `config('services.sendy.list_internal_id')` retorna `2` (ou o que estiver no .env).
-- `DB::connection('sendy')->getPdo()` conecta sem erro.
-- `DB::connection('sendy')->table('subscribers')->limit(1)->get()` retorna pelo menos 1 linha.
+- Estrutura Laravel 10 legada (`Http/Kernel.php`, `Console/Kernel.php`). Não mexer em `bootstrap/app.php`.
+- Tailwind `tw-`, Form Requests, Eloquent tipado, `@honeypot` em forms públicos.
+- Filament settings: espelhar `MeteredWallSettings.php`.
+- Helpers: `tests/Pest.php` → `fakeSendyConnection()`, `createAdminUser()`.
 
-Reportar o resultado desses 5 checks ao user antes de avançar.
+### Em caso de bloqueio
 
----
-
-Comece agora pela leitura dos arquivos e pela confirmação. Não escreva código até ter o "ok" para a Fase 0.
+- Teste falha 2x → parar, reportar.
+- Sendy indisponível → reportar, não mascarar.
+- Plano vs código → parar, propor ajuste, aguardar decisão.

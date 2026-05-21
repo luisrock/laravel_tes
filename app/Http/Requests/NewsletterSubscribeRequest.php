@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class NewsletterSubscribeRequest extends FormRequest
 {
@@ -22,7 +23,15 @@ class NewsletterSubscribeRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email:rfc,dns', 'max:255'],
+            'email' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::email()
+                    ->rfcCompliant(strict: false)
+                    ->validateMxRecord()
+                    ->preventSpoofing(),
+            ],
         ];
     }
 
@@ -34,7 +43,7 @@ class NewsletterSubscribeRequest extends FormRequest
         return [
             'name.required' => 'Informe o seu nome.',
             'email.required' => 'Informe o seu email.',
-            'email.email' => 'O email informado é inválido.',
+            'email' => 'O email informado é inválido.',
         ];
     }
 }

@@ -28,7 +28,9 @@
 </head>
 
 <body class="tw-bg-slate-50 tw-text-slate-900 tw-flex tw-flex-col tw-min-h-screen">
-    
+
+    @include('partials.newsletter-registration-toast')
+
     @include('partials.header')
 
     <main class="tw-flex-grow tw-py-12 tw-px-4 sm:tw-px-6 lg:tw-px-8">

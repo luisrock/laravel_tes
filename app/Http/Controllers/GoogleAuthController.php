@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\NewsletterEventSource;
 use App\Models\User;
+use App\Services\Sendy\NewUserNewsletterSubscription;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
@@ -28,11 +30,15 @@ class GoogleAuthController extends Controller
         $user = User::query()->where('google_id', $googleUser->getId())->first()
             ?? User::query()->where('email', $googleUser->getEmail())->first();
 
+        $isNewUser = false;
+
         if ($user) {
             if (! $user->google_id) {
                 $user->update(['google_id' => $googleUser->getId()]);
             }
         } else {
+            $isNewUser = true;
+
             $user = User::create([
                 'name' => $this->generateUniqueName($googleUser->getName()),
                 'email' => $googleUser->getEmail(),
@@ -45,6 +51,11 @@ class GoogleAuthController extends Controller
         }
 
         Auth::login($user, remember: true);
+
+        if ($isNewUser) {
+            app(NewUserNewsletterSubscription::class)
+                ->subscribeNewUser($user, NewsletterEventSource::GoogleOauth);
+        }
 
         return redirect()->intended(config('fortify.home', '/minha-conta'));
     }
