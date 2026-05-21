@@ -124,7 +124,9 @@
 
 @section('scripts')
     @if ($integrationEnabled && ! $isAlreadySubscribed)
-        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js"></script>
+        @once('alpinejs-3.14.3')
+            <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js"></script>
+        @endonce
         <script>
             function newsletterForm() {
                 return {

@@ -10,6 +10,7 @@ use App\Services\Sendy\NewsletterSubscriptionContext;
 use App\Services\Sendy\SendyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 
 final class NewsletterSubscriptionController extends Controller
@@ -25,6 +26,27 @@ final class NewsletterSubscriptionController extends Controller
             ], 503);
         }
 
+        $email = strtolower(trim($request->user()?->email ?? $request->string('email')->toString()));
+        $lockKey = 'newsletter-subscribe:'.hash('sha256', $email);
+
+        /** @var JsonResponse $response */
+        $response = Cache::lock($lockKey, 15)->block(5, function () use ($request, $email): JsonResponse {
+            if ($this->hasRecentSuccessfulSubscription($email)) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Inscrição realizada! Verifique seu email.',
+                    'already_subscribed' => false,
+                ]);
+            }
+
+            return $this->performSubscribe($request, $email);
+        });
+
+        return $response;
+    }
+
+    private function performSubscribe(NewsletterSubscribeRequest $request, string $email): JsonResponse
+    {
         $userId = $request->user()?->id;
         $silent = $userId
             ? (bool) config('services.sendy.silent_authenticated', true)
@@ -47,8 +69,6 @@ final class NewsletterSubscriptionController extends Controller
                 : null;
         }
 
-        $email = $request->user()?->email ?? $request->string('email')->toString();
-
         $result = $this->sendy->subscribe(
             email: $email,
             name: $request->string('name')->toString(),
@@ -62,6 +82,18 @@ final class NewsletterSubscriptionController extends Controller
                 : ($result->success ? 'Inscrição realizada! Verifique seu email.' : 'Não foi possível inscrever agora. Tente novamente em instantes.'),
             'already_subscribed' => $result->alreadySubscribed,
         ]);
+    }
+
+    private function hasRecentSuccessfulSubscription(string $email): bool
+    {
+        return NewsletterSubscriptionEvent::query()
+            ->where('email', $email)
+            ->whereIn('action', [
+                NewsletterEventAction::Subscribed->value,
+                NewsletterEventAction::AlreadySubscribed->value,
+            ])
+            ->where('created_at', '>=', now()->subSeconds(60))
+            ->exists();
     }
 
     public function trackEvent(Request $request): JsonResponse

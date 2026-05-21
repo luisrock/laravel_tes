@@ -80,6 +80,28 @@ it('aplica rate limit de 30 requisições por minuto', function () {
     ])->assertStatus(429);
 });
 
+it('ignora segundo POST subscribe duplicado em menos de 60 segundos', function () {
+    config()->set('services.sendy.api_base_url', 'https://sendy.test');
+    config()->set('services.sendy.api_token', 'test-token');
+    config()->set('services.sendy.list_id', 'list-hash');
+    config()->set('services.sendy.list_internal_id', 2);
+
+    \Illuminate\Support\Facades\Http::fake([
+        'https://sendy.test/subscribe' => \Illuminate\Support\Facades\Http::response('true'),
+    ]);
+
+    $payload = [
+        'name' => 'Ivan',
+        'email' => 'dedup-test@gmail.com',
+        'from_popup' => '1',
+    ];
+
+    $this->postJson(route('newsletter.subscribe'), $payload)->assertSuccessful();
+    $this->postJson(route('newsletter.subscribe'), $payload)->assertSuccessful();
+
+    \Illuminate\Support\Facades\Http::assertSentCount(1);
+});
+
 it('inscrição via popup grava source popup no evento', function () {
     config()->set('services.sendy.api_base_url', 'https://sendy.test');
     config()->set('services.sendy.api_token', 'test-token');

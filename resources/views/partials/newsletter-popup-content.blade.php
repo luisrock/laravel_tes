@@ -112,7 +112,7 @@
                     </label>
                     <button
                         type="submit"
-                        :disabled="loading"
+                        :disabled="loading || submitting"
                         class="tw-w-full tw-rounded-lg tw-bg-brick-600 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-shadow-lg tw-shadow-brick-600/30 hover:tw-bg-brick-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-brick-500/40 disabled:tw-opacity-50"
                         x-text="cta"
                     ></button>
@@ -137,7 +137,9 @@
     </div>
 </div>
 
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js"></script>
+@once('alpinejs-3.14.3')
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js"></script>
+@endonce
 <script>
     function newsletterPopup(config) {
         return {
@@ -149,6 +151,7 @@
             name: '',
             email: '',
             loading: false,
+            submitting: false,
             message: '',
             success: false,
             armed: false,
@@ -270,6 +273,11 @@
             },
 
             async submit(event) {
+                if (this.submitting || this.loading) {
+                    return;
+                }
+
+                this.submitting = true;
                 this.loading = true;
                 this.message = '';
                 const formData = new FormData(event.target);
@@ -299,8 +307,8 @@
                 } catch (e) {
                     this.success = false;
                     this.message = 'Erro de rede. Tente em instantes.';
-                } finally {
                     this.loading = false;
+                    this.submitting = false;
                 }
             },
 
