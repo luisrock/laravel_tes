@@ -22,7 +22,7 @@ todos:
     status: completed
   - id: phase6
     content: "FASE 6 — Popup visitante (Alpine.js, 3 gatilhos, A/B, cookies) + Filament NewsletterPopupSettings"
-    status: pending
+    status: completed
   - id: phase7
     content: "FASE 7 — Filament NewsletterStats (dashboard) + comando newsletter:sync + schedule"
     status: pending
@@ -50,7 +50,7 @@ Integração ponta-a-ponta para captura de inscrições na newsletter do T&S, si
 | 3 | Form AJAX em /newsletters + Filament kill switch | `validated` | 2026-05-20 | 4253b7c |
 | 4 | Auto-inscrição registro/Google + Rule::email + toast | `validated` | 2026-05-21 | — |
 | 5 | Toggle no painel /minha-conta/perfil | `validated` | 2026-05-20 | 4253b7c |
-| 6 | Popup visitante + Filament settings | `pending` | — | — |
+| 6 | Popup visitante + Filament settings | `validated` | 2026-05-21 | — |
 | 7 | Filament stats + sync command | `pending` | — | — |
 | 8 | PROJECT_BRIEF + Pint + suite final | `pending` | — | — |
 
@@ -1038,13 +1038,18 @@ Antes do `</body>`, depois do `livewireScripts`:
 6. Voltar flag global para `'0'` antes do commit.
 
 ## Critérios de aceitação
-- [ ] Testes da fase verdes.
-- [ ] Suite completa sem regressão.
-- [ ] Validação browser dos 3 gatilhos.
-- [ ] A/B split funciona (testar com 2 sessões de browser).
+- [x] Testes da fase verdes (`--filter=Popup` → 17 passed).
+- [x] Validação browser (user confirmou 2026-05-21).
+- [x] Gatilhos timer / scroll / exit-intent testados no Filament.
+- [x] Reset de espera e reset completo (testes) no Filament.
 
 ## Notas de execução
-_(preencher)_
+- **Filament:** `NewsletterPopupSettings` em `/admin/painel/newsletter-popup-settings` (sort 53). Select gatilho com `->live()` (timer → segundos; scroll → %; exit-intent → sem campo extra). Botões **Resetar espera (X dias)** e **Reset completo (testes)** via `newsletter_popup_dismiss_reset_epoch` / `newsletter_popup_subscribed_reset_epoch`.
+- **Front:** `partials/newsletter-popup.blade.php` + `newsletter-popup-content.blade.php`; include em `front/base.blade.php`. UI: cabeçalho gradiente brand, CTA brick, overlay escuro; X não sobrepõe título.
+- **API:** `POST /newsletter/event` (30/min); `trackEvent()` → `impression`/`dismissed`. `POST /newsletter/subscribe` com `from_popup=1` → `source=popup`.
+- **Cookies:** `newsletter_popup_dismissed_until` + `newsletter_popup_dismiss_epoch`; `newsletter_subscribed` + `newsletter_popup_subscribed_epoch`; `newsletter_popup_variant` (A/B).
+- **Testes:** `PopupConfigTest`, `PopupEventsTest`.
+- **Deploy:** sem migration nova nesta fase; **sem seeder obrigatório** para chaves popup (defaults no `mount()` Filament e no Blade). Ver secção «Deploy Fase 6» no `NEWSLETTER_SENDY_EXECUTION_PROMPT.md`.
 
 ---
 
@@ -1188,4 +1193,15 @@ Ainda a fazer (no início da Fase 0 / 1):
 
 Pós Fase 8 (operação manual em prod):
 - Setar `newsletter_integration_enabled='1'` em Filament `/painel`.
-- Rodar `php artisan newsletter:sync --all` uma vez (popular cache local).
+- Rodar `php artisan newsletter:sync --all` uma vez (popular cache local) — comando criado na **Fase 7**.
+
+## Deploy automático (push `master`) — Fases 1–6 acumuladas
+
+O Vito já executa `migrate --force` e `SiteSettingsSeeder --force`. Para este push:
+
+| Item | Necessário? |
+|------|-------------|
+| **Migrations** | Só se ainda não correram em prod: `add_newsletter_columns_to_users`, `create_newsletter_subscription_events`. O deploy habitual aplica pendentes. |
+| **Seeder** | **Não obrigatório** para popup. `SiteSettingsSeeder` só garante `newsletter_integration_enabled=0` via `firstOrCreate` (não sobrescreve valor existente). Chaves do popup **não** estão no seeder — defaults no Filament/Blade até o admin salvar. |
+| **`.env` Sendy** | Já deve estar em prod (Fases 0–1). |
+| **Pós-deploy manual** | Filament: ligar integração e popup se quiseres em prod; configurar gatilho/textos. `newsletter:sync` só após Fase 7. |

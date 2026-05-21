@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\NewsletterEventAction;
 use App\Enums\NewsletterEventSource;
 use App\Http\Requests\NewsletterSubscribeRequest;
+use App\Models\NewsletterSubscriptionEvent;
 use App\Services\Sendy\NewsletterSubscriptionContext;
 use App\Services\Sendy\SendyService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 final class NewsletterSubscriptionController extends Controller
 {
@@ -26,12 +30,22 @@ final class NewsletterSubscriptionController extends Controller
             ? (bool) config('services.sendy.silent_authenticated', true)
             : (bool) config('services.sendy.silent_visitor', false);
 
-        $ctx = NewsletterSubscriptionContext::fromRequest(
-            NewsletterEventSource::NewslettersForm,
-            $request,
-            $userId,
-        );
+        $fromPopup = $request->boolean('from_popup');
+        $source = $fromPopup
+            ? NewsletterEventSource::Popup
+            : NewsletterEventSource::NewslettersForm;
+
+        $ctx = NewsletterSubscriptionContext::fromRequest($source, $request, $userId);
         $ctx->silent = $silent;
+
+        if ($fromPopup) {
+            $variant = $request->input('popup_variant');
+            $ctx->popupVariant = is_string($variant) && in_array($variant, ['A', 'B'], true) ? $variant : null;
+            $trigger = $request->input('popup_trigger');
+            $ctx->popupTrigger = is_string($trigger) && in_array($trigger, ['timer', 'exit_intent', 'scroll'], true)
+                ? $trigger
+                : null;
+        }
 
         $email = $request->user()?->email ?? $request->string('email')->toString();
 
@@ -48,5 +62,38 @@ final class NewsletterSubscriptionController extends Controller
                 : ($result->success ? 'Inscrição realizada! Verifique seu email.' : 'Não foi possível inscrever agora. Tente novamente em instantes.'),
             'already_subscribed' => $result->alreadySubscribed,
         ]);
+    }
+
+    public function trackEvent(Request $request): JsonResponse
+    {
+        if (! $this->sendy->isEnabled()) {
+            return response()->json(['ok' => false], 503);
+        }
+
+        $validated = $request->validate([
+            'action' => ['required', Rule::in([
+                NewsletterEventAction::Impression->value,
+                NewsletterEventAction::Dismissed->value,
+            ])],
+            'variant' => ['nullable', Rule::in(['A', 'B'])],
+            'trigger' => ['nullable', Rule::in(['timer', 'exit_intent', 'scroll'])],
+        ]);
+
+        $referrer = $request->headers->get('referer');
+        $userAgent = $request->userAgent();
+
+        NewsletterSubscriptionEvent::query()->create([
+            'email' => '',
+            'action' => $validated['action'],
+            'source' => NewsletterEventSource::Popup->value,
+            'popup_variant' => $validated['variant'] ?? null,
+            'popup_trigger' => $validated['trigger'] ?? null,
+            'ip' => $request->ip(),
+            'user_agent' => $userAgent !== null ? substr($userAgent, 0, 512) : null,
+            'referrer' => $referrer !== null ? substr($referrer, 0, 1024) : null,
+            'page_url' => $referrer !== null ? substr($referrer, 0, 512) : null,
+        ]);
+
+        return response()->json(['ok' => true]);
     }
 }

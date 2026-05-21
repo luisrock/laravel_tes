@@ -143,6 +143,8 @@
     @endauth
     @livewireScripts
 
+    @include('partials.newsletter-popup')
+
     @yield('scripts')
 </body>
 </html>

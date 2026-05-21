@@ -128,6 +128,8 @@ Route::get('/newsletters', [App\Http\Controllers\CampaignsPageController::class,
 Route::get('/newsletter/{slug}', [App\Http\Controllers\NewsletterController::class, 'show'])->name('newsletter.show');
 Route::middleware(['throttle:5,1'])->post('/newsletter/subscribe', [App\Http\Controllers\NewsletterSubscriptionController::class, 'subscribe'])
     ->name('newsletter.subscribe');
+Route::middleware(['throttle:30,1'])->post('/newsletter/event', [App\Http\Controllers\NewsletterSubscriptionController::class, 'trackEvent'])
+    ->name('newsletter.event');
 
 // Quiz Public Routes
 Route::get('/quizzes', [App\Http\Controllers\QuizController::class, 'index'])->name('quizzes.index');
