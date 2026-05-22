@@ -1,5 +1,9 @@
 @php
+    $authUser = auth()->user();
     $popupConfig = [
+        'initialName' => $authUser?->name ?? '',
+        'initialEmail' => $authUser?->email ?? '',
+        'emailReadonly' => (bool) $authUser,
         'trigger' => \App\Models\SiteSetting::get('newsletter_popup_trigger', 'timer'),
         'delaySeconds' => (int) \App\Models\SiteSetting::get('newsletter_popup_delay_seconds', '20'),
         'scrollPercent' => (int) \App\Models\SiteSetting::get('newsletter_popup_scroll_percent', '50'),
@@ -107,7 +111,8 @@
                             maxlength="255"
                             placeholder="Seu e-mail"
                             x-model="email"
-                            class="tw-block tw-w-full tw-rounded-lg tw-border tw-border-slate-200 tw-bg-white tw-px-3 tw-py-2.5 tw-text-sm tw-text-slate-900 tw-shadow-sm placeholder:tw-text-slate-400 focus:tw-border-brand-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-brand-500/20"
+                            :readonly="emailReadonly"
+                            class="tw-block tw-w-full tw-rounded-lg tw-border tw-border-slate-200 tw-bg-white tw-px-3 tw-py-2.5 tw-text-sm tw-text-slate-900 tw-shadow-sm placeholder:tw-text-slate-400 focus:tw-border-brand-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-brand-500/20 disabled:tw-cursor-not-allowed disabled:tw-bg-slate-50"
                         >
                     </label>
                     <button
@@ -148,8 +153,9 @@
             title: '',
             body: '',
             cta: '',
-            name: '',
-            email: '',
+            name: config.initialName || '',
+            email: config.initialEmail || '',
+            emailReadonly: !!config.emailReadonly,
             loading: false,
             submitting: false,
             message: '',

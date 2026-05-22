@@ -5,6 +5,7 @@ use App\Models\SiteSetting;
 use App\Models\User;
 
 beforeEach(function () {
+    config()->set('services.sendy.list_internal_id', 2);
     SiteSetting::set('newsletter_integration_enabled', '0');
     SiteSetting::set('newsletter_popup_enabled', '0');
 });
@@ -75,17 +76,80 @@ it('resetPopupTestCookies atualiza epochs de dismiss e subscribed', function () 
         ->and((int) SiteSetting::get('newsletter_popup_subscribed_reset_epoch'))->toBeGreaterThan(0);
 });
 
-it('não inclui popup para utilizador autenticado', function () {
+it('inclui popup para utilizador autenticado não inscrito no Sendy', function () {
     SiteSetting::set('newsletter_integration_enabled', '1');
     SiteSetting::set('newsletter_popup_enabled', '1');
+    fakeSendyConnection();
 
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'newsletter_subscribed_at' => null,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('searchpage'))
+        ->assertSuccessful()
+        ->assertSee('newsletterPopup(', false)
+        ->assertSee('data-testid="newsletter-popup"', false)
+        ->assertSee($user->email, false)
+        ->assertSee('emailReadonly', false);
+});
+
+it('não inclui popup para utilizador autenticado inscrito no Sendy', function () {
+    SiteSetting::set('newsletter_integration_enabled', '1');
+    SiteSetting::set('newsletter_popup_enabled', '1');
+    fakeSendyConnection();
+
+    $user = User::factory()->create([
+        'newsletter_subscribed_at' => null,
+    ]);
+
+    seedSendyActiveSubscriber($user->email);
 
     $this->actingAs($user)
         ->get(route('searchpage'))
         ->assertSuccessful()
         ->assertDontSee('newsletterPopup(', false)
         ->assertDontSee('data-testid="newsletter-popup"', false);
+});
+
+it('não inclui popup para logado com cache de inscrição quando Sendy falha', function () {
+    SiteSetting::set('newsletter_integration_enabled', '1');
+    SiteSetting::set('newsletter_popup_enabled', '1');
+
+    $user = User::factory()->create([
+        'newsletter_subscribed_at' => now(),
+    ]);
+
+    bindNewsletterCheckerMock(function ($mock): void {
+        $mock->shouldReceive('isEnabled')->andReturn(true);
+        $mock->shouldReceive('isSubscribed')->once()->andThrow(new RuntimeException('Sendy indisponível'));
+    });
+
+    $this->actingAs($user)
+        ->get(route('searchpage'))
+        ->assertSuccessful()
+        ->assertDontSee('newsletterPopup(', false)
+        ->assertDontSee('data-testid="newsletter-popup"', false);
+});
+
+it('inclui popup para logado sem cache quando Sendy falha', function () {
+    SiteSetting::set('newsletter_integration_enabled', '1');
+    SiteSetting::set('newsletter_popup_enabled', '1');
+
+    $user = User::factory()->create([
+        'newsletter_subscribed_at' => null,
+    ]);
+
+    bindNewsletterCheckerMock(function ($mock): void {
+        $mock->shouldReceive('isEnabled')->andReturn(true);
+        $mock->shouldReceive('isSubscribed')->once()->andThrow(new RuntimeException('Sendy indisponível'));
+    });
+
+    $this->actingAs($user)
+        ->get(route('searchpage'))
+        ->assertSuccessful()
+        ->assertSee('newsletterPopup(', false)
+        ->assertSee('data-testid="newsletter-popup"', false);
 });
 
 describe('Acesso à página NewsletterPopupSettings', function () {

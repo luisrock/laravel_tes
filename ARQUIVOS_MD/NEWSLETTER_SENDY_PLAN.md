@@ -26,6 +26,9 @@ todos:
   - id: phase7
     content: "FASE 7 — Filament NewsletterStats (dashboard) + comando newsletter:sync + schedule"
     status: completed
+  - id: phase7b
+    content: "FASE 7-B — Popup também para contas logadas não inscritas na lista Sendy"
+    status: validated
   - id: phase8
     content: "FASE 8 — Atualizar PROJECT_BRIEF.md + Pint + suite completa de testes"
     status: pending
@@ -51,7 +54,8 @@ Integração ponta-a-ponta para captura de inscrições na newsletter do T&S, si
 | 4 | Auto-inscrição registro/Google + Rule::email + toast | `validated` | 2026-05-21 | — |
 | 5 | Toggle no painel /minha-conta/perfil | `validated` | 2026-05-20 | 4253b7c |
 | 6 | Popup visitante + Filament settings | `validated` | 2026-05-21 | 55379a0, 9fdc9fa |
-| 7 | Filament stats + sync command + scheduler unificado | `validated` | 2026-05-21 | (este commit) |
+| 7 | Filament stats + sync command + scheduler unificado | `validated` | 2026-05-21 | d67024f |
+| 7-B | Popup para logados não inscritos (Sendy) | `validated` | 2026-05-22 | — |
 | 8 | PROJECT_BRIEF + Pint + suite final | `pending` | — | — |
 
 Status válidos: `pending` | `in_progress` | `awaiting_validation` | `validated` | `blocked`.
@@ -1129,13 +1133,118 @@ $schedule->command('newsletter:sync')->everySixHours()->withoutOverlapping();
 
 ---
 
+# FASE 7-B — Popup para contas logadas não inscritas (Sendy)
+
+## Objetivo
+
+Alargar o popup de newsletter (hoje só `@guest`) para **utilizadores autenticados** que **ainda não estão na lista de email Sendy**, mantendo visitantes e todo o comportamento da Fase 6 (gatilhos, A/B, cookies, dedup, tracking).
+
+## Pré-requisitos
+
+- Fases 6 e 7 validadas.
+- `newsletter_integration_enabled` e `newsletter_popup_enabled` compreendidos (kill switch + popup).
+
+## Contexto / motivação
+
+- Contas antigas ou que nunca passaram pelo fluxo de auto-inscrição (Fase 4) podem estar logadas sem estar na lista Sendy.
+- O toggle em **Minha conta → Perfil** existe, mas é passivo; o popup captura quem navega sem ir ao perfil.
+- **Não** mostrar popup a quem já está inscrito (Sendy) nem a quem já tem cache local de inscrição coerente.
+
+## Decisão de elegibilidade (fechada para implementação)
+
+**Mostrar popup quando:**
+
+1. `newsletter_integration_enabled` = true **e** `newsletter_popup_enabled` = true, **e**
+2. **Visitante** (`@guest`), **ou**
+3. **Utilizador autenticado** que **não está inscrito** na lista Sendy.
+
+**Critério «não inscrito» (ordem de fallback):**
+
+1. Chamar `SendyService::isSubscribed($user->email)` **apenas** ao avaliar se o partial do popup entra no HTML (uma verificação por request, com `try/catch`).
+2. Se Sendy falhar ou integração desligada → fallback `! $user->wantsNewsletter()` (cache `newsletter_subscribed_at`).
+3. **Não** chamar Sendy em todas as páginas para todos os logados — só quando as duas flags estão ON (o partial já só é incluído nesse caso).
+
+Extrair lógica para classe pequena (ex.: `App\Services\Newsletter\NewsletterPopupVisibility::shouldRender(): bool`) para testabilidade e Blade limpo.
+
+## Arquivos a criar/tocar
+
+- `app/Services/Newsletter/NewsletterPopupVisibility.php` (novo)
+- `resources/views/partials/newsletter-popup.blade.php` — remover `@guest`; usar `shouldRender()`
+- `resources/views/partials/newsletter-popup-content.blade.php` — UX logado: pré-preencher nome/email; email readonly; CTA único (sem campos editáveis se logado)
+- `tests/Feature/Newsletter/PopupConfigTest.php` — novos/ajustados casos auth
+- `tests/Unit/Newsletter/NewsletterPopupVisibilityTest.php` (novo, opcional mas recomendado)
+- `ARQUIVOS_MD/NEWSLETTER_SENDY_PLAN.md` — STATUS TRACKER ao concluir
+- **Não** alterar `PROJECT_BRIEF.md` (reservado à Fase 8)
+- **Não** obrigatório:** novo toggle Filament (pode ficar para melhoria futura)
+
+## Spec da UI (logado)
+
+- Nome e email pré-preenchidos com `$user->name` / `$user->email`.
+- Campo email **readonly** (igual `/newsletters`).
+- Botão CTA com texto da variante A/B; submit via mesmo `POST /newsletter/subscribe` com `from_popup=1`.
+- `NewsletterSubscribeRequest::authorize()` já exige email = email da conta — manter.
+- Após sucesso: cookies `newsletter_subscribed` + epoch (comportamento actual); cache user atualizado pelo `SendyService` no subscribe.
+
+## Spec da UI (visitante)
+
+- **Sem regressão:** form com nome + email editáveis; mesmos gatilhos/cookies/A/B.
+
+## O que NÃO fazer nesta fase
+
+- Não mudar stats, sync, scheduler, Filament popup settings (salvo copy helper no settings se quiseres 1 linha de descrição).
+- Não alterar auto-inscrição no registro/Google (Fase 4).
+- Não adicionar popup para admins com role especial — mesma regra para todos os users autenticados elegíveis.
+
+## Testes (Pest)
+
+- `PopupConfigTest`:
+  - Guest + flags ON → popup no HTML (mantém teste actual).
+  - Auth + flags ON + `wantsNewsletter()` false + `isSubscribed` false (mock) → popup presente.
+  - Auth + flags ON + inscrito (`wantsNewsletter` true ou `isSubscribed` true) → popup ausente.
+  - Flags OFF → auth sem popup (mantém).
+- Substituir/remover teste «não inclui popup para utilizador autenticado» (comportamento invertido).
+- Usar `Http::fake()` / mock `SendyService` ou `fakeSendyConnection()` + seed subscribers conforme testes existentes em `SendyServiceTest`.
+
+## Validação no browser
+
+1. Flag integração + popup ON.
+2. Conta logada **não** na lista Sendy (ou cache vazio) → após gatilho, popup abre com dados pré-preenchidos.
+3. Submeter → sucesso; popup fecha; perfil mostra inscrito.
+4. Recarregar → popup não volta (cookie + cache).
+5. Conta já inscrita (Sendy) → popup não aparece.
+6. Visitante anónimo → comportamento igual ao anterior.
+
+## Critérios de aceitação
+
+- [x] `NewsletterPopupVisibility` (ou equivalente) implementado com fallback Sendy → cache.
+- [x] Logados não inscritos veem popup; inscritos e visitantes inscritos (cookie) não.
+- [x] Form logado pré-preenchido + email readonly.
+- [x] `--filter=Popup` verde; sem regressão dedup subscribe.
+- [x] Pint `--dirty` OK.
+- [x] User validou no browser.
+
+## Estimativa de complexidade
+
+**Baixa a média-baixa** (~0,5–1 dia). Sem migrations nem rotas novas.
+
+## Notas de execução
+
+- **`NewsletterPopupVisibility`**: flags ON + guest **ou** auth com `!isSubscribed` (Sendy); fallback `!wantsNewsletter()` em exceção ou `isEnabled()` false no checker.
+- **`NewsletterSubscriptionChecker`**: interface para injeção/testes; `SendyService` implementa; bind em `AppServiceProvider`.
+- **Views**: `newsletter-popup.blade.php` usa `shouldRender()`; conteúdo com `initialName`/`initialEmail`/`emailReadonly` para logados.
+- **Testes**: `--filter=Popup` → 29 passed (7 unit visibility + 22 feature/config/events); helpers `seedSendyActiveSubscriber`, `bindNewsletterCheckerMock`.
+- **Pint**: OK.
+- **Browser**: user confirmou 2026-05-22 (logado não inscrito, inscrito sem popup, visitante inalterado).
+
+---
+
 # FASE 8 — PROJECT_BRIEF.md + Pint + ligar flag + suite final
 
 ## Objetivo
 Documentar, formatar, ligar a flag global em prod e fechar.
 
 ## Pré-requisitos
-- Fases 0-7 validadas.
+- Fases 0-7 e **7-B** validadas.
 
 ## Arquivos a tocar
 - `PROJECT_BRIEF.md` — nova seção "Newsletter (Sendy)".
@@ -1146,7 +1255,8 @@ Documentar, formatar, ligar a flag global em prod e fechar.
    - Service: `App\Services\Sendy\SendyService`
    - Jobs: `Subscribe/UnsubscribeToSendyJob`, `SyncNewsletterStatusJob`
    - Comando: `newsletter:sync`
-   - Filament pages: `NewsletterPopupSettings`, `NewsletterStats`
+   - Filament pages: `NewsletterPopupSettings`, `SiteStats`, `NewsletterIntegrationSettings`
+   - `NewsletterPopupVisibility` (popup guest + logados não inscritos)
    - Feature flag: `newsletter_integration_enabled` (SiteSetting)
    - Variáveis de env relevantes
 2. `vendor/bin/pint --dirty --format agent`.

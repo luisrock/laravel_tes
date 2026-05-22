@@ -151,6 +151,25 @@ function fakeSendyConnection(): void
     });
 }
 
+function seedSendyActiveSubscriber(string $email): void
+{
+    \Illuminate\Support\Facades\DB::connection('sendy')->table('subscribers')->insert([
+        'email' => $email,
+        'list' => (int) config('services.sendy.list_internal_id', 2),
+        'unsubscribed' => 0,
+        'bounced' => 0,
+        'complaint' => 0,
+        'confirmed' => 1,
+    ]);
+}
+
+function bindNewsletterCheckerMock(callable $configure): void
+{
+    $mock = \Mockery::mock(\App\Contracts\NewsletterSubscriptionChecker::class);
+    $configure($mock);
+    app()->instance(\App\Contracts\NewsletterSubscriptionChecker::class, $mock);
+}
+
 function createSubscribedUser(string $productId = 'prod_test'): \App\Models\User
 {
     $user = \App\Models\User::factory()->create();

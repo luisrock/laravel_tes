@@ -2,6 +2,7 @@
 
 namespace App\Services\Sendy;
 
+use App\Contracts\NewsletterSubscriptionChecker;
 use App\Enums\NewsletterEventAction;
 use App\Enums\SendyStatus;
 use App\Models\NewsletterSubscriptionEvent;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Throwable;
 
-final class SendyService
+final class SendyService implements NewsletterSubscriptionChecker
 {
     public function __construct(
         private HttpFactory $http,

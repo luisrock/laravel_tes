@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Contracts\NewsletterSubscriptionChecker;
+use App\Services\Sendy\SendyService;
 use App\Services\StripeService;
 use App\Services\SubscriptionService;
 use Illuminate\Pagination\Paginator;
@@ -21,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment() == 'local') {
             $this->app->register(CodersServiceProvider::class);
         }
+
+        $this->app->bind(NewsletterSubscriptionChecker::class, SendyService::class);
 
         // Registrar services como singletons
         $this->app->singleton(StripeService::class);
