@@ -31,6 +31,7 @@ class SiteOverviewStats extends StatsOverviewWidget
         $periodLabel = SiteMetrics::periodLabel($period);
         $sendyCount = app(SendyService::class)->activeSubscriberCount();
         $popupRate = SiteMetrics::popupConversionRate($period);
+        $newsletterPagesCount = SiteMetrics::newsletterPagesSubscriptions($period);
 
         return [
             Stat::make('Novos registos', (string) SiteMetrics::newUserRegistrations($period))
@@ -39,6 +40,9 @@ class SiteOverviewStats extends StatsOverviewWidget
             Stat::make('Novas inscrições na newsletter', (string) SiteMetrics::newSubscriptions($period))
                 ->description($periodLabel)
                 ->descriptionIcon('heroicon-m-envelope'),
+            Stat::make('Inscrições (páginas newsletters)', (string) $newsletterPagesCount)
+                ->description($periodLabel.' · /newsletters e edições')
+                ->descriptionIcon('heroicon-m-newspaper'),
             Stat::make('Total na lista de email', $sendyCount !== null ? number_format($sendyCount, 0, ',', '.') : '—')
                 ->description('Contactos ativos no Sendy (agora)')
                 ->descriptionIcon('heroicon-m-users'),

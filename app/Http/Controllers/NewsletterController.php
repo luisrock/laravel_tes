@@ -3,20 +3,33 @@
 namespace App\Http\Controllers;
 
 use App\Models\Newsletter;
+use App\Models\SiteSetting;
+use App\Services\Sendy\SendyService;
 use DOMDocument;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class NewsletterController extends Controller
 {
-    public function show($slug)
+    public function show(string $slug, SendyService $sendy): View
     {
         $newsletter = Newsletter::where('slug', $slug)->firstOrFail();
+
+        $user = auth()->user();
+        $integrationEnabled = SiteSetting::getAsBool('newsletter_integration_enabled', false);
+        $isAlreadySubscribed = false;
+
+        if ($integrationEnabled && $user) {
+            $isAlreadySubscribed = $sendy->syncUserSubscriptionState($user);
+        }
 
         return view('front.newsletter', [
             'campaign' => $newsletter,
             'newsletterContent' => $this->sanitizeNewsletterContent($newsletter->web_content ?? $newsletter->html_content ?? ''),
             'display_pdf' => false,
             'description' => Str::limit(strip_tags($newsletter->plain_text ?? $newsletter->html_content), 155),
+            'integrationEnabled' => $integrationEnabled,
+            'isAlreadySubscribed' => $isAlreadySubscribed,
         ]);
     }
 

@@ -37,6 +37,7 @@ describe('Acesso à página SiteStats', function () {
             ->assertSee('Período', false)
             ->assertSee('Novos registos', false)
             ->assertSee('Novas inscrições na newsletter', false)
+            ->assertSee('Inscrições (páginas newsletters)', false)
             ->assertSee('Teste A/B do popup', false)
             ->assertSee('Atualizar', false);
     });

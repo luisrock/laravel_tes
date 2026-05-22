@@ -48,18 +48,7 @@
 
             <!-- Sidebar -->
             <div class="tw-space-y-6">
-                 <!-- Subscribe Box -->
-                 <div class="tw-bg-brand-50 tw-rounded-xl tw-border tw-border-brand-100 tw-overflow-hidden tw-p-6">
-                    <h3 class="tw-text-lg tw-font-bold tw-text-brand-900 tw-mb-2">Gostou?</h3>
-                    <p class="tw-text-brand-800 tw-text-sm tw-mb-4">
-                        Receba nossas newsletters diretamente no seu email. É gratuito e você pode cancelar quando quiser.
-                    </p>
-                    <a href="https://newsletter.maurolopes.com.br/subscription?f=guJ3cS2Vm7AxAFSQ24hY1x2LOVOrbH44BBFmy4NXDEULQPmQ9VecJ538XJVLM9JbWogaBgUkTuwWL1y8WaWG1w" 
-                       target="_blank"
-                       class="tw-block tw-w-full tw-text-center tw-rounded-lg tw-bg-brand-600 tw-text-white hover:tw-bg-brand-700 tw-px-4 tw-py-2.5 tw-font-medium tw-transition hover:tw-shadow-md">
-                        Inscrever-se Agora
-                    </a>
-                </div>
+                @include('partials.newsletter-subscribe-sidebar')
 
                 <!-- Share -->
                  <div class="tw-bg-white tw-shadow-sm tw-rounded-xl tw-border tw-border-slate-200 tw-overflow-hidden tw-p-6">
@@ -88,4 +77,10 @@
 
     </div>
 
+@endsection
+
+@section('scripts')
+    @if ($integrationEnabled && ! $isAlreadySubscribed)
+        @include('partials.newsletter-subscribe-scripts')
+    @endif
 @endsection

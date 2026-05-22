@@ -56,6 +56,19 @@ final class SiteMetrics
             ->count();
     }
 
+    public static function newsletterPagesSubscriptions(string $period = '30'): int
+    {
+        if (! Schema::hasTable('newsletter_subscription_events')) {
+            return 0;
+        }
+
+        return NewsletterSubscriptionEvent::query()
+            ->subscriptions()
+            ->where('source', NewsletterEventSource::NewslettersForm->value)
+            ->where('created_at', '>=', self::periodStart($period))
+            ->count();
+    }
+
     public static function cachedSubscribedUserCount(): int
     {
         if (! Schema::hasColumn('users', 'newsletter_subscribed_at')) {
@@ -160,7 +173,7 @@ final class SiteMetrics
                 NewsletterEventSource::Registration => 'Registro no site',
                 NewsletterEventSource::GoogleOauth => 'Conta Google',
                 NewsletterEventSource::PanelToggle => 'Minha conta',
-                NewsletterEventSource::NewslettersForm => 'Página newsletters',
+                NewsletterEventSource::NewslettersForm => 'Páginas de newsletters',
                 NewsletterEventSource::Popup => 'Popup',
                 NewsletterEventSource::Sync => 'Sincronização',
                 default => $row->source,
