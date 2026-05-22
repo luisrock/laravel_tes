@@ -23,6 +23,7 @@ ads.txtSearch-Console-*/
 !AGENTS.md
 !CLAUDE.md
 !GEMINI.md
+!PROJECT_BRIEF.md
 !ARQUIVOS_MD/*.md
 
 # Laravel Boost (auto-generated, regenerate with: php artisan boost:install)

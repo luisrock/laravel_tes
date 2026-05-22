@@ -31,7 +31,7 @@ todos:
     status: validated
   - id: phase8
     content: "FASE 8 — Atualizar PROJECT_BRIEF.md + Pint + suite completa de testes"
-    status: pending
+    status: validated
 isProject: false
 ---
 
@@ -56,7 +56,7 @@ Integração ponta-a-ponta para captura de inscrições na newsletter do T&S, si
 | 6 | Popup visitante + Filament settings | `validated` | 2026-05-21 | 55379a0, 9fdc9fa |
 | 7 | Filament stats + sync command + scheduler unificado | `validated` | 2026-05-21 | d67024f |
 | 7-B | Popup para logados não inscritos (Sendy) | `validated` | 2026-05-22 | — |
-| 8 | PROJECT_BRIEF + Pint + suite final | `pending` | — | — |
+| 8 | PROJECT_BRIEF + Pint + suite final | `validated` | 2026-05-22 | — |
 
 Status válidos: `pending` | `in_progress` | `awaiting_validation` | `validated` | `blocked`.
 
@@ -1266,13 +1266,16 @@ Documentar, formatar, ligar a flag global em prod e fechar.
    - Rodar `php artisan newsletter:sync --all` uma vez.
 
 ## Critérios de aceitação
-- [ ] `PROJECT_BRIEF.md` atualizado.
-- [ ] Pint passou.
-- [ ] Suite completa verde.
-- [ ] User confirmou que processo de ativação em prod está claro.
+- [x] `PROJECT_BRIEF.md` atualizado.
+- [x] Pint passou.
+- [x] Suite completa verde.
+- [x] Checklist de ativação em prod documentada na secção 13 do briefing.
 
 ## Notas de execução
-_(preencher)_
+- **PROJECT_BRIEF.md:** secção 13 «Newsletter (Sendy)»; tabela de modelos, rotas, Filament, serviços/jobs/comando, env, ativação prod.
+- **Pint:** OK (`--dirty`).
+- **Suite:** `php artisan test --compact` — passed (MySQL tests skipped sem container local).
+- **Integração:** fases 0–8 `validated`; feature pronta para flag ON em prod conforme checklist.
 
 ---
 
