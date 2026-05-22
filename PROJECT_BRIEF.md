@@ -26,11 +26,57 @@ PHP 8.3.30 · Laravel 12 · MySQL (prod) / SQLite in-memory (testes) · Tailwind
 
 Estrutura **Laravel 10 legada** (não migrada para a nova): middleware em `app/Http/Kernel.php`, exceções em `app/Exceptions/Handler.php`, schedule em `app/Console/Kernel.php`. NÃO mexer em `bootstrap/app.php`.
 
-## 3. Ambientes
+## 3. Ambientes e deploy
 
-- **Dev**: Laravel Valet em `https://teses.test` · DB `forge_tes` (MySQL local).
-- **Prod**: `https://tesesesumulas.com.br` · servidor `ssh vito@15.229.244.115`, path `/home/vito/tesesesumulas.com.br`.
-- **Deploy**: automático via Vito Deploy após `git push` (branch principal). Script roda `composer install`, `npm ci && npm run build`, `php artisan migrate --force`, seeder `RolesAndPermissionsSeeder`, `optimize:clear`, `config:cache`, `view:cache`. Script só editável na UI web do Vito.
+### Ambientes
+
+- **Dev**: Laravel Valet em `https://teses.test` · DB `forge_tes` (MySQL local) · Sendy DB normalmente OFF (`SENDY_DB_ENABLED=false`).
+- **Prod**: `https://tesesesumulas.com.br` · `ssh vito@15.229.244.115` · código em `/home/vito/tesesesumulas.com.br` · PHP **8.3** (FPM).
+
+### Deploy automático (Vito Deploy)
+
+**Cada `git push` na branch principal dispara deploy automático** — não há passo manual de release. O script abaixo vive **só no painel Vito Deploy** (variáveis `$DOMAIN`, `$SITE_PATH`, `$BRANCH`, `$PHP_PATH`, `$PHP_VERSION`); **não está no repositório Git**.
+
+Ordem efetiva do script:
+
+1. `git fetch origin $BRANCH --prune` + `git reset --hard origin/$BRANCH`
+2. `composer install --no-interaction --prefer-dist --optimize-autoloader`
+3. Se existir `package.json`: `npm ci` + `npm run build` (assets Vite/Tailwind)
+4. `sudo systemctl reload php$PHP_VERSION-fpm`
+5. `php artisan migrate --force`
+6. `php artisan db:seed --class=CollectionSettingsSeeder --force` (sempre no script atual)
+7. `php artisan optimize:clear` → `config:cache` → `view:cache`
+
+**Não corre no deploy** (ação manual SSH ou Filament quando necessário):
+
+- `RolesAndPermissionsSeeder`, `SiteSettingsSeeder` (ex.: chaves newsletter/popup) — usar `db:seed --class=... --force` à mão se faltar setting.
+- Seeders pontuais: o script tem bloco comentado no painel Vito para descomentar **uma** classe, fazer deploy, e voltar a comentar.
+- `php artisan queue:work` contínuo — a fila é acionada pelo scheduler (ver abaixo).
+
+**Implicações para IAs:** migrations novas aplicam-se em prod no próximo push; mudanças em Blade/JS exigem `npm run build` no deploy; após alterar `config/*` o deploy já faz `config:cache`. Não assumir seeders além de `CollectionSettingsSeeder` sem o user pedir.
+
+### Cron em produção (servidor)
+
+Uma única linha no crontab do servidor (a cada minuto):
+
+```bash
+* * * * * php8.3 /home/vito/tesesesumulas.com.br/artisan schedule:run >> /dev/null 2>&1
+```
+
+Tarefas definidas em `app/Console/Kernel.php` (não duplicar comandos soltos no crontab):
+
+| Agendamento | Comando / job |
+|---|---|
+| Diário 00:00 | `queue:work --stop-when-empty` |
+| Diário 06:00 | `sitemap:generate` |
+| Segunda 03:00 | `matomo:sync` |
+| Terça 23:00 | `newsletters:import` |
+| Diário 10:00 | job `SendRenewalReminders` |
+| A cada 6 h | `newsletter:sync` |
+
+### Dev local — qualidade antes do push
+
+Hook **pre-commit** (quando instalado): Pint (`--test`) + suite Pest (SQLite) + tentativa de testes MySQL (skip se container indisponível). Correr `php artisan test --compact` antes de push evita falha no hook.
 
 ## 4. Domínio — modelos principais (`app/Models/`)
 
@@ -180,6 +226,6 @@ Integração opt-in/opt-out com **Sendy** (lista configurada em `.env`). Arquite
 1. Após deploy com migrations: `php artisan db:seed --class=SiteSettingsSeeder --force` se faltar chaves.
 2. Filament `/painel` → **Newsletter Sendy** → ligar integração; configurar **Newsletter Popup** se desejado.
 3. Opcional uma vez: `php artisan newsletter:sync --all` (popular cache `newsletter_subscribed_at`).
-4. Cron no servidor: apenas `* * * * * php artisan schedule:run` (já inclui `newsletter:sync` a cada 6h).
+4. Cron no servidor: ver secção **3** (`schedule:run` a cada minuto; `newsletter:sync` a cada 6 h via Kernel).
 
 Plano completo e histórico de fases: `ARQUIVOS_MD/NEWSLETTER_SENDY_PLAN.md`.
