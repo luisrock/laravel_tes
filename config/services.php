@@ -52,4 +52,14 @@ return [
         'db_enabled' => env('SENDY_DB_ENABLED', true),
     ],
 
+    'openrouter' => [
+        // Chave usada nas requisições ao modelo (chat/avaliação) — também lida pelo provider em config/ai.php.
+        'key' => env('OPENROUTER_API_KEY'),
+        // Chave de gerenciamento — crédito residual e catálogo de modelos.
+        'management_key' => env('OPENROUTER_API_KEY_MANAGEMENT'),
+        'base_url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'),
+        // Timeout HTTP (segundos) das requisições ao modelo. Com tool-calling há várias idas e voltas.
+        'request_timeout' => (int) env('OPENROUTER_REQUEST_TIMEOUT', 120),
+    ],
+
 ];

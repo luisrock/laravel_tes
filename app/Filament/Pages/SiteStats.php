@@ -6,6 +6,7 @@ use App\Filament\Widgets\NewsletterBySourceChart;
 use App\Filament\Widgets\NewsletterDailyChart;
 use App\Filament\Widgets\NewsletterPopupAbStats;
 use App\Filament\Widgets\SiteOverviewStats;
+use App\Livewire\StatsAiChat;
 use App\Services\Newsletter\SiteMetrics;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
@@ -16,6 +17,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Artisan;
 
@@ -78,23 +80,6 @@ class SiteStats extends Page
         ];
     }
 
-    /**
-     * @return array<class-string>
-     */
-    protected function getFooterWidgets(): array
-    {
-        return [
-            NewsletterDailyChart::class,
-            NewsletterBySourceChart::class,
-            NewsletterPopupAbStats::class,
-        ];
-    }
-
-    public function getFooterWidgetsColumns(): int|array
-    {
-        return 2;
-    }
-
     public function content(Schema $schema): Schema
     {
         return $schema
@@ -108,6 +93,16 @@ class SiteStats extends Page
                     ->schema(fn (): array => $this->getWidgetsSchemaComponents([
                         SiteOverviewStats::class,
                     ])),
+                Grid::make(['default' => 1, 'md' => 2])
+                    ->schema(fn (): array => $this->getWidgetsSchemaComponents([
+                        NewsletterDailyChart::class,
+                        NewsletterBySourceChart::class,
+                        NewsletterPopupAbStats::class,
+                    ])),
+                // O assistente de IA é o último elemento da página, após os gráficos.
+                Livewire::make(StatsAiChat::class, [
+                    'period' => $this->filters['period'] ?? '30',
+                ]),
             ]);
     }
 
