@@ -40,6 +40,26 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Conversation Persistence
+    |--------------------------------------------------------------------------
+    |
+    | Configura a persistência de conversas do AI SDK (trait RemembersConversations),
+    | usada pelo assistente de estatísticas (admin). O título é derivado do início do
+    | prompt (generate_title=false) para evitar uma chamada LLM extra por conversa.
+    |
+    */
+
+    'conversations' => [
+        'connection' => env('AI_CONVERSATIONS_CONNECTION'),
+        'generate_title' => false,
+        'tables' => [
+            'conversations' => 'agent_conversations',
+            'messages' => 'agent_conversation_messages',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | AI Providers
     |--------------------------------------------------------------------------
     |

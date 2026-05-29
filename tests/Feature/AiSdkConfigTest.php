@@ -23,8 +23,8 @@ it('resolves the openrouter management service config', function () {
         ->and(config('services.openrouter.key'))->toBe('model-key');
 });
 
-it('does not register the AI SDK conversation migrations in this phase', function () {
+it('registers the AI SDK conversation migration for persistent conversations', function () {
     $migrations = glob(database_path('migrations/*agent_conversations*'));
 
-    expect($migrations)->toBeEmpty();
+    expect($migrations)->not->toBeEmpty();
 });

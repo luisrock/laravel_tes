@@ -5,11 +5,11 @@ namespace App\Ai\Agents;
 use App\Ai\Tools\QuerySiteMetrics;
 use App\Models\AiPrompt;
 use App\Models\SiteSetting;
+use Laravel\Ai\Concerns\RemembersConversations;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
 use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Contracts\Tool;
-use Laravel\Ai\Messages\Message;
 use Laravel\Ai\Promptable;
 use RuntimeException;
 use Stringable;
@@ -18,21 +18,18 @@ use Stringable;
  * Agente analista das estatísticas do site (admin). Usa o provedor OpenRouter e o modelo escolhido em
  * Configurações de IA (SiteSetting `ai_chat_model`), conversando sobre as métricas via a tool QuerySiteMetrics.
  *
- * Histórico é efêmero: recebido no construtor a partir do componente Livewire.
+ * A conversa é persistida via o trait RemembersConversations do SDK: `forUser()` inicia uma nova conversa
+ * e `continue()` retoma uma existente; o histórico (`messages()`) vem do ConversationStore quando há
+ * participante. Sem participante (ex.: testes unitários do agente), comporta-se como uma chamada avulsa.
  */
 class StatsAnalyst implements Agent, Conversational, HasTools
 {
-    use Promptable;
+    use Promptable, RemembersConversations;
 
     /**
      * Key do registro `AiPrompt` que guarda o system prompt deste agente.
      */
     public const SYSTEM_PROMPT_KEY = 'stats_analyst_system';
-
-    /**
-     * @param  array<int, array{role: string, content: string}>  $history
-     */
-    public function __construct(public array $history = []) {}
 
     /**
      * Lê o system prompt do registro `AiPrompt` editável; cai no texto default se ausente ou vazio.
@@ -68,16 +65,6 @@ class StatsAnalyst implements Agent, Conversational, HasTools
           explicitamente em vez de supor.
         - Responda sempre em português do Brasil, em tom profissional e conciso.
         PROMPT;
-    }
-
-    /**
-     * @return Message[]
-     */
-    public function messages(): iterable
-    {
-        return collect($this->history)
-            ->map(fn (array $message): Message => new Message($message['role'], $message['content']))
-            ->all();
     }
 
     /**

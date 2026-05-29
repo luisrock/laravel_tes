@@ -33,44 +33,70 @@
                 Avaliar estatísticas
             </x-filament::button>
 
-            @if (filled($messages))
+            @if (filled($messages) || filled($conversations))
                 <x-filament::button
-                    wire:click="clearConversation"
+                    wire:click="newConversation"
                     color="gray"
-                    icon="heroicon-o-trash"
+                    icon="heroicon-o-plus"
                 >
-                    Limpar conversa
+                    Nova conversa
                 </x-filament::button>
             @endif
         </div>
 
-        {{-- Conversa: ordem cronológica (pergunta e, abaixo, a resposta) --}}
-        <div style="display:flex;flex-direction:column;gap:0.75rem;margin-top:1.25rem;">
+        {{-- Conversas anteriores do admin: selecionar retoma a conversa (título + data/hora). --}}
+        @if (filled($conversations))
+            <x-filament::input.wrapper style="margin-top:0.75rem;max-width:28rem;">
+                <x-filament::input.select wire:change="loadConversation($event.target.value)">
+                    <option value="" @selected($conversationId === null)>— Conversas anteriores —</option>
+                    @foreach ($conversations as $conversation)
+                        <option value="{{ $conversation['id'] }}" @selected($conversation['id'] === $conversationId)>
+                            {{ $conversation['label'] }}
+                        </option>
+                    @endforeach
+                </x-filament::input.select>
+            </x-filament::input.wrapper>
+        @endif
+
+        {{-- Conversa: ordem cronológica, coluna única alinhada à esquerda (largura cheia). --}}
+        <div style="display:flex;flex-direction:column;gap:1rem;margin-top:1.25rem;">
             @forelse ($messages as $message)
-                @if ($message['role'] === 'user')
-                    <div style="display:flex;justify-content:flex-end;">
-                        <div style="max-width:85%;border-radius:1rem;padding:0.5rem 1rem;font-size:0.875rem;color:#fff;background-color:#912F56;white-space:pre-wrap;">
-                            {{ $message['content'] }}
+                <div @style([
+                    'border-top:1px solid rgba(120,120,120,0.15);padding-top:1rem;' => ! $loop->first,
+                ])>
+                    @if ($message['role'] === 'user')
+                        <div style="border-left:3px solid #912F56;background-color:rgba(145,47,86,0.06);border-radius:0 0.5rem 0.5rem 0;padding:0.5rem 0.875rem;">
+                            <div style="font-size:0.75rem;font-weight:600;color:#912F56;margin-bottom:0.125rem;">Você</div>
+                            <div style="font-size:0.875rem;white-space:pre-wrap;color:#374151;">{{ $message['content'] }}</div>
                         </div>
-                    </div>
-                @else
-                    <div style="display:flex;justify-content:flex-start;">
-                        <div class="fi-prose" style="max-width:85%;border-radius:1rem;padding:0.5rem 1rem;font-size:0.875rem;background-color:rgba(120,120,120,0.12);">
+                    @else
+                        <div style="font-size:0.75rem;font-weight:600;color:#6b7280;margin-bottom:0.25rem;">Assistente</div>
+                        <div class="fi-prose" style="font-size:0.875rem;">
                             {!! \Illuminate\Support\Str::markdown($message['content'], ['html_input' => 'strip']) !!}
                         </div>
-                    </div>
-                @endif
+                    @endif
+                </div>
             @empty
                 <p style="font-size:0.875rem;color:#6b7280;">
                     Pergunte sobre as métricas do site ou clique em <strong>Avaliar estatísticas</strong> para uma análise automática.
                 </p>
             @endforelse
 
-            {{-- Indicador de carregamento (oculto até haver requisição em curso) --}}
-            <div wire:loading.flex wire:target="send, evaluateOnScreen" style="justify-content:flex-start;align-items:center;gap:0.5rem;font-size:0.875rem;color:#6b7280;">
-                <x-filament::loading-indicator style="width:1.25rem;height:1.25rem;" />
-                A analisar as estatísticas…
+            {{-- Streaming ao vivo: deltas chegam token a token (texto cru) numa bolha cinza enquanto a
+                 requisição corre; ao concluir, o re-render limpa este alvo e a resposta final renderizada
+                 (markdown, sem fundo) entra em $messages acima. A bolha fica oculta enquanto vazia. --}}
+            <div wire:loading.flex wire:target="send, evaluateOnScreen" style="flex-direction:column;gap:0.5rem;">
+                <div wire:stream="ai-answer" class="stats-ai-stream-bubble" style="font-size:0.875rem;white-space:pre-wrap;color:#374151;background-color:rgba(120,120,120,0.12);border-radius:0.75rem;padding:0.5rem 0.875rem;"></div>
+                <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;color:#6b7280;">
+                    <x-filament::loading-indicator style="width:1.25rem;height:1.25rem;" />
+                    Pensando…
+                </div>
             </div>
+
+            <style>
+                /* A bolha cinza de streaming só aparece quando o primeiro token chega. */
+                .stats-ai-stream-bubble:empty { display: none; }
+            </style>
         </div>
 
         @if ($error)
