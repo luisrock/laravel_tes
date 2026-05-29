@@ -3,6 +3,7 @@
 namespace App\Ai\Agents;
 
 use App\Ai\Tools\QuerySiteMetrics;
+use App\Models\AiPrompt;
 use App\Models\SiteSetting;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
@@ -24,11 +25,33 @@ class StatsAnalyst implements Agent, Conversational, HasTools
     use Promptable;
 
     /**
+     * Key do registro `AiPrompt` que guarda o system prompt deste agente.
+     */
+    public const SYSTEM_PROMPT_KEY = 'stats_analyst_system';
+
+    /**
      * @param  array<int, array{role: string, content: string}>  $history
      */
     public function __construct(public array $history = []) {}
 
+    /**
+     * Lê o system prompt do registro `AiPrompt` editável; cai no texto default se ausente ou vazio.
+     */
     public function instructions(): Stringable|string
+    {
+        $content = AiPrompt::contentForKey(self::SYSTEM_PROMPT_KEY);
+
+        if (is_string($content) && trim($content) !== '') {
+            return $content;
+        }
+
+        return self::defaultInstructions();
+    }
+
+    /**
+     * System prompt padrão (fallback) — também usado para semear o registro editável.
+     */
+    public static function defaultInstructions(): string
     {
         return <<<'PROMPT'
         Você é um analista de dados do site "Teses e Súmulas" (tesesesumulas.com.br), um motor de busca
