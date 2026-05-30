@@ -113,11 +113,15 @@
 - [ ] `vendor/bin/pint --dirty --format agent`; `php artisan test --compact` (suíte completa verde).
 - [ ] Atualizar checklist; confirmar com usuário antes de commit/push em `master` (deploy automático).
 
-## Pendências registradas (resolver após fechar o streaming)
-- [ ] **Prompt do botão "Avaliar estatísticas" não é editável.** O texto enviado por `evaluateOnScreen()`
-      está hardcoded em `StatsAiChat` (não aparece no editor de prompts `AiPromptResource`). Tornar editável
-      via um registro `AiPrompt` (ex.: key `stats_analyst_evaluate`) com fallback ao texto atual, como já
-      feito para o system prompt. **Anotado em 2026-05-29 a pedido do usuário, durante o Bloco B.**
+## Pendências registradas
+- [x] **Prompt do botão "Avaliar estatísticas" agora é editável** (2026-05-29). `StatsAnalyst::EVALUATE_PROMPT_KEY`
+      (`stats_analyst_evaluate`) + `defaultEvaluatePrompt()` (placeholder `{periodo}`) + `evaluatePromptFor($label)`
+      com fallback. `evaluateOnScreen()` usa o builder; `AiPromptsSeeder` semeia a key (idempotente). Aparece no
+      editor `AiPromptResource`. Testes em `AiPromptTest`. **Em prod**: rodar `db:seed --class=AiPromptsSeeder --force`
+      para criar a key nova (sem ela, usa o fallback).
+- [x] **Card do assistente colapsável** (2026-05-29). `<x-filament::section collapsible persist-collapsed
+      collapse-id="stats-ai-chat">` — toggle no header; só o header fica visível ao encolher; estado persistido
+      em localStorage (nativo do Filament/Alpine `$persist`). Sem código custom. Teste de render em `StatsAiChatTest`.
 
 ## Riscos / notas
 - **Migrations voltam** (Blocos A e C) → validar em dev; em prod o Vito roda `migrate --force` no push.

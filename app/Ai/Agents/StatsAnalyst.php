@@ -32,6 +32,12 @@ class StatsAnalyst implements Agent, Conversational, HasTools
     public const SYSTEM_PROMPT_KEY = 'stats_analyst_system';
 
     /**
+     * Key do registro `AiPrompt` que guarda o prompt do botão "Avaliar estatísticas".
+     * O placeholder `{periodo}` é substituído pelo rótulo do período selecionado.
+     */
+    public const EVALUATE_PROMPT_KEY = 'stats_analyst_evaluate';
+
+    /**
      * Lê o system prompt do registro `AiPrompt` editável; cai no texto default se ausente ou vazio.
      */
     public function instructions(): Stringable|string
@@ -65,6 +71,32 @@ class StatsAnalyst implements Agent, Conversational, HasTools
           explicitamente em vez de supor.
         - Responda sempre em português do Brasil, em tom profissional e conciso.
         PROMPT;
+    }
+
+    /**
+     * Monta o prompt do botão "Avaliar estatísticas" para o período informado, lendo o registro
+     * `AiPrompt` editável (com fallback ao texto padrão). O placeholder `{periodo}` é substituído
+     * pelo rótulo do período (ex.: "Últimos 7 dias").
+     */
+    public static function evaluatePromptFor(string $periodLabel): string
+    {
+        $template = AiPrompt::contentForKey(self::EVALUATE_PROMPT_KEY);
+
+        if (! is_string($template) || trim($template) === '') {
+            $template = self::defaultEvaluatePrompt();
+        }
+
+        return str_replace('{periodo}', $periodLabel, $template);
+    }
+
+    /**
+     * Texto padrão (fallback) do prompt do botão de avaliação — também usado para semear o registro.
+     */
+    public static function defaultEvaluatePrompt(): string
+    {
+        return 'Faça uma avaliação das estatísticas do período "{periodo}". Consulte os números, aponte as '
+            .'principais tendências, possíveis causas e recomendações práticas para melhorar registos '
+            .'e inscrições na newsletter.';
     }
 
     /**

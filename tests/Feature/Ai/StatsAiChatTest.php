@@ -20,6 +20,13 @@ it('a página de estatísticas renderiza com o chat embutido para o admin', func
     expect($response->getStatusCode())->toBeIn([200, 302]);
 });
 
+it('renderiza o card como colapsável com estado persistido', function () {
+    Livewire::test(StatsAiChat::class)
+        ->assertSeeHtml('fi-collapsible')
+        ->assertSeeHtml('$persist')
+        ->assertSeeHtml('stats-ai-chat');
+});
+
 it('inicializa o período a partir do parâmetro de mount', function () {
     Livewire::test(StatsAiChat::class, ['period' => '7'])
         ->assertSet('period', '7');

@@ -55,14 +55,7 @@ class StatsAiChat extends Component
 
     public function evaluateOnScreen(): void
     {
-        $label = SiteMetrics::periodLabel($this->period);
-
-        $this->submitPrompt(sprintf(
-            'Faça uma avaliação das estatísticas do período "%s". Consulte os números, aponte as '
-            .'principais tendências, possíveis causas e recomendações práticas para melhorar registos '
-            .'e inscrições na newsletter.',
-            $label,
-        ));
+        $this->submitPrompt(StatsAnalyst::evaluatePromptFor(SiteMetrics::periodLabel($this->period)));
     }
 
     public function newConversation(): void

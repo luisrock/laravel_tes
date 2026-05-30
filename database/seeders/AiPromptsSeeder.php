@@ -24,5 +24,15 @@ class AiPromptsSeeder extends Seeder
                 'description' => 'Instruções (system prompt) do assistente de IA da página de Estatísticas.',
             ]
         );
+
+        AiPrompt::firstOrCreate(
+            ['key' => StatsAnalyst::EVALUATE_PROMPT_KEY],
+            [
+                'title' => 'Analista de Estatísticas — botão "Avaliar estatísticas"',
+                'content' => StatsAnalyst::defaultEvaluatePrompt(),
+                'description' => 'Prompt do botão "Avaliar estatísticas". Use {periodo} onde o rótulo do '
+                    .'período selecionado (ex.: "Últimos 7 dias") deve ser inserido.',
+            ]
+        );
     }
 }

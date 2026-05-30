@@ -49,15 +49,45 @@ describe('StatsAnalyst::instructions — prompt editável com fallback', functio
 
 });
 
+describe('StatsAnalyst::evaluatePromptFor — prompt do botão com fallback', function () {
+
+    it('usa o conteúdo do AiPrompt e substitui o placeholder do período', function () {
+        AiPrompt::factory()->create([
+            'key' => StatsAnalyst::EVALUATE_PROMPT_KEY,
+            'content' => 'Analise o período {periodo} com foco em conversão.',
+        ]);
+
+        expect(StatsAnalyst::evaluatePromptFor('Últimos 7 dias'))
+            ->toBe('Analise o período Últimos 7 dias com foco em conversão.');
+    });
+
+    it('cai no texto default (com placeholder substituído) quando não há registro', function () {
+        expect(StatsAnalyst::evaluatePromptFor('Últimos 30 dias'))
+            ->toContain('Últimos 30 dias')
+            ->not->toContain('{periodo}');
+    });
+
+    it('cai no texto default quando o conteúdo está vazio', function () {
+        AiPrompt::factory()->create([
+            'key' => StatsAnalyst::EVALUATE_PROMPT_KEY,
+            'content' => '   ',
+        ]);
+
+        expect(StatsAnalyst::evaluatePromptFor('Hoje'))
+            ->toBe(str_replace('{periodo}', 'Hoje', StatsAnalyst::defaultEvaluatePrompt()));
+    });
+
+});
+
 describe('AiPromptsSeeder', function () {
 
-    it('semeia o prompt do StatsAnalyst com o texto default', function () {
+    it('semeia ambos os prompts do StatsAnalyst com os textos default', function () {
         (new AiPromptsSeeder)->run();
 
-        $prompt = AiPrompt::where('key', StatsAnalyst::SYSTEM_PROMPT_KEY)->first();
-
-        expect($prompt)->not->toBeNull()
-            ->and($prompt->content)->toBe(StatsAnalyst::defaultInstructions());
+        expect(AiPrompt::contentForKey(StatsAnalyst::SYSTEM_PROMPT_KEY))
+            ->toBe(StatsAnalyst::defaultInstructions())
+            ->and(AiPrompt::contentForKey(StatsAnalyst::EVALUATE_PROMPT_KEY))
+            ->toBe(StatsAnalyst::defaultEvaluatePrompt());
     });
 
     it('é idempotente e não sobrescreve conteúdo editado', function () {
@@ -69,7 +99,8 @@ describe('AiPromptsSeeder', function () {
         (new AiPromptsSeeder)->run();
 
         expect(AiPrompt::where('key', StatsAnalyst::SYSTEM_PROMPT_KEY)->count())->toBe(1)
-            ->and(AiPrompt::contentForKey(StatsAnalyst::SYSTEM_PROMPT_KEY))->toBe('Editado.');
+            ->and(AiPrompt::contentForKey(StatsAnalyst::SYSTEM_PROMPT_KEY))->toBe('Editado.')
+            ->and(AiPrompt::where('key', StatsAnalyst::EVALUATE_PROMPT_KEY)->count())->toBe(1);
     });
 
 });

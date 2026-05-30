@@ -1,5 +1,11 @@
 <div>
-    <x-filament::section icon="heroicon-o-sparkles" icon-color="primary">
+    <x-filament::section
+        icon="heroicon-o-sparkles"
+        icon-color="primary"
+        collapsible
+        persist-collapsed
+        collapse-id="stats-ai-chat"
+    >
         <x-slot name="heading">Assistente de estatísticas (IA)</x-slot>
 
         <x-slot name="description">
