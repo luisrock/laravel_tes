@@ -19,12 +19,19 @@ class AnalisarAcordaoJob implements ShouldQueue
     /** @var array<int, int> */
     public array $backoff = [60, 300, 900];
 
+    /**
+     * Análise multimodal com PDFs pode levar vários minutos (OpenRouter timeout ~120s + margem).
+     */
+    public int $timeout = 600;
+
     public function __construct(
         public int $teseAnalysisJobId,
     ) {}
 
     public function handle(AcordaoAnalysisService $service): void
     {
+        set_time_limit($this->analysisTimeLimit());
+
         $record = TeseAnalysisJob::query()->find($this->teseAnalysisJobId);
 
         if ($record === null || $record->status !== 'queued') {
@@ -80,6 +87,22 @@ class AnalisarAcordaoJob implements ShouldQueue
 
             $this->markAsError($record, $exception->getMessage());
         }
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        $record = TeseAnalysisJob::query()->find($this->teseAnalysisJobId);
+
+        if ($record === null || in_array($record->status, ['done', 'error'], true)) {
+            return;
+        }
+
+        $this->markAsError($record, $exception?->getMessage() ?? 'Job falhou sem mensagem');
+    }
+
+    private function analysisTimeLimit(): int
+    {
+        return (int) config('services.openrouter.request_timeout', 120) + 180;
     }
 
     private function markAsError(TeseAnalysisJob $record, string $message): void

@@ -230,8 +230,8 @@ Ordem de implementação **core_first**. Cada tela que mexe em UI exige **valida
 - [x] **4.1** `AnalisarAcordaoJob` (status em `tese_analysis_jobs` running→done/error; retryável vs permanente; `max_attempts`). _Gate:_ testes (sucesso marca done com métricas; permanente marca error sem retry; retryável re-enfileira; todas seções já existentes → done sem custo). _(Migration aditiva `input_tokens`/`output_tokens`/`cost_usd`; backoff 60/300/900s; 6 testes em `AnalisarAcordaoJobTest.php`.)_
 
 ### Fase 5 — Disparo no Filament (UI) + browser de temas
-- [ ] **5.1** Tela "Temas elegíveis" (filtros tribunal/tem-IA/trânsito/ordenação + paginação) com ações Analisar/Forçar/lote (`updateOrCreate` job + `dispatch`; `Queue::fake` nos testes). _Gate:_ teste Filament **+ validação manual**.
-- [ ] **5.2** Detalhe do tema (acórdãos + seções + jobs; enfileirar single com modelo/force). _Gate:_ teste Filament **+ validação manual**.
+- [x] **5.1** Tela "Temas elegíveis" (filtros tribunal/tem-IA/trânsito/ordenação + paginação) com ações Analisar/Forçar/lote (`updateOrCreate` job + `dispatch` com `afterResponse`; `Queue::fake` nos testes). _Gate:_ teste Filament **+ validação manual**. _(Implementado: `TemasElegiveis`, `EligibleTemasQuery`, `AcordaoAnalysisEnqueueService`; coluna Tema unificada + menu de ações; validação manual OK em `/admin/painel/temas-elegiveis`.)_
+- [x] **5.2** Detalhe do tema (acórdãos + seções + jobs; enfileirar single com modelo/force). _Gate:_ teste Filament **+ validação manual**. _(Implementado: `TemaDetalhe` em `/admin/painel/tema/{tribunal}/{numero}` (URL canônica pelo número do tema), abas Filament, metadados de custo/modelo na aba Seções IA (não na tabela de jobs), polling 5s enquanto job `queued`/`running`, `AnalisarAcordaoJob::dispatch()->afterResponse()` + `set_time_limit` no job; migrations `openrouter` no enum + colunas de usage em jobs; 11 testes Pest. **Validação manual OK**.)_
 - [ ] **5.3** (Opcional) Alinhar `TesePageController@enqueueAi` para também `dispatch(AnalisarAcordaoJob)` (botão "Resumir com IA" ponta a ponta). _Gate:_ teste de rota **+ validação manual**.
 
 ### Fase 6 — Fila / monitor (UI)
