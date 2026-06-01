@@ -64,6 +64,18 @@ class AcordaoAnalysisEnqueueService
             if ($hasActiveJob) {
                 return null;
             }
+        } else {
+            TeseAnalysisJob::query()
+                ->where('tese_id', $teseId)
+                ->where('tribunal', $tribunal)
+                ->where('section_type', 'all')
+                ->where('status', 'running')
+                ->update([
+                    'status' => 'error',
+                    'last_error' => 'Interrompido: novo enfileiramento forçado pelo admin.',
+                    'completed_at' => now(),
+                    'locked_by' => null,
+                ]);
         }
 
         $aiModel = filled($modelSlug)
@@ -102,6 +114,27 @@ class AcordaoAnalysisEnqueueService
             ->where('section_type', 'all')
             ->where('status', 'queued')
             ->delete() > 0;
+    }
+
+    /**
+     * Remove o job do tema (qualquer status) para permitir novo enfileiramento.
+     */
+    public function removeJob(int $teseId, string $tribunal): bool
+    {
+        return TeseAnalysisJob::query()
+            ->where('tese_id', $teseId)
+            ->where('tribunal', strtoupper($tribunal))
+            ->where('section_type', 'all')
+            ->delete() > 0;
+    }
+
+    public function hasJob(int $teseId, string $tribunal): bool
+    {
+        return TeseAnalysisJob::query()
+            ->where('tese_id', $teseId)
+            ->where('tribunal', strtoupper($tribunal))
+            ->where('section_type', 'all')
+            ->exists();
     }
 
     /**

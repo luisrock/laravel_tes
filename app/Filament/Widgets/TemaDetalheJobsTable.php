@@ -3,6 +3,10 @@
 namespace App\Filament\Widgets;
 
 use App\Models\TeseAnalysisJob;
+use App\Services\Ai\AcordaoAnalysisEnqueueService;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\Concerns\CanPoll;
@@ -51,12 +55,37 @@ class TemaDetalheJobsTable extends TableWidget
                     ->label('Escopo'),
                 TextColumn::make('attempts')
                     ->label('Tentativas')
+                    ->formatStateUsing(fn (TeseAnalysisJob $record): string => "{$record->attempts}/{$record->max_attempts}")
                     ->alignCenter(),
                 TextColumn::make('last_error')
                     ->label('Erro')
-                    ->limit(40)
                     ->placeholder('—')
+                    ->wrap()
+                    ->lineClamp(4)
+                    ->tooltip(fn (TeseAnalysisJob $record): ?string => $record->last_error)
                     ->toggleable(),
+            ])
+            ->recordActions([
+                Action::make('remove')
+                    ->label('Remover')
+                    ->icon(Heroicon::OutlinedTrash)
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Remover job de análise')
+                    ->modalDescription('Remove o registro da fila para este tema. Depois pode enfileirar de novo (com outro modelo, se quiser).')
+                    ->action(function (TeseAnalysisJob $record): void {
+                        app(AcordaoAnalysisEnqueueService::class)->removeJob(
+                            $record->tese_id,
+                            $record->tribunal,
+                        );
+
+                        Notification::make()
+                            ->success()
+                            ->title('Job removido')
+                            ->send();
+
+                        $this->dispatch('tema-detail-refresh');
+                    }),
             ])
             ->paginated(false)
             ->emptyStateHeading('Nenhum job')

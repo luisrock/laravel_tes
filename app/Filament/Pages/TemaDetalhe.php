@@ -27,6 +27,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use Livewire\Attributes\On;
 
 /**
  * Detalhe de um tema STF/STJ: acórdãos, seções de IA e jobs (paridade Flask /tema).
@@ -122,7 +123,7 @@ class TemaDetalhe extends Page
                         ->required(),
                     Toggle::make('force')
                         ->label('Forçar reprocesso')
-                        ->helperText('Re-enfileira mesmo com seções existentes ou job anterior.'),
+                        ->helperText('Re-enfileira mesmo com seções existentes. Se o job está travado em queued/running, use Remover job antes ou marque isto para interromper running.'),
                 ])
                 ->action(function (array $data): void {
                     $job = app(AcordaoAnalysisEnqueueService::class)->enqueue(
@@ -136,7 +137,7 @@ class TemaDetalhe extends Page
                         Notification::make()
                             ->warning()
                             ->title('Não enfileirado')
-                            ->body('Tema não elegível ou job já ativo (use Forçar reprocesso).')
+                            ->body('Tema não elegível ou job queued/running sem Forçar. Remova o job na aba Jobs ou ative Forçar reprocesso.')
                             ->send();
 
                         return;
@@ -151,7 +152,42 @@ class TemaDetalhe extends Page
                     $this->refreshDetail();
                     $this->dispatch('$refresh');
                 }),
+            Action::make('removeJob')
+                ->label('Remover job')
+                ->icon(Heroicon::OutlinedTrash)
+                ->color('danger')
+                ->requiresConfirmation()
+                ->modalHeading('Remover job de análise')
+                ->modalDescription('Apaga o job deste tema para poder enfileirar de novo (útil após erro 400, running travado ou troca de modelo).')
+                ->visible(fn (): bool => app(AcordaoAnalysisEnqueueService::class)->hasJob($this->teseId, $this->tribunal))
+                ->action(function (): void {
+                    $removed = app(AcordaoAnalysisEnqueueService::class)->removeJob($this->teseId, $this->tribunal);
+
+                    if (! $removed) {
+                        Notification::make()
+                            ->warning()
+                            ->title('Nenhum job para remover')
+                            ->send();
+
+                        return;
+                    }
+
+                    Notification::make()
+                        ->success()
+                        ->title('Job removido')
+                        ->body('Pode enfileirar a análise novamente.')
+                        ->send();
+
+                    $this->refreshDetail();
+                    $this->dispatch('$refresh');
+                }),
         ];
+    }
+
+    #[On('tema-detail-refresh')]
+    public function onTemaDetailRefresh(): void
+    {
+        $this->refreshDetail();
     }
 
     public function content(Schema $schema): Schema

@@ -103,6 +103,55 @@ it('força re-enfileiramento resetando job com erro', function () {
     Queue::assertPushed(AnalisarAcordaoJob::class);
 });
 
+it('remove job em qualquer status', function () {
+    $aiModel = AiModel::create([
+        'provider' => 'openrouter',
+        'name' => 'Test',
+        'model_id' => 'anthropic/claude-sonnet-4.6',
+        'price_input_per_million' => 3.0,
+        'price_output_per_million' => 15.0,
+        'is_active' => true,
+    ]);
+
+    TeseAnalysisJob::create([
+        'tese_id' => 10,
+        'tribunal' => 'STF',
+        'section_type' => 'all',
+        'ai_model_id' => $aiModel->id,
+        'status' => 'running',
+    ]);
+
+    expect(app(AcordaoAnalysisEnqueueService::class)->removeJob(10, 'STF'))->toBeTrue()
+        ->and(TeseAnalysisJob::query()->where('tese_id', 10)->count())->toBe(0);
+});
+
+it('permite enfileirar após job em error sem forçar', function () {
+    Queue::fake();
+
+    $aiModel = AiModel::create([
+        'provider' => 'openrouter',
+        'name' => 'Test',
+        'model_id' => 'anthropic/claude-sonnet-4.6',
+        'price_input_per_million' => 3.0,
+        'price_output_per_million' => 15.0,
+        'is_active' => true,
+    ]);
+
+    TeseAnalysisJob::create([
+        'tese_id' => 10,
+        'tribunal' => 'STF',
+        'section_type' => 'all',
+        'ai_model_id' => $aiModel->id,
+        'status' => 'error',
+        'last_error' => 'OpenRouter Error: [400] Provider returned error',
+    ]);
+
+    $job = app(AcordaoAnalysisEnqueueService::class)->enqueue(10, 'STF');
+
+    expect($job)->not->toBeNull()
+        ->and($job->status)->toBe('queued');
+});
+
 it('considera inelegível quando há seções de IA', function () {
     $aiModel = AiModel::create([
         'provider' => 'openrouter',

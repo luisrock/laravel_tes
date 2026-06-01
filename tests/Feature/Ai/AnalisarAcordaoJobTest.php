@@ -178,6 +178,31 @@ it('marks the job as error without retry on permanent failures', function () {
     expect(TeseAnalysisSection::query()->where('tese_id', $teseId)->count())->toBe(0);
 });
 
+it('marks OpenRouter 400 as error without requeue', function () {
+    $teseId = jobTestCreateStfTese();
+    $aiModel = jobTestCreateOpenRouterAiModel();
+
+    $this->mock(AcordaoAnalysisService::class, function ($mock): void {
+        $mock->shouldReceive('analyze')
+            ->once()
+            ->andThrow(new RuntimeException(
+                'OpenRouter Error: [400] Provider returned error: context length exceeded for multimodal request'
+            ));
+    });
+
+    $job = jobTestCreateQueuedJob($teseId, $aiModel, ['max_attempts' => 3]);
+
+    jobTestDispatch($job);
+
+    $job->refresh();
+
+    expect($job->status)->toBe('error')
+        ->and($job->attempts)->toBe(1)
+        ->and($job->last_error)->toContain('[400]')
+        ->and($job->last_error)->toContain('context length exceeded')
+        ->and($job->completed_at)->not->toBeNull();
+});
+
 it('requeues retryable failures until max attempts are exhausted', function () {
     $teseId = jobTestCreateStfTese();
     $aiModel = jobTestCreateOpenRouterAiModel();

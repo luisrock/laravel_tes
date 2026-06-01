@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Exceptions\AcordaoAnalysisPermanentException;
 use App\Models\TeseAnalysisJob;
 use App\Services\Ai\AcordaoAnalysisService;
+use App\Support\AcordaoJobFailure;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -73,19 +74,21 @@ class AnalisarAcordaoJob implements ShouldQueue
         } catch (Throwable $exception) {
             $record->refresh();
 
-            if ($record->canRetry()) {
-                $record->update([
-                    'status' => 'queued',
-                    'last_error' => $exception->getMessage(),
-                    'locked_by' => null,
-                ]);
+            $message = AcordaoJobFailure::message($exception);
 
-                $this->release($this->backoffSecondsForAttempt($record->attempts));
+            if (AcordaoJobFailure::isPermanent($exception) || ! $record->canRetry()) {
+                $this->markAsError($record, $message);
 
                 return;
             }
 
-            $this->markAsError($record, $exception->getMessage());
+            $record->update([
+                'status' => 'queued',
+                'last_error' => $message,
+                'locked_by' => null,
+            ]);
+
+            $this->release($this->backoffSecondsForAttempt($record->attempts));
         }
     }
 
