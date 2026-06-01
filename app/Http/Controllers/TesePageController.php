@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AiModel;
+use App\Ai\Agents\AcordaoAnalyst;
 use App\Models\Quiz;
 use App\Models\TeseAnalysisJob;
+use App\Services\Ai\AcordaoAnalysisEnqueueService;
 use App\Services\ContentViewService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
@@ -370,23 +371,26 @@ class TesePageController extends Controller
         abort_unless(auth()->check() && auth()->user()->hasRole('admin'), 403);
 
         $tribunalUpper = strtoupper($tribunal);
-        $activeJob = TeseAnalysisJob::where('tese_id', $tese_id)
-            ->where('tribunal', $tribunalUpper)
-            ->whereIn('status', ['queued', 'running'])
-            ->exists();
 
-        if (! $activeJob) {
-            $model = AiModel::active()->first();
-            abort_if(! $model, 422, 'Nenhum modelo de IA ativo.');
+        abort_unless(
+            in_array($tribunalUpper, ['STF', 'STJ'], true),
+            422,
+            'Análise de acórdãos disponível apenas para STF e STJ.',
+        );
 
-            TeseAnalysisJob::updateOrCreate(
-                ['tese_id' => $tese_id, 'tribunal' => $tribunalUpper, 'section_type' => 'all'],
-                ['status' => 'queued', 'ai_model_id' => $model->id, 'attempts' => 0, 'last_error' => null]
-            );
-        }
+        abort_unless(
+            AcordaoAnalyst::isConfigured(),
+            422,
+            'Nenhum modelo de IA configurado para análise de acórdãos.',
+        );
+
+        $job = app(AcordaoAnalysisEnqueueService::class)->enqueue($tese_id, $tribunalUpper);
 
         if ($request->expectsJson()) {
-            return response()->json(['status' => 'queued']);
+            return response()->json([
+                'status' => $job !== null ? 'queued' : 'unchanged',
+                'job_id' => $job?->id,
+            ]);
         }
 
         return redirect()->back();
