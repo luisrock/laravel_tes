@@ -1,12 +1,13 @@
 <?php
 
+use App\Ai\Agents\AcordaoAnalyst;
 use App\Models\AiPrompt;
 use Database\Seeders\AiPromptsSeeder;
 
 it('seeds a non-empty acordao analysis system prompt', function () {
     $this->seed(AiPromptsSeeder::class);
 
-    $content = AiPrompt::contentForKey('acordao_analysis_system');
+    $content = AiPrompt::contentForKey(AcordaoAnalyst::SYSTEM_PROMPT_KEY);
 
     expect($content)->toBeString()
         ->and(trim((string) $content))->not->toBe('')
@@ -20,12 +21,12 @@ it('is idempotent and does not duplicate the prompt', function () {
     $this->seed(AiPromptsSeeder::class);
     $this->seed(AiPromptsSeeder::class);
 
-    expect(AiPrompt::query()->where('key', 'acordao_analysis_system')->count())->toBe(1);
+    expect(AiPrompt::query()->where('key', AcordaoAnalyst::SYSTEM_PROMPT_KEY)->count())->toBe(1);
 });
 
 it('does not overwrite an admin-edited prompt', function () {
     AiPrompt::create([
-        'key' => 'acordao_analysis_system',
+        'key' => AcordaoAnalyst::SYSTEM_PROMPT_KEY,
         'title' => 'Custom',
         'content' => 'Conteúdo editado pelo admin',
         'description' => 'editado',
@@ -33,5 +34,5 @@ it('does not overwrite an admin-edited prompt', function () {
 
     $this->seed(AiPromptsSeeder::class);
 
-    expect(AiPrompt::contentForKey('acordao_analysis_system'))->toBe('Conteúdo editado pelo admin');
+    expect(AiPrompt::contentForKey(AcordaoAnalyst::SYSTEM_PROMPT_KEY))->toBe('Conteúdo editado pelo admin');
 });

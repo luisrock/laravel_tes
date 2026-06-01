@@ -20,11 +20,17 @@ class TeseAnalysisJob extends Model
         'locked_by',
         'started_at',
         'completed_at',
+        'input_tokens',
+        'output_tokens',
+        'cost_usd',
     ];
 
     protected $casts = [
         'attempts' => 'integer',
         'max_attempts' => 'integer',
+        'input_tokens' => 'integer',
+        'output_tokens' => 'integer',
+        'cost_usd' => 'float',
         'created_at' => 'datetime',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
