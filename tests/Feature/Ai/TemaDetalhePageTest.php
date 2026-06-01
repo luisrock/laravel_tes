@@ -270,6 +270,44 @@ describe('TemaDetalhe — polling', function () {
 
 describe('TemaDetalhe — enfileiramento', function () {
 
+    it('enfileira após remover job em error', function () {
+        Queue::fake();
+        temaDetalheFakeOpenRouter();
+
+        $teseId = temaDetalheCreateStfTese(506);
+        temaDetalheCreateAcordao($teseId);
+
+        $aiModel = AiModel::create([
+            'provider' => 'openrouter',
+            'name' => 'Test',
+            'model_id' => 'anthropic/claude-sonnet-4.6',
+            'price_input_per_million' => 3.0,
+            'price_output_per_million' => 15.0,
+            'is_active' => true,
+        ]);
+
+        TeseAnalysisJob::create([
+            'tese_id' => $teseId,
+            'tribunal' => 'STF',
+            'section_type' => 'all',
+            'ai_model_id' => $aiModel->id,
+            'status' => 'error',
+            'last_error' => 'OpenRouter Error: [400] Provider returned error',
+        ]);
+
+        Livewire::actingAs(createAdminUser())
+            ->test(TemaDetalhe::class, ['tribunal' => 'STF', 'numero' => 506])
+            ->callAction(TestAction::make('removeJob'))
+            ->callAction(TestAction::make('enqueue')->arguments([
+                'model_slug' => 'anthropic/claude-sonnet-4.6',
+                'force' => false,
+            ]))
+            ->assertNotified();
+
+        expect(TeseAnalysisJob::query()->where('tese_id', $teseId)->where('status', 'queued')->exists())->toBeTrue();
+        Queue::assertPushed(AnalisarAcordaoJob::class);
+    });
+
     it('enfileira via ação do header com modelo escolhido', function () {
         Queue::fake();
         temaDetalheFakeOpenRouter();

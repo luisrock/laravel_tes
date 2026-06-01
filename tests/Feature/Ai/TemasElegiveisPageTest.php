@@ -6,6 +6,7 @@ use App\Models\AiModel;
 use App\Models\TeseAnalysisJob;
 use App\Models\TeseAnalysisSection;
 use App\Models\User;
+use App\Services\Ai\EligibleTemasQuery;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -126,6 +127,39 @@ describe('TemasElegiveis — acesso', function () {
 
 });
 
+describe('TemasElegiveis — filtros padrão', function () {
+
+    it('lista apenas temas sem IA em trânsito quando filtros não são enviados', function () {
+        $transitoSemIa = temasElegiveisCreateStfTese(301, 'Trânsito em Julgado');
+        temasElegiveisCreateAcordao($transitoSemIa);
+
+        $suspensoSemIa = temasElegiveisCreateStfTese(302, 'Suspenso');
+        temasElegiveisCreateAcordao($suspensoSemIa);
+
+        $transitoComIa = temasElegiveisCreateStfTese(303, 'Trânsito em Julgado');
+        temasElegiveisCreateAcordao($transitoComIa);
+        $aiModel = temasElegiveisCreateAiModel();
+        TeseAnalysisSection::create([
+            'tese_id' => $transitoComIa,
+            'tribunal' => 'STF',
+            'section_type' => 'teaser',
+            'content' => str_repeat('z', 250),
+            'status' => 'draft',
+            'is_active' => false,
+            'ai_model_id' => $aiModel->id,
+            'generated_at' => now(),
+        ]);
+
+        $paginator = app(EligibleTemasQuery::class)->paginate(null, null, null, null, 1, 50);
+        $numeros = $paginator->getCollection()->pluck('numero')->all();
+
+        expect($numeros)->toContain(301)
+            ->and($numeros)->not->toContain(302)
+            ->and($numeros)->not->toContain(303);
+    });
+
+});
+
 describe('TemasElegiveis — enfileiramento', function () {
 
     it('enfileira tema elegível e despacha o job', function () {
@@ -138,7 +172,9 @@ describe('TemasElegiveis — enfileiramento', function () {
 
         Livewire::actingAs(createAdminUser())
             ->test(TemasElegiveis::class)
-            ->callAction(TestAction::make('analyze')->table($key))
+            ->callAction(TestAction::make('analyze')->table($key), [
+                'model_slug' => 'anthropic/claude-sonnet-4.6',
+            ])
             ->assertNotified();
 
         $job = TeseAnalysisJob::query()
@@ -176,7 +212,10 @@ describe('TemasElegiveis — enfileiramento', function () {
 
         Livewire::actingAs(createAdminUser())
             ->test(TemasElegiveis::class)
-            ->callAction(TestAction::make('force')->table($key))
+            ->filterTable('has_ai', true)
+            ->callAction(TestAction::make('force')->table($key), [
+                'model_slug' => 'anthropic/claude-sonnet-4.6',
+            ])
             ->assertNotified();
 
         expect(TeseAnalysisJob::query()->where('tese_id', $teseId)->where('status', 'queued')->exists())->toBeTrue();
@@ -207,7 +246,9 @@ describe('TemasElegiveis — enfileiramento', function () {
         Livewire::actingAs(createAdminUser())
             ->test(TemasElegiveis::class)
             ->selectTableRecords(["STF:{$eligibleId}", "STF:{$withIaId}"])
-            ->callAction(TestAction::make('enqueueEligible')->table()->bulk())
+            ->callAction(TestAction::make('enqueueEligible')->table()->bulk(), [
+                'model_slug' => 'anthropic/claude-sonnet-4.6',
+            ])
             ->assertNotified();
 
         expect(TeseAnalysisJob::query()->where('status', 'queued')->count())->toBe(1)

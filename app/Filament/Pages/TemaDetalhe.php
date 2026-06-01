@@ -2,16 +2,14 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\InteractsWithAcordaoModels;
 use App\Filament\Widgets\TemaDetalheAcordaosTable;
 use App\Filament\Widgets\TemaDetalheJobsTable;
-use App\Models\SiteSetting;
 use App\Models\TeseAnalysisSection;
 use App\Services\Ai\AcordaoAnalysisEnqueueService;
 use App\Services\Ai\AcordaoTemaDetailService;
-use App\Services\Ai\OpenRouterManagementService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -34,6 +32,8 @@ use Livewire\Attributes\On;
  */
 class TemaDetalhe extends Page
 {
+    use InteractsWithAcordaoModels;
+
     protected static ?string $slug = 'tema';
 
     protected static bool $shouldRegisterNavigation = false;
@@ -112,21 +112,17 @@ class TemaDetalhe extends Page
                 ->label('Enfileirar análise')
                 ->icon(Heroicon::OutlinedSparkles)
                 ->form([
-                    Select::make('model_slug')
-                        ->label('Modelo')
-                        ->options(fn (): array => $this->acordaoModelOptions())
-                        ->default(fn (): string => (string) SiteSetting::get(
-                            'acordao_analysis_model',
-                            config('ai.acordao_analysis.default_model')
-                        ))
-                        ->searchable()
-                        ->required(),
+                    $this->acordaoModelSelectField(),
                     Toggle::make('force')
                         ->label('Forçar reprocesso')
+                        ->default(fn (): bool => app(AcordaoAnalysisEnqueueService::class)
+                            ->hasAiSections($this->teseId, $this->tribunal))
                         ->helperText('Re-enfileira mesmo com seções existentes. Se o job está travado em queued/running, use Remover job antes ou marque isto para interromper running.'),
                 ])
                 ->action(function (array $data): void {
-                    $job = app(AcordaoAnalysisEnqueueService::class)->enqueue(
+                    $service = app(AcordaoAnalysisEnqueueService::class);
+
+                    $job = $service->enqueue(
                         $this->teseId,
                         $this->tribunal,
                         force: (bool) ($data['force'] ?? false),
@@ -134,10 +130,16 @@ class TemaDetalhe extends Page
                     );
 
                     if ($job === null) {
+                        $body = $service->hasActiveJob($this->teseId, $this->tribunal)
+                            ? 'Há um job queued ou running. Remova o job na aba Jobs ou marque Forçar reprocesso para interromper um running.'
+                            : ($service->hasAiSections($this->teseId, $this->tribunal)
+                                ? 'Já existem seções de IA neste tema. Marque Forçar reprocesso para reenfileirar.'
+                                : 'Não foi possível enfileirar. Verifique acórdãos e configuração do modelo.');
+
                         Notification::make()
                             ->warning()
                             ->title('Não enfileirado')
-                            ->body('Tema não elegível ou job queued/running sem Forçar. Remova o job na aba Jobs ou ative Forçar reprocesso.')
+                            ->body($body)
                             ->send();
 
                         return;
@@ -359,22 +361,6 @@ class TemaDetalhe extends Page
                 ? number_format($tokensIn).' / '.number_format($tokensOut)
                 : null,
         ];
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    protected function acordaoModelOptions(): array
-    {
-        $options = app(OpenRouterManagementService::class)->pdfCapableModels();
-
-        $current = SiteSetting::get('acordao_analysis_model', config('ai.acordao_analysis.default_model'));
-
-        if (is_string($current) && $current !== '' && ! isset($options[$current])) {
-            $options[$current] = $current;
-        }
-
-        return $options;
     }
 
     /**

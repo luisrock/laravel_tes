@@ -22,23 +22,28 @@ class AcordaoAnalysisEnqueueService
         return $this->resolver->resolveOpenRouterModel((string) $slug);
     }
 
-    public function isEligible(int $teseId, string $tribunal): bool
+    public function hasActiveJob(int $teseId, string $tribunal): bool
     {
-        $tribunal = strtoupper($tribunal);
-
-        if (TeseAnalysisSection::query()
+        return TeseAnalysisJob::query()
             ->where('tese_id', $teseId)
-            ->where('tribunal', $tribunal)
-            ->exists()) {
-            return false;
-        }
-
-        return ! TeseAnalysisJob::query()
-            ->where('tese_id', $teseId)
-            ->where('tribunal', $tribunal)
+            ->where('tribunal', strtoupper($tribunal))
             ->where('section_type', 'all')
             ->whereIn('status', ['queued', 'running'])
             ->exists();
+    }
+
+    public function hasAiSections(int $teseId, string $tribunal): bool
+    {
+        return TeseAnalysisSection::query()
+            ->where('tese_id', $teseId)
+            ->where('tribunal', strtoupper($tribunal))
+            ->exists();
+    }
+
+    public function isEligible(int $teseId, string $tribunal): bool
+    {
+        return ! $this->hasAiSections($teseId, $tribunal)
+            && ! $this->hasActiveJob($teseId, $tribunal);
     }
 
     public function enqueue(
@@ -49,19 +54,12 @@ class AcordaoAnalysisEnqueueService
     ): ?TeseAnalysisJob {
         $tribunal = strtoupper($tribunal);
 
-        if (! $force && ! $this->isEligible($teseId, $tribunal)) {
-            return null;
-        }
-
         if (! $force) {
-            $hasActiveJob = TeseAnalysisJob::query()
-                ->where('tese_id', $teseId)
-                ->where('tribunal', $tribunal)
-                ->where('section_type', 'all')
-                ->whereIn('status', ['queued', 'running'])
-                ->exists();
+            if ($this->hasActiveJob($teseId, $tribunal)) {
+                return null;
+            }
 
-            if ($hasActiveJob) {
+            if ($this->hasAiSections($teseId, $tribunal)) {
                 return null;
             }
         } else {
@@ -140,12 +138,12 @@ class AcordaoAnalysisEnqueueService
     /**
      * @param  array<int, array{tese_id: int, tribunal: string}>  $records
      */
-    public function enqueueEligibleBatch(array $records): int
+    public function enqueueEligibleBatch(array $records, ?string $modelSlug = null): int
     {
         $count = 0;
 
         foreach ($records as $record) {
-            if ($this->enqueue($record['tese_id'], $record['tribunal']) !== null) {
+            if ($this->enqueue($record['tese_id'], $record['tribunal'], modelSlug: $modelSlug) !== null) {
                 $count++;
             }
         }

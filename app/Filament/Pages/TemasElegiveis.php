@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\InteractsWithAcordaoModels;
 use App\Services\Ai\AcordaoAnalysisEnqueueService;
 use App\Services\Ai\EligibleTemasQuery;
 use Filament\Actions\Action;
@@ -29,6 +30,7 @@ use Illuminate\Support\Collection;
  */
 class TemasElegiveis extends Page implements HasTable
 {
+    use InteractsWithAcordaoModels;
     use InteractsWithTable {
         makeTable as makeBaseTable;
     }
@@ -109,10 +111,14 @@ class TemasElegiveis extends Page implements HasTable
                     ->default('STF'),
                 TernaryFilter::make('has_ai')
                     ->label('Tem IA')
-                    ->placeholder('Todos'),
+                    ->placeholder('Todos')
+                    ->trueLabel('Sim')
+                    ->falseLabel('Não')
+                    ->default(false),
                 Filter::make('only_transito')
                     ->label('Somente trânsito em julgado')
-                    ->toggle(),
+                    ->toggle()
+                    ->default(true),
             ])
             ->defaultSort('numero', 'desc')
             ->defaultPaginationPageOption(25)
@@ -132,10 +138,14 @@ class TemasElegiveis extends Page implements HasTable
                         ->label('Analisar com IA')
                         ->icon(Heroicon::OutlinedSparkles)
                         ->visible(fn (array $record): bool => (bool) ($record['is_eligible'] ?? false))
-                        ->action(function (array $record): void {
+                        ->form([
+                            $this->acordaoModelSelectField(),
+                        ])
+                        ->action(function (array $record, array $data): void {
                             $job = app(AcordaoAnalysisEnqueueService::class)->enqueue(
                                 $record['tese_id'],
                                 $record['tribunal'],
+                                modelSlug: $data['model_slug'] ?? null,
                             );
 
                             if ($job === null) {
@@ -160,12 +170,17 @@ class TemasElegiveis extends Page implements HasTable
                         ->label('Forçar reprocesso')
                         ->icon(Heroicon::OutlinedArrowPath)
                         ->color('warning')
-                        ->requiresConfirmation()
-                        ->action(function (array $record): void {
+                        ->modalHeading('Forçar reprocesso')
+                        ->modalDescription('Re-enfileira a análise mesmo com seções existentes ou job em erro.')
+                        ->form([
+                            $this->acordaoModelSelectField(),
+                        ])
+                        ->action(function (array $record, array $data): void {
                             app(AcordaoAnalysisEnqueueService::class)->enqueue(
                                 $record['tese_id'],
                                 $record['tribunal'],
                                 force: true,
+                                modelSlug: $data['model_slug'] ?? null,
                             );
 
                             Notification::make()
@@ -187,13 +202,19 @@ class TemasElegiveis extends Page implements HasTable
                     ->label('Enfileirar elegíveis')
                     ->icon(Heroicon::OutlinedSparkles)
                     ->requiresConfirmation()
-                    ->action(function (Collection $records): void {
+                    ->form([
+                        $this->acordaoModelSelectField(),
+                    ])
+                    ->action(function (Collection $records, array $data): void {
                         $eligible = $records
                             ->filter(fn (array $record): bool => (bool) ($record['is_eligible'] ?? false))
                             ->values()
                             ->all();
 
-                        $count = app(AcordaoAnalysisEnqueueService::class)->enqueueEligibleBatch($eligible);
+                        $count = app(AcordaoAnalysisEnqueueService::class)->enqueueEligibleBatch(
+                            $eligible,
+                            $data['model_slug'] ?? null,
+                        );
 
                         Notification::make()
                             ->success()

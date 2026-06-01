@@ -103,7 +103,7 @@ class EligibleTemasQuery
         $value = $this->filterValue($filters, 'has_ai');
 
         if ($value === null || $value === '') {
-            return null;
+            return false;
         }
 
         return filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
@@ -115,6 +115,10 @@ class EligibleTemasQuery
     private function onlyTransitoFromFilters(?array $filters): bool
     {
         $value = $this->filterValue($filters, 'only_transito');
+
+        if ($value === null || $value === '') {
+            return true;
+        }
 
         return filter_var($value, FILTER_VALIDATE_BOOLEAN);
     }
