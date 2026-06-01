@@ -60,6 +60,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Análise de Acórdãos ("Decifrando a Tese")
+    |--------------------------------------------------------------------------
+    |
+    | Modelo OpenRouter default usado quando o admin ainda não escolheu um modelo
+    | em Configurações de IA (SiteSetting `acordao_analysis_model`). Garante um
+    | fallback robusto mesmo sem seed manual em produção.
+    |
+    */
+
+    'acordao_analysis' => [
+        'default_model' => env('ACORDAO_ANALYSIS_DEFAULT_MODEL', 'anthropic/claude-sonnet-4.6'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | AI Providers
     |--------------------------------------------------------------------------
     |

@@ -17,6 +17,8 @@ final class OpenRouterManagementService
 {
     private const MODELS_CACHE_KEY = 'openrouter:models';
 
+    private const RAW_MODELS_CACHE_KEY = 'openrouter:models:raw';
+
     private const MODELS_CACHE_TTL = 21600; // 6 horas
 
     public function __construct(private HttpFactory $http) {}
@@ -74,17 +76,123 @@ final class OpenRouterManagementService
     }
 
     /**
+     * Modelos PDF-capable (aceitam arquivo como anexo), para a análise de acórdãos.
+     *
+     * Filtra o catálogo por modelos de texto cujo `architecture.input_modalities` inclui `file`.
+     *
+     * @return array<string, string>
+     */
+    public function pdfCapableModels(): array
+    {
+        $models = [];
+
+        foreach ($this->rawCatalog() as $id => $model) {
+            if (! $this->isTextModel($model) || ! $this->isPdfCapable($model)) {
+                continue;
+            }
+
+            $models[$id] = $this->formatModelLabel($model);
+        }
+
+        asort($models);
+
+        return $models;
+    }
+
+    /**
      * Limpa o cache do catálogo de modelos (usado pelo botão "Atualizar").
      */
     public function clearModelsCache(): void
     {
         Cache::forget(self::MODELS_CACHE_KEY);
+        Cache::forget(self::RAW_MODELS_CACHE_KEY);
+    }
+
+    /**
+     * Preços por 1M de tokens (input/output) de um modelo do catálogo, prontos para `ai_models`.
+     *
+     * Retorna null quando o slug não existe no catálogo ou não tem pricing de texto.
+     *
+     * @return array{input: float, output: float}|null
+     */
+    public function modelPricingPerMillion(string $slug): ?array
+    {
+        $model = $this->rawModel($slug);
+
+        if ($model === null) {
+            return null;
+        }
+
+        $prompt = $model['pricing']['prompt'] ?? null;
+        $completion = $model['pricing']['completion'] ?? null;
+
+        if (! is_numeric($prompt) || ! is_numeric($completion)) {
+            return null;
+        }
+
+        return [
+            'input' => round((float) $prompt * 1_000_000, 4),
+            'output' => round((float) $completion * 1_000_000, 4),
+        ];
+    }
+
+    /**
+     * Nome legível do modelo no catálogo (ex.: "Anthropic: Claude Sonnet 4.6"); null se ausente.
+     */
+    public function modelName(string $slug): ?string
+    {
+        $model = $this->rawModel($slug);
+        $name = $model['name'] ?? null;
+
+        return is_string($name) && $name !== '' ? $name : null;
     }
 
     /**
      * @return array<string, string>
      */
     private function fetchModels(): array
+    {
+        $models = [];
+
+        foreach ($this->rawCatalog() as $id => $model) {
+            if (! $this->isTextModel($model)) {
+                continue;
+            }
+
+            $models[$id] = $this->formatModelLabel($model);
+        }
+
+        asort($models);
+
+        return $models;
+    }
+
+    /**
+     * Registro bruto de um modelo do catálogo OpenRouter por slug.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function rawModel(string $slug): ?array
+    {
+        return $this->rawCatalog()[$slug] ?? null;
+    }
+
+    /**
+     * Catálogo bruto da API OpenRouter, indexado por slug e cacheado por 6h.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    private function rawCatalog(): array
+    {
+        return Cache::remember(self::RAW_MODELS_CACHE_KEY, self::MODELS_CACHE_TTL, function (): array {
+            return $this->fetchRawCatalog();
+        });
+    }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    private function fetchRawCatalog(): array
     {
         $key = $this->managementKey();
 
@@ -103,23 +211,15 @@ final class OpenRouterManagementService
                 return [];
             }
 
-            $models = [];
+            $catalog = [];
 
             foreach ($response->json('data', []) as $model) {
-                if (! is_array($model) || ! isset($model['id'])) {
-                    continue;
+                if (is_array($model) && isset($model['id']) && is_string($model['id'])) {
+                    $catalog[$model['id']] = $model;
                 }
-
-                if (! $this->isTextModel($model)) {
-                    continue;
-                }
-
-                $models[$model['id']] = $this->formatModelLabel($model);
             }
 
-            asort($models);
-
-            return $models;
+            return $catalog;
         } catch (Throwable $e) {
             Log::warning('OpenRouter models request threw', ['message' => $e->getMessage()]);
 
@@ -143,6 +243,18 @@ final class OpenRouterManagementService
         $outputModalities = $model['architecture']['output_modalities'] ?? ['text'];
 
         return in_array('text', (array) $outputModalities, true);
+    }
+
+    /**
+     * Indica se o modelo aceita PDF/arquivo como anexo de entrada (multimodal).
+     *
+     * @param  array<string, mixed>  $model
+     */
+    private function isPdfCapable(array $model): bool
+    {
+        $inputModalities = $model['architecture']['input_modalities'] ?? [];
+
+        return in_array('file', (array) $inputModalities, true);
     }
 
     /**

@@ -7,9 +7,12 @@ O painel em `/admin` oferece navegação centralizada para todas as áreas admin
 - **Temas & Pesquisas** - Gestão de temas com estatísticas em tempo real
 - **Quizzes** - Criação e gestão de quizzes jurídicos
 - **Banco de Perguntas** - Perguntas reutilizáveis em múltiplos quizzes
-- **Estatísticas** - Dashboard com gráficos e métricas de desempenho
+- **Estatísticas** - Dashboard com gráficos e métricas de desempenho, com **Assistente de IA** (chat com streaming + botão "Avaliar estatísticas"; Laravel AI SDK / OpenRouter)
+- **Configurações de IA** - Escolha do modelo OpenRouter, crédito residual e editor de prompts (`/admin/painel/configuracoes-ia`)
 - **Newsletters** - Visualização de newsletters publicadas
 - **Tags** - Gestão de tags para categorização
+
+> Assistente de estatísticas (admin-only) e IA "Decifrando a Tese" são features **distintas e isoladas**. Detalhes do assistente em `PROJECT_BRIEF.md` §14 e `ARQUIVOS_MD/AI_SDK_*`.
 
 ### Emails Transacionais
 

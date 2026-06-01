@@ -16,13 +16,18 @@ function fakeOpenRouterCatalogue(string $modelId): void
     config()->set('services.openrouter.management_key', 'mgmt-key');
     Cache::forget('openrouter:models');
 
+    Cache::forget('openrouter:models:raw');
+
     Http::fake([
         'openrouter.ai/api/v1/models' => Http::response([
             'data' => [[
                 'id' => $modelId,
                 'name' => $modelId,
                 'pricing' => ['prompt' => '0.000003', 'completion' => '0.000015'],
-                'architecture' => ['output_modalities' => ['text']],
+                'architecture' => [
+                    'input_modalities' => ['text', 'image', 'file'],
+                    'output_modalities' => ['text'],
+                ],
             ]],
         ]),
         'openrouter.ai/api/v1/credits' => Http::response([
@@ -75,6 +80,40 @@ describe('AiSettings — persistência do modelo', function () {
         Livewire::actingAs($admin)
             ->test(AiSettings::class)
             ->assertSet('data.ai_chat_model', 'openai/gpt-4o');
+    });
+
+});
+
+describe('AiSettings — modelo de análise de acórdãos', function () {
+
+    it('grava acordao_analysis_model via save da página', function () {
+        $admin = createAdminUser();
+        fakeOpenRouterCatalogue('anthropic/claude-sonnet-4.6');
+
+        Livewire::actingAs($admin)
+            ->test(AiSettings::class)
+            ->set('data.acordao_analysis_model', 'anthropic/claude-sonnet-4.6')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        expect(SiteSetting::get('acordao_analysis_model'))->toBe('anthropic/claude-sonnet-4.6');
+    });
+
+    it('usa o default da config no mount quando não há setting', function () {
+        $admin = createAdminUser();
+
+        Livewire::actingAs($admin)
+            ->test(AiSettings::class)
+            ->assertSet('data.acordao_analysis_model', 'anthropic/claude-sonnet-4.6');
+    });
+
+    it('carrega o modelo de acórdãos gravado no mount', function () {
+        $admin = createAdminUser();
+        SiteSetting::set('acordao_analysis_model', 'google/gemini-2.5-pro');
+
+        Livewire::actingAs($admin)
+            ->test(AiSettings::class)
+            ->assertSet('data.acordao_analysis_model', 'google/gemini-2.5-pro');
     });
 
 });

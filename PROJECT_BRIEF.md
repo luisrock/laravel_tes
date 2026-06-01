@@ -12,7 +12,8 @@ Funcionalidades-chave:
 - Busca por termo (única ou por tribunal), com operadores `AND/OR/NOT`, aspas, frases curtas, normalização e cache.
 - Páginas individuais de súmula/tese e listagens por tribunal.
 - **Temas** (`pesquisas`) — agregação de súmulas+teses por keyword (SEO).
-- **Análise de Precedente com IA** ("Decifrando a Tese"): seções geradas para teses do STF/STJ, com PDFs de acórdãos (S3).
+- **Análise de Precedente com IA** ("Decifrando a Tese"): seções geradas para teses do STF/STJ, com PDFs de acórdãos (S3). *(IA legada — `ai_models` + `TeseAnalysis*`.)*
+- **Assistente de Estatísticas (IA, admin)**: chat com streaming + botão "Avaliar estatísticas" embutido na página de Estatísticas do Filament. Usa o **Laravel AI SDK** (`laravel/ai`) com provedor **OpenRouter**; prompts editáveis e conversas persistentes por admin. *(Stack nova, isolada da IA legada — ver §14.)*
 - **Quizzes** jurídicos públicos + banco de perguntas reutilizáveis.
 - **Coleções** privadas/públicas (usuário salva súmulas/teses/temas em listas).
 - **Newsletters** (campanhas publicadas).
@@ -22,7 +23,7 @@ Funcionalidades-chave:
 
 ## 2. Stack
 
-PHP 8.3.30 · Laravel 12 · MySQL (prod) / SQLite in-memory (testes) · Tailwind v3 + Vite · Blade · Livewire 3 (Coleções) · Filament 4 (admin auxiliar em `/painel`) · Spatie Permission 6 · Fortify 1 · Cashier 15 (Stripe) · Socialite 5 (Google) · Pest 3 + PHPUnit 11 · Pint 1 · Laravel Boost 2 (MCP habilitado).
+PHP 8.3.30 · Laravel 12 · MySQL (prod) / SQLite in-memory (testes) · Tailwind v3 + Vite · Blade · Livewire 3 (Coleções, assistente de IA) · Filament 4 (admin auxiliar em `/painel`) · Spatie Permission 6 · Fortify 1 · Cashier 15 (Stripe) · Socialite 5 (Google) · Laravel AI SDK (`laravel/ai`, provedor OpenRouter — assistente de estatísticas) · Pest 3 + PHPUnit 11 · Pint 1 · Laravel Boost 2 (MCP habilitado).
 
 Estrutura **Laravel 10 legada** (não migrada para a nova): middleware em `app/Http/Kernel.php`, exceções em `app/Exceptions/Handler.php`, schedule em `app/Console/Kernel.php`. NÃO mexer em `bootstrap/app.php`.
 
@@ -87,7 +88,9 @@ Hook **pre-commit** (quando instalado): Pint (`--test`) + suite Pest (SQLite) + 
 | `Collection`, `CollectionItem` | `collections`, `collection_items` | Coleções privadas/públicas do usuário; item polimórfico por `(content_type, content_id, tribunal)`. |
 | `TeseAcordao` | `tese_acordaos` | PDFs de acórdãos relacionados a teses (S3). |
 | `TeseAnalysisSection`, `TeseAnalysisJob` | `tese_analysis_sections`, `tese_analysis_jobs` | Análise IA "Decifrando a Tese" (seções por tese + jobs de geração). |
-| `AiModel` | `ai_models` | Catálogo de modelos de IA disponíveis para geração. |
+| `AiModel` | `ai_models` | Catálogo de modelos de IA disponíveis para geração (IA legada "Decifrando a Tese"). |
+| `AiPrompt` | `ai_prompts` | Prompts editáveis do assistente de IA (AI SDK) por `key` única (`stats_analyst_system`, `stats_analyst_evaluate`). NÃO confundir com `ai_models`. |
+| _(SDK)_ `Conversation`, `ConversationMessage` | `agent_conversations`, `agent_conversation_messages` | Conversas persistidas do assistente de estatísticas (trait `RemembersConversations` do `laravel/ai`). |
 | `EditableContent` | `editable_contents` | Páginas/blocos editáveis (home, precedentes, toggles de visibilidade). |
 | `Newsletter` | `newsletters` | Campanhas publicadas (arquivo editorial). |
 | `NewsletterSubscriptionEvent` | `newsletter_subscription_events` | Auditoria de inscrições/opt-out/impressões do popup (Sendy). |
@@ -136,7 +139,7 @@ Auth (Fortify): login/registro/2FA/reset. Google OAuth: `/auth/google`.
 Admin (`/admin/*`, middleware `admin_access`):
 - `roles`, `permissions`, `users`, `temas`, `quizzes`, `questions`, `acordaos`, `content/{slug}/edit`.
 
-Filament secundário em `/painel` (auth via `canAccessPanel`): `UserResource`, `PlanFeatureResource`, `RefundRequestResource`, pages `CollectionSettings`, `MeteredWallSettings`, `NewsletterIntegrationSettings`, `NewsletterPopupSettings`, `SiteStats` (URL legada `/newsletter-stats` redireciona), widgets de subscriptions.
+Filament secundário em `/painel` (auth via `canAccessPanel`): `UserResource`, `PlanFeatureResource`, `RefundRequestResource`, `AiPromptResource` (CRUD de prompts de IA), pages `CollectionSettings`, `MeteredWallSettings`, `NewsletterIntegrationSettings`, `NewsletterPopupSettings`, `AiSettings` (`/admin/painel/configuracoes-ia` — escolha do modelo OpenRouter + crédito residual), `SiteStats` (URL legada `/newsletter-stats` redireciona; embute o **assistente de IA** `App\Livewire\StatsAiChat`), widgets de subscriptions.
 
 API (`routes/api.php`):
 - Públicas (sem auth): `POST /api/`, `POST /api/{trib}.php` (compat extensão Chrome), `POST /api/unified-search`.
@@ -179,7 +182,8 @@ Demais serviços (`app/Services/`):
 - `config/tes_constants.php` — registry de tribunais (FONTE ÚNICA).
 - `config/subscription.php` — flag `enabled`, tier_product_ids, features.
 - `config/permission.php` — Spatie.
-- `config/services.php` — credenciais OpenAI, Google, AWS, Matomo.
+- `config/ai.php` — Laravel AI SDK: provedor `openrouter` e seção `conversations` (persistência; `generate_title=false`).
+- `config/services.php` — credenciais OpenAI, Google, AWS, Matomo e `openrouter` (`key`, `management_key`, `base_url`, `request_timeout`).
 - Sempre `config('chave')`, NUNCA `env()` fora de `config/*`.
 
 ## 11. Convenções obrigatórias
@@ -229,3 +233,28 @@ Integração opt-in/opt-out com **Sendy** (lista configurada em `.env`). Arquite
 4. Cron no servidor: ver secção **3** (`schedule:run` a cada minuto; `newsletter:sync` a cada 6 h via Kernel).
 
 Plano completo e histórico de fases: `ARQUIVOS_MD/NEWSLETTER_SENDY_PLAN.md`.
+
+## 14. Assistente de IA (Laravel AI SDK)
+
+Feature **admin-only**, totalmente **isolada da IA legada** ("Decifrando a Tese": `ai_models`, `TeseAnalysis*` — não tocar). Usa o **Laravel AI SDK** (`laravel/ai`) com provedor **OpenRouter**.
+
+### Arquitetura (`app/Ai/`, `app/Services/Ai/`, `app/Livewire/`, `app/Filament/`)
+
+- `App\Ai\Agents\StatsAnalyst` — agente (`Agent, Conversational, HasTools` + trait `RemembersConversations`). Provider `openrouter`, modelo de `SiteSetting('ai_chat_model')`, `timeout()`/`maxSteps()`. Tool `App\Ai\Tools\QuerySiteMetrics` (métricas por período, reusa `SiteMetrics`+`SendyService`). Prompts via `AiPrompt::contentForKey()` com **fallback** em código (`defaultInstructions()`, `defaultEvaluatePrompt()`).
+- `App\Livewire\StatsAiChat` (+ view `livewire/stats-ai-chat`) — chat com **streaming** (`$this->stream()` do Livewire 3 consumindo `StatsAnalyst::stream()`, sem Reverb/Echo) + botão "Avaliar estatísticas". Conversa **persistente** por admin (retoma a última, dropdown das anteriores, "Nova conversa"). Embutido em `SiteStats` num card **colapsável** (estado em localStorage).
+- `App\Services\Ai\OpenRouterManagementService` — crédito residual + catálogo de modelos (cache 6h).
+- Filament: `AiSettings` (escolher modelo + ver crédito) e `AiPromptResource` (editar prompts).
+
+### Prompts editáveis (`ai_prompts`, modelo `AiPrompt`)
+
+- `stats_analyst_system` — system prompt do agente.
+- `stats_analyst_evaluate` — prompt do botão "Avaliar estatísticas"; placeholder `{periodo}` é trocado pelo rótulo do período.
+- Seeder `AiPromptsSeeder` (idempotente, **manual em prod**). Sem registro, usa o fallback em código.
+
+### Variáveis de ambiente / produção
+
+- `.env`: `OPENROUTER_API_KEY` (requisições) e `OPENROUTER_API_KEY_MANAGEMENT` (crédito/catálogo). Opcionais: `OPENROUTER_BASE_URL`, `OPENROUTER_REQUEST_TIMEOUT`.
+- Deploy: as migrations (`ai_prompts`, `agent_conversations`) rodam no push (Vito `migrate --force`). O **seeder de prompts é manual**: `php artisan db:seed --class=AiPromptsSeeder --force`. Escolher o modelo em `/admin/painel/configuracoes-ia`.
+- Nota: streaming melhora a percepção de velocidade, mas **não elimina timeouts** de modelos lentos — preferir modelos rápidos.
+
+Planos completos e histórico: `ARQUIVOS_MD/AI_SDK_INTEGRATION_PLAN.md` (Fase 1) e `ARQUIVOS_MD/AI_SDK_FASE2_PLAN.md` (Fase 2).

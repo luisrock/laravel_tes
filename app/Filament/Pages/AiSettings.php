@@ -42,6 +42,10 @@ class AiSettings extends Page
     {
         $this->form->fill([
             'ai_chat_model' => SiteSetting::get('ai_chat_model'),
+            'acordao_analysis_model' => SiteSetting::get(
+                'acordao_analysis_model',
+                config('ai.acordao_analysis.default_model')
+            ),
         ]);
     }
 
@@ -67,6 +71,16 @@ class AiSettings extends Page
                             ->placeholder('Selecione um modelo')
                             ->helperText($this->modelSelectHelper()),
                     ]),
+                Section::make('Análise de Acórdãos')
+                    ->description('Modelo do OpenRouter usado para gerar as análises de acórdãos ("Decifrando a Tese").')
+                    ->schema([
+                        Select::make('acordao_analysis_model')
+                            ->label('Modelo')
+                            ->options(fn (): array => $this->acordaoModelOptions())
+                            ->searchable()
+                            ->placeholder('Selecione um modelo')
+                            ->helperText($this->acordaoModelSelectHelper()),
+                    ]),
             ]);
     }
 
@@ -75,11 +89,12 @@ class AiSettings extends Page
         $data = $this->form->getState();
 
         SiteSetting::set('ai_chat_model', (string) ($data['ai_chat_model'] ?? ''));
+        SiteSetting::set('acordao_analysis_model', (string) ($data['acordao_analysis_model'] ?? ''));
 
         Notification::make()
             ->success()
             ->title('Configurações salvas')
-            ->body('Modelo de IA atualizado.')
+            ->body('Modelos de IA atualizados.')
             ->send();
     }
 
@@ -146,6 +161,31 @@ class AiSettings extends Page
         return $this->modelOptions() === []
             ? 'Nenhum modelo carregado. Verifique a chave de gerenciamento (OPENROUTER_API_KEY_MANAGEMENT) e use "Atualizar catálogo".'
             : 'A lista vem do catálogo do OpenRouter (modelos de texto).';
+    }
+
+    /**
+     * Opções do Select de análise de acórdãos: apenas modelos PDF-capable do catálogo.
+     *
+     * @return array<string, string>
+     */
+    protected function acordaoModelOptions(): array
+    {
+        $options = app(OpenRouterManagementService::class)->pdfCapableModels();
+
+        $current = SiteSetting::get('acordao_analysis_model', config('ai.acordao_analysis.default_model'));
+
+        if (is_string($current) && $current !== '' && ! isset($options[$current])) {
+            $options[$current] = $current;
+        }
+
+        return $options;
+    }
+
+    protected function acordaoModelSelectHelper(): string
+    {
+        return app(OpenRouterManagementService::class)->pdfCapableModels() === []
+            ? 'Nenhum modelo PDF-capable carregado. Verifique a chave de gerenciamento (OPENROUTER_API_KEY_MANAGEMENT) e use "Atualizar catálogo".'
+            : 'Apenas modelos do OpenRouter que aceitam PDF como anexo (multimodal).';
     }
 
     protected function remainingCreditsLabel(): HtmlString
