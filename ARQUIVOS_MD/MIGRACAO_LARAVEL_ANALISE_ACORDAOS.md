@@ -1,21 +1,43 @@
 # Migração: "Decifrando a Tese" — do script Python para o Laravel 12 / Filament
 
-> **Documento único de migração (revisado).** Descreve como levar TODA a funcionalidade do script Python `tesacordaos_ia` (`/Users/maurolopes/pythonSites/tesacordaos_ia`) para o Laravel 12 do **tesesesumulas.com.br** (`/Users/maurolopes/phpSites/teses`), de modo que a geração das análises de acórdãos ("Decifrando a Tese") passe a ser **disparada e administrada inteiramente pelo Filament admin** (`/admin/painel`), via web. Ao fim, o script Python é **desativado**.
+> **Documento único de migração (revisado).** Descreve a migração da geração de análises de acórdãos ("Decifrando a Tese") do script Python `tesacordaos_ia` para o Laravel 12 do **tesesesumulas.com.br** (`/Users/maurolopes/phpSites/teses`).
 >
-> **Objetivo de paridade:** num primeiro momento, **emular fielmente o que o script Python faz, inclusive a interface web (Flask)** — tarefa **exclusiva do admin**. A interface do visitante/usuário do site **já está pronta** e não será alterada (salvo a decisão da Fase 7).
->
-> Este documento já incorpora as decisões tomadas com o usuário (ver §2). A última seção (§14) traz o prompt jurídico pronto para semear.
+> Este documento incorpora as decisões tomadas com o usuário (ver §2). A última seção (§14) traz o prompt jurídico pronto para semear.
+
+---
+
+## Status da migração (jun/2026) — **PAUSADA na Fase 5.3**
+
+**Decisão:** considerar o trabalho **satisfatório para o fim a que se destina** — **oferecer ao usuário do site resumos de acórdãos** ("Decifrando a Tese") nas páginas públicas das teses STF/STJ.
+
+**Entregue e em uso (Laravel):**
+
+- Geração das 5 seções via OpenRouter (PDF multimodal), fila nativa (`AnalisarAcordaoJob`), QA, custo e idempotência.
+- Admin Filament: modelo default (`AiSettings`), **Temas elegíveis**, **Detalhe do tema** (enfileirar, forçar, remover job, escolha de modelo).
+- Site: exibição das seções (versão mais recente por `section_type`, por `generated_at`) + botão admin **Resumir com IA** (modelo default).
+
+**Não implementado (fases 6–9)** — **fora de escopo** nesta pausa:
+
+- Monitor global da fila, revisão/ativação editorial no Filament, dashboard de custos agregado, desativação do repositório Python.
+
+**Script Python:** mantido como **ferramenta opcional** (ex.: interface Flask legada para operações admin mais amplas). **Não** é pré-requisito para o site público. Em produção, o processamento diário deve ficar no **worker Laravel** (`queue:work` via scheduler); evitar **dois workers** (Python + Laravel) a consumir a mesma `tese_analysis_jobs`.
+
+**Front e metadados `draft` / `published` / `is_active`:** o `TesePageController` **não filtra** por esses campos — mostra sempre a seção mais recente de cada tipo. A Fase 7 (revisão/ativação) **não é necessária** para o comportamento atual do site.
+
+**Último commit relevante da Fase 5:** `e21f618` (filtros padrão em temas elegíveis, modelo no admin, melhorias de enfileiramento).
 
 ---
 
 ## 1. Contexto e objetivo
 
-Hoje a feature funciona em **dois lugares**:
+**Objetivo de produto (atingido na pausa):** o visitante vê resumos IA na página da tese; o admin dispara e acompanha a geração pelo Filament (e, se quiser, pelo botão na própria página da tese).
 
-- **Laravel**: apenas (a) **enfileira** (`POST /tese/{tribunal}/{tese_id}/resumir-ia` → `TesePageController@enqueueAi`, cria `tese_analysis_jobs` com `section_type='all'`) e (b) **lê/exibe** as seções de `tese_analysis_sections` na página pública (mostra a versão mais recente por `generated_at`, hoje **ignorando** `is_active/status`).
-- **Script Python**: é quem **gera de fato** — worker baixa o PDF do S3, extrai texto (PyMuPDF + OCR Tesseract), chama a IA, valida (QA), calcula custo e grava as seções no MySQL. Tem ainda uma **interface web Flask** (admin) com 6 telas.
+**Estado após Fases 0–5.3:**
 
-**Migração:** reimplementar a geração no Laravel com o **Laravel AI SDK** (`laravel/ai` v0.7.2, já instalado e em uso no chat de estatísticas), disparo e administração 100% no **Filament**, **emulando a interface Flask**. O PDF vai **direto ao modelo como anexo multimodal**, eliminando extração de texto, OCR e compressão.
+- **Laravel** **enfileira, processa e grava** as seções (`AcordaoAnalysisService` + `AnalisarAcordaoJob`) e **exibe** em `tese_analysis_sections` na página pública (versão mais recente por `generated_at`, sem filtro `is_active`/`status`).
+- **Script Python** (`tesacordaos_ia`): pipeline legado (extração de texto/OCR) e **UI Flask** com 6 telas — **não desativado**; uso opcional para operações que o Filament ainda não cobre (fila global, purge em massa, etc.).
+
+**Escopo original (paridade Flask + desligar Python):** documentado nas fases 6–9 abaixo como **adiado**. A migração técnica do **núcleo** (gerar + publicar no site + admin essencial) está concluída.
 
 **Stack alvo:** PHP 8.3 · Laravel 12 · Filament 4 · `laravel/ai` v0.7.2 · MySQL (prod) / SQLite (testes) · Pest 3 · Pint 1. Convenções obrigatórias em `AGENTS.md` / `CLAUDE.md`.
 
@@ -34,7 +56,8 @@ Estas decisões foram confirmadas com o usuário e são a base do roadmap:
 7. **Idempotência por hash dos PDFs.** `source_hash` passa a ser SHA-256 da concatenação ordenada dos **`checksum`** dos acórdãos (não mais do texto extraído). Aceito que **seções antigas geradas pelo Python serão regeradas** ao reprocessar (os hashes não casam com o esquema antigo baseado em texto).
 8. **QA idêntica ao Python** (constantes em §9): teaser aprovado → `published`; **demais seções sempre `draft`** (QA só registra aviso); `is_active` sempre `false` (ativação é ação manual do admin).
 9. **Escopo da UI: núcleo primeiro (`core_first`).** Ordem: temas → enfileirar/detalhe → fila → revisão/ativação → prompts → **dashboard de custos por último**.
-10. **Exibição no front:** decisão adiada para a **Fase 7** (manter paridade "visível ao gerar" vs. endurecer para `is_active=true`).
+10. **Exibição no front:** **mantida na pausa** — mostrar a versão mais recente por `generated_at` (sem gate `is_active`/`published`). Fase 7 **não planeada** enquanto esse comportamento for o desejado.
+11. **Pausa na Fase 5.3 (jun/2026):** migração considerada suficiente para resumos no site; fases 6–9 e desligamento do Python **não** serão executadas por agora; Python permanece fallback opcional.
 
 ---
 
@@ -233,34 +256,44 @@ Ordem de implementação **core_first**. Cada tela que mexe em UI exige **valida
 - [x] **5.1** Tela "Temas elegíveis" (filtros tribunal/tem-IA/trânsito/ordenação + paginação) com ações Analisar/Forçar/lote (`updateOrCreate` job + `dispatch` com `afterResponse`; `Queue::fake` nos testes). _Gate:_ teste Filament **+ validação manual**. _(Implementado: `TemasElegiveis`, `EligibleTemasQuery`, `AcordaoAnalysisEnqueueService`; coluna Tema unificada + menu de ações; validação manual OK em `/admin/painel/temas-elegiveis`.)_
 - [x] **5.2** Detalhe do tema (acórdãos + seções + jobs; enfileirar single com modelo/force). _Gate:_ teste Filament **+ validação manual**. _(Implementado: `TemaDetalhe` em `/admin/painel/tema/{tribunal}/{numero}` (URL canônica pelo número do tema), abas Filament, metadados de custo/modelo na aba Seções IA (não na tabela de jobs), polling 5s enquanto job `queued`/`running`, `AnalisarAcordaoJob::dispatch()->afterResponse()` + `set_time_limit` no job; migrations `openrouter` no enum + colunas de usage em jobs; 11 testes Pest. **Validação manual OK**.)_
 - [x] **5.3** (Opcional) Alinhar `TesePageController@enqueueAi` para também `dispatch(AnalisarAcordaoJob)` (botão "Resumir com IA" ponta a ponta). _Gate:_ teste de rota **+ validação manual**. _(Implementado: `enqueueAi` usa `AcordaoAnalysisEnqueueService` + modelo OpenRouter de `SiteSetting`; `AnalisarAcordaoJob::dispatch()->afterResponse()`; 422 se modelo não configurado ou tribunal ≠ STF/STJ; testes em `EnqueueAiTest.php`. **Validação manual OK** — botão na página pública `/tese/stf|stj/{numero}`.)_
+- [x] **5.x** Ajustes pós-5.3 (`e21f618`): filtros padrão em Temas elegíveis (sem IA + trânsito em julgado); escolha de modelo no admin (analisar/forçar/lote); mensagens e reenfileiramento após remover job no detalhe do tema.
 
-### Fase 6 — Fila / monitor (UI)
-- [ ] **6.1** Tela de `tese_analysis_jobs` (filtros por status/tentativas/erro/custo) com ações recuperar travados, remover job (queued), purgar (done/error/ambos), aplicar modelo aos queued. _Gate:_ teste Filament **+ validação manual**.
+### Fase 6 — Fila / monitor (UI) — **PAUSADA / fora de escopo**
+- [-] **6.1** Tela global de `tese_analysis_jobs` — _não implementada; opcional. Operações por tema em `TemaDetalhe` ou Flask legado._
 
-### Fase 7 — Revisão e ativação de seções (UI)
-- [ ] **7.0** Decidir exibição no front (§2.10): manter "visível ao gerar" (paridade) ou exibir só `is_active=true` (ativação vira gate real; nesse caso, promover `draft→published` antes de `ativar()` e ajustar `TesePageController`). _Gate:_ alinhamento com o usuário.
-- [ ] **7.1** Revisão das seções (ver/editar conteúdo, status/custo); promover `draft→published`; `ativar()` (marca `is_active`, desativa anteriores). _Gate:_ teste Filament **+ validação manual** (conferir exibição na página pública).
+### Fase 7 — Revisão e ativação de seções (UI) — **PAUSADA / fora de escopo**
+- [-] **7.0** Gate `is_active`/`published` no front — _não necessário: o site mostra a seção mais recente por tipo._
+- [-] **7.1** UI de revisão/ativação — _não implementada._
 
-### Fase 8 — Validação ponta a ponta
-- [ ] **8.1** Rodar pelo site: enfileirar → gerar → revisar → ativar → ver no front, em amostra STF e STJ (incluindo um PDF escaneado, para validar o multimodal sem OCR). _Gate:_ **validação manual** + paridade de resultados.
+### Fase 8 — Validação ponta a ponta — **PAUSADA**
+- [-] **8.1** E2E formal STF/STJ + PDF escaneado — _validação operacional ad hoc conforme necessidade; não bloqueia a pausa._
 
-### Fase 9 — Dashboard de custos (UI) + corte do Python
-- [ ] **9.1** Dashboard: stats por status + custo agregado por modelo (deduplicando a requisição única). _Gate:_ teste **+ validação manual**.
-- [ ] **9.2** Parar workers Python em produção (sem novos enfileiramentos pelo Python).
-- [ ] **9.3** Aposentar/arquivar o repositório Python. _Gate:_ confirmação do usuário.
+### Fase 9 — Dashboard de custos (UI) + corte do Python — **PAUSADA**
+- [-] **9.1** Dashboard de custos — _não implementado._
+- [-] **9.2** Parar workers Python — _não aplicável na pausa; Python mantido._
+- [-] **9.3** Aposentar repositório Python — _não aplicável na pausa._
+
+> **Legenda:** `[x]` concluído · `[ ]` pendente no roadmap original · `[-]` adiado/fora de escopo na pausa de jun/2026.
 
 ---
 
-## 13. Checklist de paridade (antes de desativar o Python)
+## 13. Checklist de paridade (referência; desligamento do Python **não** é meta na pausa)
 
-- [ ] 5 seções com o mesmo prompt e regras (anonimização, CPC/73, evergreen, anti-alucinação, JSON estrito, campo `erro`).
-- [ ] Idempotência por hashes (pula repetida; job `done` sem custo).
-- [ ] QA (teaser→published; demais→draft; `is_active=false`).
-- [ ] Custo/tokens por seção (snapshots + `raw_usage`) e total no job.
-- [ ] PDF escaneado tratado via multimodal (sem OCR).
-- [ ] Fila com status, retry e recuperação de travados.
-- [ ] Disparo single/lote/forçar pela web; modelo default e edição de prompt no Filament.
-- [ ] Telas equivalentes às do Flask (temas, detalhe, fila, revisão/ativação, prompts, dashboard).
+Itens **necessários para o site público** (objetivo da pausa):
+
+- [x] 5 seções com prompt e regras (agente + seeder §14; QA em `SectionQa`).
+- [x] Idempotência por hashes de PDF (`checksum`).
+- [x] Geração, custo/tokens e gravação em `tese_analysis_sections` + job `done`/`error`.
+- [x] PDF via multimodal OpenRouter (sem OCR no Laravel).
+- [x] Fila com status, retry e erros permanentes (4xx).
+- [x] Disparo single/lote/forçar no Filament; modelo default + escolha por job no admin; prompt editável (`AiPromptResource`).
+
+Itens **não exigidos** na pausa (paridade Flask completa / desativar Python):
+
+- [ ] Recuperação global de travados / purge em massa na UI Laravel (Flask ou detalhe por tema).
+- [ ] Telas Flask restantes (fila global, revisão/ativação dedicada, dashboard agregado).
+- [ ] Gate editorial `is_active`/`published` no front.
+- [ ] Desativação do worker e repositório Python.
 
 ---
 
