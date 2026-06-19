@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\ExtensionUsageStats;
 use App\Filament\Widgets\NewsletterBySourceChart;
 use App\Filament\Widgets\NewsletterDailyChart;
 use App\Filament\Widgets\NewsletterPopupAbStats;
@@ -92,6 +93,7 @@ class SiteStats extends Page
                 ])
                     ->schema(fn (): array => $this->getWidgetsSchemaComponents([
                         SiteOverviewStats::class,
+                        ExtensionUsageStats::class,
                     ])),
                 Grid::make(['default' => 1, 'md' => 2])
                     ->schema(fn (): array => $this->getWidgetsSchemaComponents([

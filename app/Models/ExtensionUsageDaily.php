@@ -59,4 +59,50 @@ class ExtensionUsageDaily extends Model
 
         return self::UNKNOWN_VERSION;
     }
+
+    /**
+     * Soma de buscas da extensão no período (em dias).
+     */
+    public static function totalHits(string $period = '30'): int
+    {
+        return (int) self::query()
+            ->where('date', '>=', self::periodStartDate($period))
+            ->sum('hits');
+    }
+
+    /**
+     * Média diária de buscas no período (hits ÷ dias do período).
+     */
+    public static function dailyAverage(string $period = '30'): float
+    {
+        return round(self::totalHits($period) / self::periodDays($period), 1);
+    }
+
+    /**
+     * Versão da extensão com mais buscas no período (ou null se não houver dados).
+     */
+    public static function topVersion(string $period = '30'): ?string
+    {
+        return self::query()
+            ->where('date', '>=', self::periodStartDate($period))
+            ->groupBy('extension_version')
+            ->orderByRaw('SUM(hits) DESC')
+            ->value('extension_version');
+    }
+
+    /**
+     * Quantidade de dias do período (mínimo 1).
+     */
+    private static function periodDays(string $period): int
+    {
+        return max(1, (int) $period);
+    }
+
+    /**
+     * Data inicial (YYYY-MM-DD) do recorte do período.
+     */
+    private static function periodStartDate(string $period): string
+    {
+        return now()->subDays(self::periodDays($period) - 1)->toDateString();
+    }
 }

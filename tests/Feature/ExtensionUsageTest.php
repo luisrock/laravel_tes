@@ -51,6 +51,35 @@ describe('ExtensionUsageDaily::record', function () {
 
 });
 
+describe('Agregações para o painel (passo stats)', function () {
+
+    it('soma os hits do período em totalHits', function () {
+        ExtensionUsageDaily::create(['date' => now()->toDateString(), 'extension_version' => '1.0.0', 'hits' => 10]);
+        ExtensionUsageDaily::create(['date' => now()->subDays(2)->toDateString(), 'extension_version' => '1.0.0', 'hits' => 5]);
+        ExtensionUsageDaily::create(['date' => now()->subDays(40)->toDateString(), 'extension_version' => '1.0.0', 'hits' => 99]);
+
+        expect(ExtensionUsageDaily::totalHits('30'))->toBe(15);
+    });
+
+    it('calcula a média diária pelo número de dias do período', function () {
+        ExtensionUsageDaily::create(['date' => now()->toDateString(), 'extension_version' => '1.0.0', 'hits' => 30]);
+
+        expect(ExtensionUsageDaily::dailyAverage('30'))->toBe(1.0);
+    });
+
+    it('retorna a versão com mais hits em topVersion', function () {
+        ExtensionUsageDaily::create(['date' => now()->toDateString(), 'extension_version' => '1.0.0', 'hits' => 3]);
+        ExtensionUsageDaily::create(['date' => now()->toDateString(), 'extension_version' => '1.1.0', 'hits' => 8]);
+
+        expect(ExtensionUsageDaily::topVersion('30'))->toBe('1.1.0');
+    });
+
+    it('retorna null em topVersion quando não há dados', function () {
+        expect(ExtensionUsageDaily::topVersion('30'))->toBeNull();
+    });
+
+});
+
 describe('Endpoint unified-search registra uso', function () {
 
     it('registra a versão recebida no header X-Extension-Version', function () {
