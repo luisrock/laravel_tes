@@ -14,7 +14,7 @@
                     </a>
                 </h1>
                 <span>
-                    <a href="https://chrome.google.com/webstore/detail/teses-e-s%C3%BAmulas/biigfejcdpcpibfmffgmmndpjhnlcjfb?hl=pt-BR"
+                    <a href="{{ extension_webstore_url('atualizacoes') }}" target="_blank" rel="noopener"
                         class="tw-inline-flex tw-items-center tw-px-3 tw-py-1.5 tw-rounded-full tw-text-sm tw-font-medium tw-bg-brand-100 tw-text-brand-800 hover:tw-bg-brand-200 tw-transition-colors">
                         Extensão para o Chrome
                     </a>

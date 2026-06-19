@@ -57,6 +57,13 @@ Route::get('/privacidade', function () {
     return view('front.privacidade');
 })->name('privacidade');
 
+// Landing da extensão Chrome (S8/LH-13)
+Route::get('/extensao', function () {
+    return view('front.extensao', [
+        'description' => 'Pesquise súmulas, teses e enunciados dos tribunais mais importantes direto do navegador com a extensão gratuita do Teses & Súmulas para o Google Chrome.',
+    ]);
+})->name('extensao');
+
 // Pages for sumulas
 Route::get('/index', function () {
     return view('front.tesindex', ['display_pdf' => false]);

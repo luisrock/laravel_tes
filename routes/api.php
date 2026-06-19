@@ -34,8 +34,17 @@ Route::post('/carf.php', [App\Http\Controllers\ApiController::class, 'index']);
 Route::post('/fonaje.php', [App\Http\Controllers\ApiController::class, 'index']);
 Route::post('/cej.php', [App\Http\Controllers\ApiController::class, 'index']);
 
-// Busca unificada (pública, sem token) — retorna contagens por tribunal
+// Busca unificada (pública, sem token) — retorna contagens por tribunal.
+// Rate limit: já protegida pelo limiter 'api' (60 req/min por IP) aplicado ao grupo de
+// middleware 'api' (ver RouteServiceProvider::configureRateLimiting). Excesso retorna HTTP 429.
 Route::post('/unified-search', [App\Http\Controllers\ApiController::class, 'unifiedSearch']);
+
+// Leitura pública de teor (sem token) para a extensão Chrome — S6/LH-5.
+// Rate limit herdado do grupo 'api' (60 req/min por IP); excesso retorna HTTP 429.
+Route::prefix('public')->group(function () {
+    Route::get('/sumula/{tribunal}/{numero}', [App\Http\Controllers\PublicContentApiController::class, 'getSumula']);
+    Route::get('/tese/{tribunal}/{numero}', [App\Http\Controllers\PublicContentApiController::class, 'getTese']);
+});
 
 // New endpoints for individual sumulas and teses
 Route::middleware('bearer.token')->group(function () {

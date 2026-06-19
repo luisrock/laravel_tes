@@ -21,4 +21,20 @@ return [
 
     'test_toolbar_email' => env('TEST_TOOLBAR_EMAIL', 'ivanaredler@gmail.com'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Extensão Chrome
+    |--------------------------------------------------------------------------
+    |
+    | URL única da extensão na Chrome Web Store (fonte DRY para links no site).
+    | Use o helper extension_webstore_url() para anexar parâmetros UTM.
+    |
+    */
+    'extension' => [
+        'webstore_url' => env(
+            'EXTENSION_WEBSTORE_URL',
+            'https://chrome.google.com/webstore/detail/teses-e-s%C3%BAmulas/biigfejcdpcpibfmffgmmndpjhnlcjfb'
+        ),
+    ],
+
 ];

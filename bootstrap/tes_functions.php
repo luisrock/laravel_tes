@@ -29,6 +29,26 @@ function adjustOneQuoteOnly($str)
     return search_query_parser()->adjustOneQuoteOnly((string) $str);
 }
 
+/**
+ * Monta a URL da extensão na Chrome Web Store com parâmetros UTM de atribuição.
+ *
+ * @param  string  $medium  Origem do clique no site (ex.: footer, header, atualizacoes, extensao_page).
+ * @param  string  $source  Origem da campanha (default 'site').
+ * @param  string  $campaign  Nome da campanha (default 'extensao').
+ */
+function extension_webstore_url(string $medium, string $source = 'site', string $campaign = 'extensao'): string
+{
+    $base = (string) config('teses.extension.webstore_url');
+
+    $query = http_build_query([
+        'utm_source' => $source,
+        'utm_medium' => $medium,
+        'utm_campaign' => $campaign,
+    ]);
+
+    return $base.'?'.$query;
+}
+
 function get_teses_with_ai($tribunal = null)
 {
     return \Illuminate\Support\Facades\Cache::remember('ai_teses_'.($tribunal ?? 'all'), 3600, function () use ($tribunal) {

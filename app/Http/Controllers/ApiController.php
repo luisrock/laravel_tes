@@ -422,14 +422,20 @@ class ApiController extends Controller
      */
     public function unifiedSearch(Request $request): \Illuminate\Http\JsonResponse
     {
+        // Aceita 'q' ou 'keyword' (compat com a extensão e consistência com index()).
         $request->validate([
-            'keyword' => 'required|string|min:3',
+            'q' => 'required_without:keyword|min:3',
+            'keyword' => 'required_without:q|min:3',
         ], [
-            'keyword.required' => 'Por favor, defina o(s) termo(s) de busca.',
+            'q.required_without' => 'Por favor, defina o(s) termo(s) de busca.',
+            'keyword.required_without' => 'Por favor, defina o(s) termo(s) de busca.',
+            'q.min' => 'O termo de busca deve conter ao menos três caracteres.',
             'keyword.min' => 'O termo de busca deve conter ao menos três caracteres.',
         ]);
 
-        $keyword = $request->input('keyword');
+        $keyword = $request->input('q') ?? $request->input('keyword');
+
+        \App\Models\ExtensionUsageDaily::record($request->header('X-Extension-Version'));
 
         $allResults = $this->searchDatabaseService->searchAllDatabaseTribunals($keyword);
 

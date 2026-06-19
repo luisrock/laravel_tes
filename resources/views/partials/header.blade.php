@@ -49,6 +49,7 @@
             <a href="{{ route('alltemaspage') }}" class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100 hover:tw-text-brand-700 tw-transition">Prontas</a>
             <a href="/index" class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100 hover:tw-text-brand-700 tw-transition">Índice</a>
             <a href="{{ route('newsletterspage') }}" class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100 hover:tw-text-brand-700 tw-transition">Newsletters</a>
+            <a href="{{ route('extensao') }}" class="tw-inline-flex tw-items-center tw-gap-1.5 tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100 hover:tw-text-brand-700 tw-transition"><i class="fa fa-puzzle-piece tw-text-xs" aria-hidden="true"></i>Extensão</a>
 
             <span class="tw-h-6 tw-w-px tw-bg-slate-300 tw-mx-2"></span>
 
@@ -84,6 +85,7 @@
         <a href="{{ route('alltemaspage') }}" class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100">Prontas</a>
         <a href="/index" class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100">Índice</a>
         <a href="{{ route('newsletterspage') }}" class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100">Newsletters</a>
+        <a href="{{ route('extensao') }}" class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-text-slate-700 hover:tw-bg-slate-100"><i class="fa fa-puzzle-piece tw-text-xs tw-mr-1.5" aria-hidden="true"></i>Extensão</a>
 
         <div class="tw-my-2 tw-h-px tw-bg-slate-200"></div>
 

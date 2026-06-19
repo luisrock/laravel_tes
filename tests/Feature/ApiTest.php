@@ -173,4 +173,33 @@ describe('Busca Unificada', function () {
         }
     });
 
+    it('aceita o parâmetro q como alias de keyword (LH-3)', function () {
+        $response = $this->postJson('/api/unified-search', [
+            'q' => 'dano moral',
+        ]);
+
+        expect($response->getStatusCode())->toBeIn([200, 500]);
+
+        if ($response->getStatusCode() === 200) {
+            expect($response->json('meta.keyword'))->toBe('dano moral');
+        }
+    });
+
+    it('valida tamanho mínimo quando usa q', function () {
+        $this->postJson('/api/unified-search', ['q' => 'ab'])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['q']);
+    });
+
+    it('aplica rate limit (HTTP 429) ao exceder o limite por IP (LH-4)', function () {
+        // O grupo de middleware 'api' limita a 60 req/min por IP (RouteServiceProvider).
+        // Payload vazio retorna 422 rapidamente, mas ainda incrementa o contador do throttle.
+        for ($i = 0; $i < 60; $i++) {
+            $this->postJson('/api/unified-search', []);
+        }
+
+        $this->postJson('/api/unified-search', ['keyword' => 'dano moral'])
+            ->assertStatus(429);
+    });
+
 });
