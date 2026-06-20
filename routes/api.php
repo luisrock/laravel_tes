@@ -44,6 +44,8 @@ Route::post('/unified-search', [App\Http\Controllers\ApiController::class, 'unif
 Route::prefix('public')->group(function () {
     Route::get('/sumula/{tribunal}/{numero}', [App\Http\Controllers\PublicContentApiController::class, 'getSumula']);
     Route::get('/tese/{tribunal}/{numero}', [App\Http\Controllers\PublicContentApiController::class, 'getTese']);
+    // Súmula vinculante: apenas STF (demais tribunais → 404). Caminho: /api/public/sumula-vinculante/stf/{n}.
+    Route::get('/sumula-vinculante/{tribunal}/{numero}', [App\Http\Controllers\PublicContentApiController::class, 'getSumulaVinculante']);
 });
 
 // New endpoints for individual sumulas and teses

@@ -6,9 +6,13 @@ use App\Services\TribunalContentReader;
 use Illuminate\Http\JsonResponse;
 
 /**
- * Leitura pública (sem token) do teor de súmulas/teses para a extensão Chrome.
- * Resposta enxuta e estável: { success, data: { tribunal, tipo, numero, texto, url } }.
- * Protegido pelo rate limit do grupo 'api' (60 req/min por IP).
+ * Leitura pública (sem token) do teor de súmulas/teses (e súmulas vinculantes do
+ * STF) para a extensão Chrome. Resposta enxuta e estável; protegido pelo rate
+ * limit do grupo 'api' (60 req/min por IP).
+ *
+ * - Súmula:            { success, data: { tribunal, tipo, numero, texto, situacao, url } }
+ * - Tese:             { success, data: { tribunal, tipo, numero, texto, tema, tese, situacao, url } }
+ * - Súmula vinculante: { success, data: { tribunal, tipo, numero, texto, situacao, url } }
  */
 class PublicContentApiController extends Controller
 {
@@ -22,6 +26,11 @@ class PublicContentApiController extends Controller
     public function getTese(string $tribunal, string $numero): JsonResponse
     {
         return $this->respond('tese', $tribunal, $numero);
+    }
+
+    public function getSumulaVinculante(string $tribunal, string $numero): JsonResponse
+    {
+        return $this->respond('sumula-vinculante', $tribunal, $numero);
     }
 
     private function respond(string $tipo, string $tribunal, string $numero): JsonResponse
@@ -47,7 +56,11 @@ class PublicContentApiController extends Controller
         if ($data === null) {
             return response()->json([
                 'success' => false,
-                'error' => $tipo === 'sumula' ? 'Súmula não encontrada.' : 'Tese não encontrada.',
+                'error' => match ($tipo) {
+                    'tese' => 'Tese não encontrada.',
+                    'sumula-vinculante' => 'Súmula vinculante não encontrada.',
+                    default => 'Súmula não encontrada.',
+                },
             ], 404);
         }
 

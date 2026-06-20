@@ -6,7 +6,7 @@
 > `AGENTS.md` daquele repositório — **mantido em sincronia por este plano** (ver coluna "Sync ext.").
 >
 > **Criado:** 2026-06-19.
-> **Status geral:** S1–S8 concluídos (2026-06-19). Pendência futura: print/GIF real do popup na landing; eventual ampliação do teor público para FONAJE (adiado).
+> **Status geral:** S1–S9 concluídos (S1–S8 em 2026-06-19; S9 em 2026-06-20). Pendência futura: print/GIF real do popup na landing; eventual ampliação do teor público para FONAJE (adiado).
 
 ---
 
@@ -36,6 +36,7 @@
 | **S6** | LH-5 | Endpoint público de leitura de teor (súmula/tese) | M | não | **sim** (endpoint novo) |
 | **S7** | LH-6 | Ampliar tribunais no teor (além de STF/STJ) | M | não | **sim** (cobertura) |
 | **S8** | LH-13 | Página `/extensao` (landing enxuta) | S/M | **sim 🔶** | **sim** (UTM destino) |
+| **S9** | — | Ampliar teor público: `tema`/`tese`/`situacao` nas teses, `situacao` nas súmulas e Súmula Vinculante | M | não | **sim** (contrato) |
 
 > **Semana A:** S1 → S2 → S3 → S4. **Semana B:** S5 → S6 → S7 (+ S8 em paralelo).
 > S6 depende da **decisão LH-0** (teor público sem login). Confirmar com o Mauro antes de S6.
@@ -310,6 +311,7 @@ campanhas/links) e o padrão de UTM.
 - [x] S6 — Endpoint público de teor (LH-5) → sync ext. — **concluído 2026-06-19**. Novos `GET /api/public/sumula/{trib}/{n}` e `GET /api/public/tese/{trib}/{n}` (sem `bearer.token`), resposta enxuta `{ success, data: { tribunal, tipo, numero, texto, url } }` com `url` canônica via `route()`. Lógica de leitura centralizada no service `App\Services\TribunalContentReader` (resolve tabela via `SearchTribunalRegistry`, coluna de teor explícita, sem `select('*')` nem PII). Controller fino `PublicContentApiController`. **Escopo S6 = STF/STJ** (mesmo do endpoint autenticado; ampliação no S7). Rate limit herdado do grupo `api` (60/min por IP), consistente com S3 (sem throttle redundante empilhado). 7 testes em `PublicContentApiTest.php`; happy path validado em MySQL dev via tinker. `AGENTS.md` da extensão atualizado (novo contrato).
 - [x] S7 — Ampliar tribunais no teor (LH-6) → sync ext. — **concluído 2026-06-19**. `TribunalContentReader` ampliado: **súmulas** em STF/STJ/TST/TNU/CARF/CEJ e **teses** em STF/STJ/TST/TNU (coluna de teor por tribunal: súmula→`texto`; tese→`tese_texto` em STF/STJ, `texto` no TST, `tese` no TNU). Tabela resolvida via `SearchTribunalRegistry` (`tables()`), sem concatenação fixa. **FONAJE adiado** por decisão do Mauro (3 sub-bases civ/cri/faz com numerações próprias ⇒ `/FONAJE/{n}` ambíguo) → retorna 404; **TCU fora** (API externa). Teses de CARF/CEJ/FONAJE → 404 claro. URL canônica via `route()` para STF/STJ/TST/TNU; fallback de busca para CARF/CEJ (sem página individual). Testes ampliados com datasets em `PublicContentApiTest.php` (20 testes); happy path de todos os tribunais validado em MySQL dev. `AGENTS.md` atualizado.
 - [x] S8 — Página `/extensao` (LH-13) 🔶 → sync ext. — **concluído 2026-06-19** (validado pelo Mauro). Rota `GET /extensao` (closure, sem DB, `name('extensao')`) + view `front/extensao.blade.php` no layout `front.base` (hero, mock visual do popup como placeholder até print/GIF real, 4 bullets, CTA "Instalar no Chrome" com `utm_medium=extensao_page`). CTA "Extensão" do header (S2, desktop+mobile) repontado de Web Store para `/extensao`. Ajustes do Mauro aplicados: hero "dos tribunais mais importantes" e card "Tudo num só lugar". `npm run build` gerado. Testes: ajustado o do header + 3 novos da landing em `ExtensionLinksTest.php`. `AGENTS.md` atualizado (landing oficial). **Pendente futuro:** trocar o mock por print/GIF real do popup.
+- [x] S9 — Ampliar API pública de teor para a extensão → sync ext. — **concluído 2026-06-20**. Três inclusões em `App\Services\TribunalContentReader` + `PublicContentApiController`, sem quebrar o contrato S6/S7 (mantidos `success`, `tribunal`, `tipo`, `numero`, `url`, `texto`): **(1)** `GET /api/public/tese/{trib}/{n}` ganha `tema` (questão; STF de `tema_texto` com prefixo "N - " removido; STJ/TST/TNU de `tema`), `tese` (== `texto`; `tese_texto` em STF/STJ, `texto` no TST, `tese` no TNU) e `situacao` (coluna `situacao`; TST não tem → `""`). Tese não fixada ⇒ `texto`/`tese` `""` com `tema`/`situacao` preenchidos (validado no Tema 1443/STF). **(2)** `GET /api/public/sumula/{trib}/{n}` ganha `situacao` (`"Cancelada"`/`""`: STJ/TNU via `isCancelada`, STF via `obs`); STF passa a filtrar `is_vinculante=0` (corrige ambiguidade da numeração compartilhada com a SV). **(3)** Novo `GET /api/public/sumula-vinculante/{trib}/{n}` (só STF; `is_vinculante=1`), `tipo: "sumula-vinculante"`, `url` canônica `/sumula/stf/sv{n}`. Rate limit/erros (400/404/429) e leitura de `X-Extension-Version` inalterados. Testes: `PublicContentApiTest.php` ampliado (31 testes) + 4 JSON reais validados em MySQL dev via HTTP. `ApiTest.php` sem regressão. `AGENTS.md` da extensão atualizado (estado atual + log S9).
 
 ## Procedimento ao concluir cada passo
 
