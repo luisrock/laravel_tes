@@ -7,6 +7,11 @@
 >
 > **Criado:** 2026-06-19.
 > **Status geral:** S1–S9 concluídos (S1–S8 em 2026-06-19; S9 em 2026-06-20). Pendência futura: print/GIF real do popup na landing; eventual ampliação do teor público para FONAJE (adiado).
+>
+> **Lado extensão (2026-06-21):** consumindo todo o contrato S6/S7/S9, a extensão chegou à **v2.0.0**
+> (etapas E1–E5 em `tes_chrome/PLANO_EXTENSAO.md`): side panel com teor, detecção de referência
+> (bolinha + menu), UTM e changelog automático. **Ainda não publicada** (Web Store tem a v1.0.0) —
+> próximo marco é (re)publicar a v2.0.0. Nada pendente do servidor para esse lançamento.
 
 ---
 

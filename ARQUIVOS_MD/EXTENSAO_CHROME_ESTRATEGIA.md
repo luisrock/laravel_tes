@@ -5,8 +5,12 @@
 > roadmap priorizado, desenho de freemium, plano de aquisição (botão + página no site) e um
 > **briefing técnico para os modelos de IA** que vão ajudar a implementar no editor de código.
 >
-> **Última atualização:** 2026-06-18.
-> **Status geral:** diagnóstico concluído; implementação não iniciada.
+> **Última atualização:** 2026-06-21.
+> **Status geral:** Onda 1 praticamente concluída na extensão (v2.0.0, ainda **não** publicada).
+> Feito (etapas E1–E5 do `tes_chrome/PLANO_EXTENSAO.md`): F1 (menu de contexto), F2 (side panel +
+> teor inline), F3 (detecção de referência + bolinha), F6 (UTM), F7 (novidades/changelog).
+> Pendentes da Onda 1: **F4 (omnibox)** e **F5 (cache local)**. Lado servidor: S1–S9 concluídos
+> (ver `EXTENSAO_SITE_PLANO_IMPLEMENTACAO.md`). **Próximo marco: (re)publicar a v2.0.0 na Web Store.**
 >
 > **Como usar este doc (para humanos e IAs):**
 > - As seções 1–4 são contexto e diagnóstico — leia antes de codar.
@@ -52,26 +56,47 @@ deploy automático no push). Núcleo:
 
 ## 2. Estado atual da extensão
 
+> **Atualizado em 2026-06-21.** A extensão evoluiu muito desde o diagnóstico inicial: hoje está na
+> **v2.0.0** (em dev, **ainda não publicada** — a Web Store segue com a v1.0.0). Detalhe das etapas em
+> `tes_chrome/PLANO_EXTENSAO.md` (E1–E5) e contrato em `tes_chrome/AGENTS.md`.
+
 - **Repo:** `luisrock/tes_chrome` (GitHub, privado). Branch padrão: `master`.
-- **Stack:** Manifest V3, **vanilla JS (sem build/bundler)**, CSS3 puro. Permissão só `storage`.
-  `host_permissions`: `https://tesesesumulas.com.br/*`.
-- **Arquivos:** `manifest.json`, `popup.html`, `js/tes.js`, `css/tes.css`, `icons/`.
-- **O que faz hoje:** `POST /api/unified-search` com `{keyword}` e mostra **contagens** por tribunal +
-  link pro site. Persiste a última busca via `chrome.storage.session`.
-- **Limitações:** não mostra o **teor** da súmula/tese (só número/contagem); sem histórico além da
-  sessão; sem login; sem integração com Collections; sem detecção de referências em páginas.
+- **Stack:** Manifest V3, **vanilla JS (sem build/bundler)**, CSS3 puro. Design system `--brand-*`
+  (azul `#4B6C90`) + `--accent-*` (âmbar, destaque do botão do painel); fonte Inter.
+- **Permissões (v2.0.0):** `storage`, `sidePanel`, `contextMenus`, `scripting`;
+  `host_permissions: https://tesesesumulas.com.br/*`; `optional_host_permissions: <all_urls>`
+  (pedida **em runtime** pelo toggle do popup — habilita bolinha **e** menu de contexto, acoplados);
+  `web_accessible_resources: icons/icon48.png` (ícone da bolinha).
+- **Arquivos:** `manifest.json`, `popup.html`, `js/tes.js`, `js/api.js` (apiFetch + UTM),
+  `js/refs.js` (parser de referências), `sidepanel.html` + `js/sidepanel.js` + `css/sidepanel.css`
+  (painel de teor), `js/service-worker.js` (menu/bolinha/painel), `js/content.js` (bolinha),
+  `css/tes.css`, `icons/`, `tests/referencias.html` (teste manual do parser, fora do pacote).
+- **O que faz hoje:**
+  - **Busca** (`POST /api/unified-search`): contagens por tribunal + deep links com UTM; persiste a
+    última busca em `chrome.storage.session`. Trata `429` (rate limit) com mensagem amigável.
+  - **Side panel (teor inline):** lookup de súmula/tese/súmula vinculante **por número** via
+    `GET /api/public/(sumula|sumula-vinculante|tese)/{trib}/{n}` (S6/S7/S9), com Tema+Tese+Situação,
+    badge de cancelada e cross-filter tipo↔órgão.
+  - **Menu de contexto + bolinha:** selecionar uma referência ("Súmula 7 do STJ", "Tema 69 STF",
+    "Súmula Vinculante 11") em qualquer página → menu do botão direito **ou** bolinha flutuante →
+    abre o painel já com o teor. Detector único (`js/refs.js`), gated por `<all_urls>` opcional.
+  - **Novidades/changelog:** overlay no popup mostrado automaticamente após atualização (selo "novo"
+    no ícone), uma vez por versão; link "Novidades" no rodapé reabre.
+- **Limitações atuais:** sem **omnibox** (F4) e sem **cache local** (F5); sem login/conta (F8),
+  sem integração com Collections (F9), sem sync (F10) — dependem de trabalho no site. FONAJE e TCU
+  não têm teor inline (cobertura do endpoint público; ver contrato).
 
-### Esclarecimento sobre versões (resolvido)
-Existe **uma única** extensão. Linha do tempo:
+### Esclarecimento sobre versões
 
-| Data | Versão | Endpoint |
+| Data | Versão | Observação |
 |---|---|---|
-| 2022-09-08 | v0.0.9 | `/api/*.php` (legados) |
-| 2026-02-18 | v1.0.0 (reescrita) | `/api/unified-search` |
+| 2022-09-08 | v0.0.9 | endpoints `/api/*.php` (legados) |
+| 2026-02-18 | v1.0.0 (reescrita) | `/api/unified-search`; **versão publicada hoje na Web Store** |
+| 2026-06 | v2.0.0 (em dev) | side panel + teor + detecção de referência + changelog; **a publicar** |
 
-Web Store hoje: **v1.0.0, atualizada 19/02/2026, 3.000 usuários, nota 5,0 (11 avaliações), 44 KiB.**
-Os 3k já estão na v1.0.0. Endpoints `.php` em `routes/api.php` são só rede de segurança (e a medição
-confirmou: **0 hits legados** — ninguém usa mais a versão antiga).
+Web Store hoje: **v1.0.0, ~3.000 usuários, nota 5,0.** Os 3k estão na v1.0.0; a v2.0.0 é um salto
+grande de utilidade (daí o changelog forte no popup para reativar os dormentes). Endpoints `.php` em
+`routes/api.php` são só rede de segurança (medição confirmou **0 hits legados**).
 
 ---
 
@@ -130,21 +155,23 @@ completo ao lado do documento, sem abrir aba, com cache offline. A T&S deve repl
 > Marque `[x]` ao concluir. "Site" indica mudança no repo Laravel; "Ext" no repo `tes_chrome`.
 
 ### Onda 1 — Utilidade sem login (reduz atrito, reativa dormentes)
-- [ ] **F1 — Menu de contexto (Ext):** selecionar texto em qualquer página → clique direito →
-      "Buscar no Teses & Súmulas". Requer permissão `contextMenus`. Maior impacto/menor custo.
-- [ ] **F2 — Side panel com teor inline (Ext):** substituir/complementar o popup minúsculo por um
-      painel lateral (Chrome Side Panel API) que mostra o **teor completo** da súmula/tese, não só a
-      contagem. Usa os endpoints de detalhe (ver seção 10). É o coração da proposta de valor.
-- [ ] **F3 — Detecção de referência + botão flutuante (Ext):** content script que reconhece padrões
-      como "Súmula 7 do STJ", "Súmula Vinculante 25", "Tema 69 do STF/Repercussão Geral",
-      "Tese 123" no texto selecionado e oferece bolha flutuante → abre o teor no side panel.
-- [ ] **F4 — Omnibox (Ext):** digitar `ts <termo>` na barra de endereço dispara a busca.
+- [x] **F1 — Menu de contexto (Ext):** ✅ **Feito (E4b, 2026-06-20).** "Buscar teor no Teses & Súmulas"
+      sobre a seleção; aparece só para referências citáveis (acoplado à bolinha). Permissão `contextMenus`.
+- [x] **F2 — Side panel com teor inline (Ext):** ✅ **Feito (E4a/E4a+, 2026-06-20).** Painel lateral
+      mostra o **teor completo** (súmula/tese/súmula vinculante) por número via `/api/public/...`
+      (S6/S7/S9), com Tema+Tese+Situação e badge de cancelada. Coração da proposta de valor.
+- [x] **F3 — Detecção de referência + botão flutuante (Ext):** ✅ **Feito (E4c, 2026-06-20).** Content
+      script (`js/refs.js` + `js/content.js`, shadow DOM) reconhece "Súmula 7 do STJ", "Súmula
+      Vinculante 25", "Tema 69 do STF", "Tese 123" → bolinha flutuante → abre o teor no side panel.
+      Gated por `<all_urls>` opcional (pedida no toggle do popup).
+- [ ] **F4 — Omnibox (Ext):** digitar `ts <termo>` na barra de endereço dispara a busca. **(pendente)**
 - [ ] **F5 — Cache local (Ext):** `chrome.storage.local` para reter resultados/teores recentes
-      (ex.: 7 dias, padrão Planalto Express) — performance e uso offline parcial.
-- [ ] **F6 — UTM nos links (Ext):** anexar `?utm_source=extension&utm_medium=<popup|sidepanel>` em
-      todos os links que levam ao site (ver seção 9). ~1 linha por link.
-- [ ] **F7 — "Novidades" no popup/side panel (Ext):** bloco discreto de changelog para reengajar quem
-      reabre a extensão após muito tempo.
+      (ex.: 7 dias, padrão Planalto Express) — performance e uso offline parcial. **(pendente)**
+- [x] **F6 — UTM nos links (Ext):** ✅ **Feito (E3, 2026-06-20).** Helper `withUtm(url, medium)` em
+      `js/api.js`; aplicado em todos os links do popup com `utm_medium=popup` (e `sidepanel` no painel).
+- [x] **F7 — "Novidades" no popup (Ext):** ✅ **Feito (E5, 2026-06-21).** Overlay de changelog mostrado
+      automaticamente após atualização (selo "novo" no ícone; 1×/versão via `storage.local`); conteúdo
+      no objeto `CHANGELOG` versionado em `js/tes.js`; link "Novidades" no rodapé reabre.
 
 ### Onda 2 — Conta e sincronização (puxa cadastro)
 - [ ] **F8 — Login na extensão (Ext+Site):** autenticação via bearer token. O middleware
@@ -299,13 +326,21 @@ do site). E os logs nginx só guardam ~14 dias e exigem acesso `vito`.
 
 ## 11. Próximos passos (checklist mestre)
 - [x] Medir uso real (seção 3) — concluído. Achado: gap instalação×uso; problema é ativação.
-- [ ] **Sprint de aquisição (Site):** A1 + A2 (botão + página de features) — provável maior ROI, pode
-      andar em paralelo às features da extensão.
-- [ ] **Sprint 1 da extensão:** F1 (menu de contexto) + F2 (side panel + teor) + F6/M1 (UTM).
-- [ ] **Decisão de produto (Mauro):** teor anônimo público vs. atrás de login (seção 10.3).
-- [ ] **Sprint 2:** F3 (detecção de referência), F4 (omnibox), F5 (cache), F7 (novidades).
+- [x] **Decisão de produto (Mauro):** teor anônimo público vs. atrás de login (seção 10.3) —
+      **decidido: teor público sem login** (LH-0, 2026-06-19). Desbloqueou S6/F2.
+- [x] **Sprint de servidor (Site):** S1–S9 concluídos (UTM, header CTA, throttle, `q`/`keyword`,
+      instrumentação `X-Extension-Version`, endpoints públicos de teor, ampliação de tribunais,
+      landing `/extensao`, teor ampliado). Ver `EXTENSAO_SITE_PLANO_IMPLEMENTACAO.md`.
+- [x] **Sprint 1 da extensão:** F1 (menu) + F2 (side panel + teor) + F6/M1 (UTM) — concluídos (E3/E4).
+- [x] **Sprint 2 (parcial):** F3 (detecção de referência) + F7 (novidades) — concluídos (E4c/E5).
+      **Falta:** F4 (omnibox) e F5 (cache local).
+- [ ] **(Re)publicar a v2.0.0 na Web Store** — empacotar, escrever justificativas de permissão
+      (sobretudo `<all_urls>` opcional: só leitura local da seleção; nada transmitido), atualizar
+      prints/descrição da loja. **Próximo marco.**
+- [ ] **Sprint 2 (restante):** F4 (omnibox) + F5 (cache local).
 - [ ] **Sprint 3 (conta):** F8 (login) → F9 (coleções) → F10 (sync) + R1–R6.
-- [ ] **M2/M3:** instrumentação própria de métricas.
+- [ ] **M2/M3:** instrumentação própria de métricas — **M1/M3 já cobertos** (UTM + `X-Extension-Version`);
+      falta o agregado consultável (M2, parcialmente em `extension_usage_dailies`).
 - [ ] **Quando base ativa crescer:** abrir freemium (seção 8) + R7–R10 / Onda 3.
 
 ---
@@ -330,9 +365,18 @@ do site). E os logs nginx só guardam ~14 dias e exigem acesso `vito`.
 > Ordenados por **impacto ÷ esforço**. Cada um tem ID `LH-*` para referência.
 > Legenda de esforço: **S** (&lt;½ dia), **M** (1–2 dias), **L** (3+ dias).
 
+> **Status (2026-06-21):** quase tudo concluído.
+> - **Site:** LH-1, LH-2, LH-3, LH-4, LH-5, LH-6, LH-7, LH-13 ✅ (passos S1–S8; ver
+>   `EXTENSAO_SITE_PLANO_IMPLEMENTACAO.md`).
+> - **Extensão:** LH-8 (deep links + UTM), LH-9 (F1 menu), LH-11 (UTM), LH-12 (changelog) ✅.
+>   **Pendente: LH-10 (F4 omnibox).**
+> - **LH-0** (decisão teor público sem login) ✅ decidido em 2026-06-19.
+
 ### Correções de documentação / decisão rápida
 
-- [ ] **LH-0 — Esclarecer o bearer token atual (doc + produto):** o middleware `bearer.token` valida um
+- [x] **LH-0 — Esclarecer o bearer token atual (doc + produto):** ✅ **decidido 2026-06-19** — teor
+      básico **público sem login** (com rate limit); extras (IA/salvar) ficam atrás de login no futuro.
+      Desbloqueou S6/F2. Texto original abaixo para contexto. — o middleware `bearer.token` valida um
       **único** `API_TOKEN` global (`config/services.php` ← `.env`), **não** token por usuário. O F8
       (login na extensão) exige trabalho novo no site; até lá, a extensão **não** consegue chamar
       `/api/sumula` e `/api/tese` sem embutir o token global (inaceitável no cliente) **ou** sem um
