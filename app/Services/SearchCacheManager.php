@@ -12,7 +12,7 @@ class SearchCacheManager
 {
     private const TAG_ALL = 'search';
 
-    private const TTL_SECONDS = 3600;
+    private const TTL_SECONDS = 86400;
 
     public function cacheKey(string $tribunalLower, string $keyword): string
     {

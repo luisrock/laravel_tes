@@ -11,6 +11,12 @@ it('generates deterministic cache keys using tribunal and keyword md5', function
         ->toBe('search_stf_'.md5('dano moral'));
 });
 
+it('caches search results for one day (base updates 1-2x/week)', function () {
+    $ttl = (new ReflectionClassConstant(SearchCacheManager::class, 'TTL_SECONDS'))->getValue();
+
+    expect($ttl)->toBe(86400);
+});
+
 it('caches search results on first call and returns cached on second call', function () {
     $manager = app(SearchCacheManager::class);
     $callCount = 0;
