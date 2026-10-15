@@ -2,20 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\SearchCacheManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class AllStjTesesPageController extends Controller
 {
-    public function index()
+    public function index(SearchCacheManager $cacheManager)
     {
-        $teses = DB::table('stj_teses')
-            // select all fields
+        $admin = auth()->check() && auth()->user()->hasRole('admin');
+
+        $fetchTeses = fn () => DB::table('stj_teses')
             ->select('*')
-            // order by numero DESC
             ->orderBy('numero', 'DESC')
-            // get all from the DB (no items limit)
             ->get();
+
+        $teses = $admin ? $fetchTeses() : $cacheManager->rememberListing('stj', 'stj_teses', $fetchTeses);
 
         $tribunal = 'STJ';
         $count = $teses->count();
@@ -34,8 +36,6 @@ class AllStjTesesPageController extends Controller
             ['name' => 'Índice', 'url' => url('/index')],
             ['name' => 'Teses STJ', 'url' => null],
         ];
-
-        $admin = auth()->check() && auth()->user()->hasRole('admin');
 
         if ($admin) {
             $teses_with_ai = DB::table('tese_analysis_sections')

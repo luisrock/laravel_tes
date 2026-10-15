@@ -5,6 +5,7 @@ namespace App\Services;
 use Closure;
 use Exception;
 use Illuminate\Cache\TaggableStore;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -13,6 +14,8 @@ class SearchCacheManager
     private const TAG_ALL = 'search';
 
     private const TTL_SECONDS = 86400;
+
+    private const LISTING_TTL_SECONDS = 3600;
 
     public function cacheKey(string $tribunalLower, string $keyword): string
     {
@@ -32,6 +35,33 @@ class SearchCacheManager
             return Cache::remember($key, self::TTL_SECONDS, $callback);
         } catch (Exception $e) {
             Log::warning('Cache de busca falhou, executando sem cache: '.$e->getMessage());
+
+            return $callback();
+        }
+    }
+
+    public function listingCacheKey(string $table): string
+    {
+        return 'listing_'.$table;
+    }
+
+    /**
+     * Cacheia o resultado bruto da consulta de uma listagem completa (ex.: /teses/stf).
+     * Só a consulta é cacheada; a view continua renderizando por request (CSRF, sessão, admin, ads).
+     */
+    public function rememberListing(string $tribunalLower, string $table, Closure $callback): Collection
+    {
+        $key = $this->listingCacheKey($table);
+
+        try {
+            if ($this->supportsTags()) {
+                return Cache::tags([self::TAG_ALL, $this->tagForTribunal($tribunalLower)])
+                    ->remember($key, self::LISTING_TTL_SECONDS, $callback);
+            }
+
+            return Cache::remember($key, self::LISTING_TTL_SECONDS, $callback);
+        } catch (Exception $e) {
+            Log::warning('Cache de listagem falhou, executando sem cache: '.$e->getMessage());
 
             return $callback();
         }

@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\SearchCacheManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class AllTnuTesesPageController extends Controller
 {
-    public function index()
+    public function index(SearchCacheManager $cacheManager)
     {
-        $teses = DB::table('tnu_teses')
+        $teses = $cacheManager->rememberListing('tnu', 'tnu_teses', fn () => DB::table('tnu_teses')
             ->select('*')
             ->orderBy('numero', 'DESC')
-            ->get();
+            ->get());
 
         foreach ($teses as $tese) {
             $tese->isCancelada = ! empty($tese->situacao) && Str::contains($tese->situacao, 'ancelad');

@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\SearchCacheManager;
 use Illuminate\Support\Facades\DB;
 
 class AllStfTesesPageController extends Controller
 {
-    public function index()
+    public function index(SearchCacheManager $cacheManager)
     {
-        $teses = DB::table('stf_teses')
+        $admin = auth()->check() && auth()->user()->hasRole('admin');
+
+        $fetchTeses = fn () => DB::table('stf_teses')
             ->select('*')
             ->orderBy('numero', 'DESC')
             ->get();
+
+        $teses = $admin ? $fetchTeses() : $cacheManager->rememberListing('stf', 'stf_teses', $fetchTeses);
 
         $tribunal = 'STF';
         $count = $teses->count();
@@ -28,8 +33,6 @@ class AllStfTesesPageController extends Controller
             ['name' => 'Índice', 'url' => url('/index')],
             ['name' => 'Teses STF', 'url' => null],
         ];
-
-        $admin = auth()->check() && auth()->user()->hasRole('admin');
 
         // Admin busca ao vivo (bypass do cache) para ver badges atualizados imediatamente.
         // Usuários comuns usam cache de 1h.
